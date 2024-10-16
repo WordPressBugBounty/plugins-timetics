@@ -1,5 +1,5 @@
 ===WP Timetics- AI-powered Appointment Booking Calendar and Online Scheduling Plugin===
-Contributors: arraytics, abrasel600, rezakhan995
+Contributors: arraytics,themewinter, abrasel600, rezakhan995
 Tags: booking system, appointments, booking, scheduling, appointment booking
 Requires at least: 5.2
 Tested up to: 6.6

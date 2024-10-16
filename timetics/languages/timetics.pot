@@ -2,37 +2,42 @@
 # This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Timetics 1.0.25\n"
+"Project-Id-Version: Timetics 1.0.26\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/timetics\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2024-08-20T04:58:38+00:00\n"
+"POT-Creation-Date: 2024-10-16T03:33:48+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.8.1\n"
+"X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: timetics\n"
 
 #. Plugin Name of the plugin
+#: timetics.php
 #: core/admin/menu.php:115
 #: core/admin/menu.php:116
 msgid "Timetics"
 msgstr ""
 
 #. Plugin URI of the plugin
+#: timetics.php
 msgid "https://arraytics.com/timetics/"
 msgstr ""
 
 #. Description of the plugin
+#: timetics.php
 msgid "Schedule, Appointment and Seat Booking plugin."
 msgstr ""
 
 #. Author of the plugin
+#: timetics.php
 msgid "Arraytics"
 msgstr ""
 
 #. Author URI of the plugin
+#: timetics.php
 msgid "https://arraytics.com/"
 msgstr ""
 
@@ -166,7 +171,7 @@ msgid "My Profile"
 msgstr ""
 
 #: core/admin/menu.php:100
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:388
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:388
 #: assets/src/admin/pages/shortcodes/index.js:16
 msgid "Shortcodes"
 msgstr ""
@@ -177,7 +182,7 @@ msgid "Setup Wizard"
 msgstr ""
 
 #: core/admin/menu.php:159
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:78
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:78
 #: assets/src/admin/components/GoProButton.js:19
 msgid "Go Pro"
 msgstr ""
@@ -290,9 +295,9 @@ msgid "Add New Timetics Appointment"
 msgstr ""
 
 #: core/appointments/hooks.php:85
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:318
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:318
 #: assets/js/chunk/9cc19297ce90352de77e.chunk.js:68
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:68
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:68
 #: assets/src/admin/pages/bookings/TableHeader.js:42
 #: assets/src/admin/pages/meeting/MeetingCard.js:282
 #: assets/src/admin/pages/meeting/steps/Integrations.js:157
@@ -488,7 +493,7 @@ msgstr ""
 #: core/customers/api-customer.php:291
 #: core/customers/api-customer.php:315
 #: core/customers/api-customer.php:355
-#: core/customers/api-customer.php:517
+#: core/customers/api-customer.php:516
 msgid "Invalid customer id."
 msgstr ""
 
@@ -603,13 +608,13 @@ msgid "Successfully updated business"
 msgstr ""
 
 #: core/settings/settings.php:89
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:738
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:738
 #: assets/src/common/nicheData.js:20
 msgid "Patients"
 msgstr ""
 
 #: core/settings/settings.php:90
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:738
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:738
 #: assets/src/common/nicheData.js:12
 msgid "Doctors"
 msgstr ""
@@ -841,7 +846,7 @@ msgid "Reschedule"
 msgstr ""
 
 #: templates/emails/new-event-customer.php:161
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:48
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:48
 #: assets/src/admin/components/AllDayScheduleModal.js:87
 msgid "Cancel"
 msgstr ""
@@ -871,7 +876,7 @@ msgid "Staff onboard"
 msgstr ""
 
 #: templates/staff/onboard.php:124
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:288
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:288
 #: assets/js/chunk/9314603dd26e14bd556b.chunk.js:48
 #: assets/js/chunk/ebdbae511295528c8021.chunk.js:168
 #: assets/src/admin/pages/meeting/UpdateMeeting.js:99
@@ -1563,8 +1568,8 @@ msgid "Zambian kwacha"
 msgstr ""
 
 #: utils/global-helper.php:331
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:208
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:268
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:208
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:268
 #: assets/js/frontend.js:359
 #: assets/js/frontend.js:381
 #: assets/js/frontend.js:480
@@ -1740,144 +1745,237 @@ msgstr ""
 msgid "Total Customers"
 msgstr ""
 
-#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:18
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:288
-#: assets/src/admin/pages/meeting/CreateMeeting.js:127
-#: assets/src/admin/pages/meeting/UpdateMeeting.js:161
-msgid "Back to Meetings"
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:48
+#: assets/src/admin/components/AllDayScheduleModal.js:86
+msgid "Apply Schedule"
 msgstr ""
 
-#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:308
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:216
-#: assets/src/admin/pages/meeting/steps/CreateStep.js:329
-msgid "default"
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:48
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:128
+#: assets/src/admin/components/AllDayScheduleModal.js:94
+#: assets/src/admin/components/SingleDaySchedule.js:520
+msgid "Apply schedule to other days"
 msgstr ""
 
-#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:308
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:225
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:236
-#: assets/src/admin/pages/meeting/steps/CreateStep.js:342
-#: assets/src/admin/pages/meeting/steps/CreateStep.js:353
-msgid "Title"
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:48
+#: assets/src/admin/components/AllDayScheduleModal.js:99
+msgid "Apply schedule to all days"
 msgstr ""
 
-#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:308
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:231
-#: assets/src/admin/pages/meeting/steps/CreateStep.js:348
-msgid "Please enter title!"
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:48
+#: assets/src/admin/components/AllDayScheduleModal.js:102
+msgid "Apply schedule to custom days"
 msgstr ""
 
-#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:338
-#: assets/src/admin/pages/meeting/steps/CreateStep.js:361
-#: assets/src/admin/pages/meeting/steps/TimeAvailability.js:319
-msgid "Meeting date range (meeting availibility)"
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:48
+#: assets/src/admin/components/AllDayScheduleModal.js:120
+msgid "Friday"
 msgstr ""
 
-#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:338
-#: assets/src/admin/pages/meeting/steps/CreateStep.js:367
-#: assets/src/admin/pages/meeting/steps/TimeAvailability.js:327
-msgid "If you don't specify a date, the meeting will automatically be scheduled for one year from now."
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:48
+#: assets/src/admin/components/AllDayScheduleModal.js:124
+msgid "Saturday"
 msgstr ""
 
-#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
-#: assets/src/admin/pages/meeting/steps/CreateStep.js:373
-msgid "Set meeting date"
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:48
+#: assets/src/admin/components/AllDayScheduleModal.js:128
+msgid "Sunday"
 msgstr ""
 
-#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:308
-#: assets/js/frontend.js:634
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:319
-#: assets/src/admin/pages/meeting/steps/CreateStep.js:402
-#: assets/src/frontend/pages/userAccount/TableHeader.js:62
-msgid "Duration"
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:48
+#: assets/src/admin/components/AllDayScheduleModal.js:132
+msgid "Monday"
 msgstr ""
 
-#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:308
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:323
-#: assets/src/admin/pages/meeting/steps/CreateStep.js:406
-msgid "Select your meeting duration"
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:48
+#: assets/src/admin/components/AllDayScheduleModal.js:136
+msgid "Tuesday"
 msgstr ""
 
-#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:308
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:331
-#: assets/src/admin/pages/meeting/steps/CreateStep.js:414
-msgid "Please select meeting duration!"
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:48
+#: assets/src/admin/components/AllDayScheduleModal.js:140
+msgid "Wednesday"
 msgstr ""
 
-#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:308
-#: assets/js/chunk/ebdbae511295528c8021.chunk.js:38
-#: assets/src/admin/components/notification/ReminderTime.js:74
-#: assets/src/admin/pages/meeting/notification/ReminderTime.js:91
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:349
-#: assets/src/admin/pages/meeting/steps/CreateStep.js:432
-msgid "Set custom time"
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:48
+#: assets/src/admin/components/AllDayScheduleModal.js:144
+msgid "Thursday"
 msgstr ""
 
-#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:308
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:361
-#: assets/src/admin/pages/meeting/steps/CreateStep.js:444
-msgid "Custom meeting duration time is required!"
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:68
+#: assets/src/admin/components/ErrorPage.js:15
+msgid "Ooops! Something's Wrong. "
 msgstr ""
 
-#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:308
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:371
-#: assets/src/admin/pages/meeting/steps/CreateStep.js:454
-msgid "hr's / min"
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:68
+#: assets/src/admin/components/ErrorPage.js:17
+msgid "Please try again or let us know if the issue's still here."
 msgstr ""
 
-#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:308
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:392
-#: assets/src/admin/pages/meeting/steps/CreateStep.js:475
-msgid "Please select custom time"
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:68
+#: assets/src/admin/components/ErrorPage.js:27
+msgid "Try Again"
 msgstr ""
 
-#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:338
-#: assets/src/admin/pages/meeting/steps/CreateStep.js:513
-#: assets/src/admin/pages/meeting/steps/TimeAvailability.js:369
-msgid "meeting Time zone"
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:88
+#: assets/src/admin/components/MainPageHeader.js:26
+msgid "Need Help?"
 msgstr ""
 
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:88
+#: assets/src/admin/components/MainPageHeader.js:38
+msgid "Documentation"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:88
+#: assets/src/admin/components/MainPageHeader.js:50
+msgid "Feature Request"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:98
+#: assets/src/admin/components/NoticeProFeature.js:13
+msgid "Upgrade to timetics pro for ultimate satisfaction"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:108
+#: assets/src/admin/components/ScheduleMode.js:25
+msgid "Use Default Availability"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:108
+#: assets/src/admin/components/ScheduleMode.js:36
+msgid "Customize Availability"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:128
+#: assets/src/admin/components/SingleDaySchedule.js:302
+#: assets/src/admin/components/SingleDaySchedule.js:491
+msgid "Unavailable"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:128
+#: assets/src/admin/components/SingleDaySchedule.js:480
+msgid "Time conflict."
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:128
+#: assets/src/admin/components/SingleDaySchedule.js:502
+msgid "Add new time slot"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:128
+#: assets/src/admin/components/SingleDaySchedule.js:535
+msgid "Apply All Days"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:148
+#: assets/src/admin/components/goSeatsMap.js:22
+msgid "Go Seats Map"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:208
+#: assets/js/chunk/9cc19297ce90352de77e.chunk.js:108
+#: assets/js/chunk/42ac18fa7511c1562003.chunk.js:28
+#: assets/js/chunk/ebdbae511295528c8021.chunk.js:108
+#: assets/src/admin/pages/bookings/FormField.js:300
+#: assets/src/admin/pages/calendar/CalendarSearchActions.js:70
+#: assets/src/admin/pages/settings/General.js:192
+#: assets/src/admin/pages/staff/TableHeader.js:88
+msgid "Pending"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:208
+#: assets/js/chunk/9cc19297ce90352de77e.chunk.js:108
+#: assets/js/chunk/ebdbae511295528c8021.chunk.js:108
+#: assets/src/admin/pages/bookings/FormField.js:305
+#: assets/src/admin/pages/calendar/CalendarSearchActions.js:66
+#: assets/src/admin/pages/settings/General.js:188
+msgid "Approved"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:208
+#: assets/js/chunk/9cc19297ce90352de77e.chunk.js:108
+#: assets/js/chunk/ebdbae511295528c8021.chunk.js:108
+#: assets/src/admin/pages/bookings/FormField.js:311
+#: assets/src/admin/pages/calendar/CalendarSearchActions.js:74
+#: assets/src/admin/pages/settings/General.js:196
+msgid "Canceled"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:208
+#: assets/src/admin/pages/bookings/FormField.js:322
+msgid "Customer's name"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:208
+#: assets/src/admin/pages/bookings/FormField.js:329
+msgid "Customer name is required!"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:208
+#: assets/src/admin/pages/bookings/FormField.js:332
+msgid "Jhon Deo"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:208
+#: assets/src/admin/pages/bookings/FormField.js:336
+msgid "Customer's Email"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:208
+#: assets/src/admin/pages/bookings/FormField.js:346
+msgid "name@yourdomain.com"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:208
+#: assets/src/admin/pages/bookings/FormField.js:378
+msgid "Client time zone"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:208
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:338
 #: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:208
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:338
 #: assets/src/admin/pages/bookings/FormField.js:386
 #: assets/src/admin/pages/meeting/steps/CreateStep.js:521
 #: assets/src/admin/pages/meeting/steps/TimeAvailability.js:377
 msgid "Please select your timezone"
 msgstr ""
 
-#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:338
-#: assets/src/admin/pages/meeting/steps/CreateStep.js:533
-#: assets/src/admin/pages/meeting/steps/TimeAvailability.js:274
-msgid "select team member"
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:208
+#: assets/src/admin/pages/bookings/FormField.js:399
+msgid "Create a meeting"
 msgstr ""
 
-#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:338
-#: assets/src/admin/pages/meeting/steps/CreateStep.js:537
-#: assets/src/admin/pages/meeting/steps/TimeAvailability.js:278
-msgid "Please select team member"
-msgstr ""
-
-#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:208
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:338
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:208
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:358
+#: assets/js/chunk/9cc19297ce90352de77e.chunk.js:58
 #: assets/js/chunk/9cc19297ce90352de77e.chunk.js:108
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:58
+#: assets/src/admin/pages/bookings/FormField.js:403
+#: assets/src/admin/pages/bookings/RescheduleModal.js:157
+#: assets/src/admin/pages/calendar/CalendarSearchActions.js:343
+#: assets/src/admin/pages/shortcodes/BookingForm.js:63
+msgid "Select Meeting"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:208
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:358
+#: assets/src/admin/pages/bookings/FormField.js:415
+#: assets/src/admin/pages/shortcodes/BookingForm.js:70
+msgid "Please Select Your Meeting"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:208
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:358
+#: assets/src/admin/pages/bookings/FormField.js:422
+#: assets/src/admin/pages/shortcodes/BookingForm.js:79
+msgid "Meeting title is required"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:208
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:338
+#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
+#: assets/js/chunk/9cc19297ce90352de77e.chunk.js:108
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:58
 #: assets/src/admin/pages/bookings/FormField.js:429
 #: assets/src/admin/pages/bookings/FormField.js:435
 #: assets/src/admin/pages/calendar/CalendarSearchActions.js:321
@@ -1887,17 +1985,382 @@ msgstr ""
 msgid "Select team member"
 msgstr ""
 
-#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:338
-#: assets/src/admin/pages/meeting/steps/CreateStep.js:562
-#: assets/src/admin/pages/meeting/steps/TimeAvailability.js:303
-msgid "Select availability "
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:208
+#: assets/src/admin/pages/bookings/FormField.js:440
+msgid "Team is required"
 msgstr ""
 
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:208
+#: assets/src/admin/pages/bookings/FormField.js:446
+#: assets/src/admin/pages/bookings/FormField.js:457
+msgid "Select Location"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:208
+#: assets/src/admin/pages/bookings/FormField.js:453
+msgid "Location is required"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:208
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:268
+#: assets/src/admin/pages/bookings/FormField.js:503
+#: assets/src/admin/pages/meeting/LocationType.js:461
+msgid "Phone number"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:208
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:268
+#: assets/js/frontend.js:381
+#: assets/js/frontend.js:678
+#: assets/src/admin/pages/bookings/FormField.js:507
+#: assets/src/admin/pages/meeting/LocationType.js:465
+#: assets/src/frontend/pages/bookings/ContactInfo.js:448
+#: assets/src/frontend/pages/bookings/ContactInfo.js:524
+#: assets/src/frontend/pages/userAccount/UserProfile.js:147
+msgid "Enter your phone number"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:208
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:268
+#: assets/js/frontend.js:381
+#: assets/src/admin/pages/bookings/FormField.js:514
+#: assets/src/admin/pages/meeting/LocationType.js:469
+#: assets/src/frontend/pages/bookings/ContactInfo.js:456
+#: assets/src/frontend/pages/bookings/ContactInfo.js:532
+msgid "A valid phone number is required!"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:208
+#: assets/src/admin/pages/bookings/FormField.js:531
+msgid "Date is required"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:208
+#: assets/js/chunk/9cc19297ce90352de77e.chunk.js:58
+#: assets/src/admin/pages/bookings/FormField.js:553
+#: assets/src/admin/pages/bookings/RescheduleModal.js:142
+msgid "Select time"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:208
+#: assets/src/admin/pages/bookings/FormField.js:572
+msgid "Select Time"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:208
+#: assets/js/chunk/9cc19297ce90352de77e.chunk.js:58
+#: assets/src/admin/pages/bookings/FormField.js:579
+#: assets/src/admin/pages/bookings/RescheduleModal.js:161
+msgid "Time is required"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:208
+#: assets/js/chunk/9cc19297ce90352de77e.chunk.js:68
+#: assets/js/frontend.js:634
+#: assets/src/admin/pages/bookings/FormField.js:635
+#: assets/src/admin/pages/bookings/TableHeader.js:128
+#: assets/src/frontend/pages/userAccount/TableHeader.js:108
+msgid "Status"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:208
+#: assets/src/admin/pages/bookings/FormField.js:637
+msgid "Select Booking status"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:208
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:268
+#: assets/js/chunk/ebdbae511295528c8021.chunk.js:118
+#: assets/js/frontend.js:381
+#: assets/src/admin/pages/bookings/FormField.js:653
+#: assets/src/admin/pages/meeting/LocationType.js:400
+#: assets/src/admin/pages/settings/Integrations.js:102
+#: assets/src/frontend/pages/bookings/ContactInfo.js:684
+msgid "Zoom"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:208
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:268
+#: assets/js/frontend.js:381
+#: assets/js/frontend.js:480
+#: assets/src/admin/pages/bookings/FormField.js:655
+#: assets/src/admin/pages/meeting/LocationType.js:429
+#: assets/src/frontend/pages/bookings/ContactInfo.js:686
+#: assets/src/frontend/pages/bookings/SidebarInfo.js:375
+msgid "Organizer Phone Number"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:208
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:268
+#: assets/js/frontend.js:381
+#: assets/src/admin/pages/bookings/FormField.js:656
+#: assets/src/admin/pages/meeting/LocationType.js:409
+#: assets/src/frontend/pages/bookings/ContactInfo.js:687
+msgid "In Person Meeting"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:208
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:268
+#: assets/js/frontend.js:381
+#: assets/src/admin/pages/bookings/FormField.js:657
+#: assets/src/admin/pages/meeting/LocationType.js:421
+#: assets/src/frontend/pages/bookings/ContactInfo.js:688
+msgid "Attendee Phone Number"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:248
+#: assets/js/chunk/ebdbae511295528c8021.chunk.js:48
+#: assets/src/admin/pages/meeting/AddGuest.js:44
+#: assets/src/admin/pages/settings/AddGuest.js:53
+msgid "Enable Guest(s)"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:248
+#: assets/js/chunk/ebdbae511295528c8021.chunk.js:48
+#: assets/src/admin/pages/meeting/AddGuest.js:47
+#: assets/src/admin/pages/settings/AddGuest.js:56
+msgid "Activate whether or not it is allowed to include guests on for a meeting"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:248
+#: assets/js/chunk/ebdbae511295528c8021.chunk.js:48
+#: assets/src/admin/pages/meeting/AddGuest.js:57
+#: assets/src/admin/pages/settings/AddGuest.js:65
+msgid "Number of Guest(s)"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:248
+#: assets/js/chunk/ebdbae511295528c8021.chunk.js:48
+#: assets/src/admin/pages/meeting/AddGuest.js:59
+#: assets/src/admin/pages/settings/AddGuest.js:67
+msgid "Set the maximum number of guests one user is allowed to bring."
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:258
+#: assets/js/chunk/ebdbae511295528c8021.chunk.js:98
+#: assets/src/admin/pages/meeting/CustomizeForm.js:86
+#: assets/src/admin/pages/settings/CustomizeForm.js:63
+msgid "Invitee Questions"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:258
+#: assets/js/chunk/ebdbae511295528c8021.chunk.js:98
+#: assets/src/admin/pages/meeting/CustomizeForm.js:110
+#: assets/src/admin/pages/settings/CustomizeForm.js:87
+msgid "Required"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:268
+#: assets/src/admin/pages/meeting/LocationType.js:118
+msgid "Google meet is not connected."
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:268
+#: assets/src/admin/pages/meeting/LocationType.js:130
+#: assets/src/admin/pages/meeting/LocationType.js:151
+msgid " Please configure"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:268
+#: assets/src/admin/pages/meeting/LocationType.js:139
+msgid "Zoom is not connected."
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:268
+#: assets/src/admin/pages/meeting/LocationType.js:203
+msgid "Location type"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:268
+#: assets/src/admin/pages/meeting/LocationType.js:250
+msgid "Add location"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:268
+#: assets/src/admin/pages/meeting/LocationType.js:338
+msgid "remove-location-type"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:268
+#: assets/src/admin/pages/meeting/LocationType.js:375
+msgid "Add Another Location"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:268
+#: assets/src/admin/pages/meeting/LocationType.js:443
+#: assets/src/admin/pages/meeting/LocationType.js:446
+msgid "Address"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:278
+#: assets/js/frontend.js:634
+#: assets/src/admin/pages/meeting/TicketPrice.js:19
+#: assets/src/frontend/pages/userAccount/TableHeader.js:90
+msgid "Price"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:278
+#: assets/src/admin/pages/meeting/TicketPrice.js:22
+msgid "Enter meeting price"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:288
+#: assets/src/admin/pages/meeting/UpdateMeeting.js:65
+msgid "Basic Info"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:288
+#: assets/src/admin/pages/meeting/UpdateMeeting.js:79
+msgid "Time and Availability"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:288
+#: assets/src/admin/pages/meeting/UpdateMeeting.js:93
+msgid "Recurring"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:288
+#: assets/js/chunk/ebdbae511295528c8021.chunk.js:168
+#: assets/src/admin/pages/meeting/UpdateMeeting.js:105
+#: assets/src/admin/pages/settings/index.js:81
+msgid "Booking Questions"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:288
+#: assets/src/admin/pages/meeting/UpdateMeeting.js:112
+msgid "Seats Plans"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:288
+#: assets/src/admin/pages/meeting/UpdateMeeting.js:124
+msgid "Copied the meeting link"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:288
+#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:18
+#: assets/src/admin/pages/meeting/CreateMeeting.js:127
+#: assets/src/admin/pages/meeting/UpdateMeeting.js:161
+msgid "Back to Meetings"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:288
+#: assets/src/admin/pages/meeting/UpdateMeeting.js:166
+msgid "Copy Meeting Link"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:288
+#: assets/src/admin/pages/meeting/UpdateMeeting.js:173
+msgid "Copy Link"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:288
+#: assets/src/admin/pages/meeting/UpdateMeeting.js:179
+msgid "Preview Meeting"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:288
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:68
+#: assets/src/admin/pages/meeting/MeetingCard.js:290
+#: assets/src/admin/pages/meeting/UpdateMeeting.js:188
+msgid "Preview"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:308
 #: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:308
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:318
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:338
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:216
+#: assets/src/admin/pages/meeting/steps/CreateStep.js:329
+msgid "default"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:308
+#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:225
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:236
+#: assets/src/admin/pages/meeting/steps/CreateStep.js:342
+#: assets/src/admin/pages/meeting/steps/CreateStep.js:353
+msgid "Title"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:308
+#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:231
+#: assets/src/admin/pages/meeting/steps/CreateStep.js:348
+msgid "Please enter title!"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:308
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:242
+msgid "Description"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:308
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:246
+msgid "Enter description"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:308
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:268
+msgid "Categorize your meeting"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:308
+#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
+#: assets/js/frontend.js:634
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:319
+#: assets/src/admin/pages/meeting/steps/CreateStep.js:402
+#: assets/src/frontend/pages/userAccount/TableHeader.js:62
+msgid "Duration"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:308
+#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:323
+#: assets/src/admin/pages/meeting/steps/CreateStep.js:406
+msgid "Select your meeting duration"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:308
+#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:331
+#: assets/src/admin/pages/meeting/steps/CreateStep.js:414
+msgid "Please select meeting duration!"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:308
+#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
+#: assets/js/chunk/ebdbae511295528c8021.chunk.js:38
+#: assets/src/admin/components/notification/ReminderTime.js:74
+#: assets/src/admin/pages/meeting/notification/ReminderTime.js:91
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:349
+#: assets/src/admin/pages/meeting/steps/CreateStep.js:432
+msgid "Set custom time"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:308
+#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:361
+#: assets/src/admin/pages/meeting/steps/CreateStep.js:444
+msgid "Custom meeting duration time is required!"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:308
+#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:371
+#: assets/src/admin/pages/meeting/steps/CreateStep.js:454
+msgid "hr's / min"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:308
+#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:392
+#: assets/src/admin/pages/meeting/steps/CreateStep.js:475
+msgid "Please select custom time"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:308
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:318
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:338
+#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
 #: assets/js/chunk/ebdbae511295528c8021.chunk.js:58
 #: assets/js/chunk/ebdbae511295528c8021.chunk.js:108
 #: assets/src/admin/pages/meeting/notification/Notification.js:80
@@ -1910,512 +2373,7 @@ msgstr ""
 msgid "Save Updates"
 msgstr ""
 
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:48
-#: assets/src/admin/components/AllDayScheduleModal.js:86
-msgid "Apply Schedule"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:48
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:128
-#: assets/src/admin/components/AllDayScheduleModal.js:94
-#: assets/src/admin/components/SingleDaySchedule.js:520
-msgid "Apply schedule to other days"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:48
-#: assets/src/admin/components/AllDayScheduleModal.js:99
-msgid "Apply schedule to all days"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:48
-#: assets/src/admin/components/AllDayScheduleModal.js:102
-msgid "Apply schedule to custom days"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:48
-#: assets/src/admin/components/AllDayScheduleModal.js:120
-msgid "Friday"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:48
-#: assets/src/admin/components/AllDayScheduleModal.js:124
-msgid "Saturday"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:48
-#: assets/src/admin/components/AllDayScheduleModal.js:128
-msgid "Sunday"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:48
-#: assets/src/admin/components/AllDayScheduleModal.js:132
-msgid "Monday"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:48
-#: assets/src/admin/components/AllDayScheduleModal.js:136
-msgid "Tuesday"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:48
-#: assets/src/admin/components/AllDayScheduleModal.js:140
-msgid "Wednesday"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:48
-#: assets/src/admin/components/AllDayScheduleModal.js:144
-msgid "Thursday"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:68
-#: assets/src/admin/components/ErrorPage.js:15
-msgid "Ooops! Something's Wrong. "
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:68
-#: assets/src/admin/components/ErrorPage.js:17
-msgid "Please try again or let us know if the issue's still here."
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:68
-#: assets/src/admin/components/ErrorPage.js:27
-msgid "Try Again"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:88
-#: assets/src/admin/components/MainPageHeader.js:26
-msgid "Need Help?"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:88
-#: assets/src/admin/components/MainPageHeader.js:38
-msgid "Documentation"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:88
-#: assets/src/admin/components/MainPageHeader.js:50
-msgid "Feature Request"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:98
-#: assets/src/admin/components/NoticeProFeature.js:13
-msgid "Upgrade to timetics pro for ultimate satisfaction"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:108
-#: assets/src/admin/components/ScheduleMode.js:25
-msgid "Use Default Availability"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:108
-#: assets/src/admin/components/ScheduleMode.js:36
-msgid "Customize Availability"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:128
-#: assets/src/admin/components/SingleDaySchedule.js:302
-#: assets/src/admin/components/SingleDaySchedule.js:491
-msgid "Unavailable"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:128
-#: assets/src/admin/components/SingleDaySchedule.js:480
-msgid "Time conflict."
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:128
-#: assets/src/admin/components/SingleDaySchedule.js:502
-msgid "Add new time slot"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:128
-#: assets/src/admin/components/SingleDaySchedule.js:535
-msgid "Apply All Days"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:148
-#: assets/src/admin/components/goSeatsMap.js:22
-msgid "Go Seats Map"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:208
-#: assets/js/chunk/9cc19297ce90352de77e.chunk.js:108
-#: assets/js/chunk/42ac18fa7511c1562003.chunk.js:28
-#: assets/js/chunk/ebdbae511295528c8021.chunk.js:108
-#: assets/src/admin/pages/bookings/FormField.js:300
-#: assets/src/admin/pages/calendar/CalendarSearchActions.js:70
-#: assets/src/admin/pages/settings/General.js:192
-#: assets/src/admin/pages/staff/TableHeader.js:88
-msgid "Pending"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:208
-#: assets/js/chunk/9cc19297ce90352de77e.chunk.js:108
-#: assets/js/chunk/ebdbae511295528c8021.chunk.js:108
-#: assets/src/admin/pages/bookings/FormField.js:305
-#: assets/src/admin/pages/calendar/CalendarSearchActions.js:66
-#: assets/src/admin/pages/settings/General.js:188
-msgid "Approved"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:208
-#: assets/js/chunk/9cc19297ce90352de77e.chunk.js:108
-#: assets/js/chunk/ebdbae511295528c8021.chunk.js:108
-#: assets/src/admin/pages/bookings/FormField.js:311
-#: assets/src/admin/pages/calendar/CalendarSearchActions.js:74
-#: assets/src/admin/pages/settings/General.js:196
-msgid "Canceled"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:208
-#: assets/src/admin/pages/bookings/FormField.js:322
-msgid "Customer's name"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:208
-#: assets/src/admin/pages/bookings/FormField.js:329
-msgid "Customer name is required!"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:208
-#: assets/src/admin/pages/bookings/FormField.js:332
-msgid "Jhon Deo"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:208
-#: assets/src/admin/pages/bookings/FormField.js:336
-msgid "Customer's Email"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:208
-#: assets/src/admin/pages/bookings/FormField.js:346
-msgid "name@yourdomain.com"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:208
-#: assets/src/admin/pages/bookings/FormField.js:378
-msgid "Client time zone"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:208
-#: assets/src/admin/pages/bookings/FormField.js:399
-msgid "Create a meeting"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:208
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:358
-#: assets/js/chunk/9cc19297ce90352de77e.chunk.js:58
-#: assets/js/chunk/9cc19297ce90352de77e.chunk.js:108
-#: assets/src/admin/pages/bookings/FormField.js:403
-#: assets/src/admin/pages/bookings/RescheduleModal.js:157
-#: assets/src/admin/pages/calendar/CalendarSearchActions.js:343
-#: assets/src/admin/pages/shortcodes/BookingForm.js:63
-msgid "Select Meeting"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:208
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:358
-#: assets/src/admin/pages/bookings/FormField.js:415
-#: assets/src/admin/pages/shortcodes/BookingForm.js:70
-msgid "Please Select Your Meeting"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:208
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:358
-#: assets/src/admin/pages/bookings/FormField.js:422
-#: assets/src/admin/pages/shortcodes/BookingForm.js:79
-msgid "Meeting title is required"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:208
-#: assets/src/admin/pages/bookings/FormField.js:440
-msgid "Team is required"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:208
-#: assets/src/admin/pages/bookings/FormField.js:446
-#: assets/src/admin/pages/bookings/FormField.js:457
-msgid "Select Location"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:208
-#: assets/src/admin/pages/bookings/FormField.js:453
-msgid "Location is required"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:208
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:268
-#: assets/src/admin/pages/bookings/FormField.js:503
-#: assets/src/admin/pages/meeting/LocationType.js:461
-msgid "Phone number"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:208
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:268
-#: assets/js/frontend.js:381
-#: assets/js/frontend.js:678
-#: assets/src/admin/pages/bookings/FormField.js:507
-#: assets/src/admin/pages/meeting/LocationType.js:465
-#: assets/src/frontend/pages/bookings/ContactInfo.js:448
-#: assets/src/frontend/pages/bookings/ContactInfo.js:524
-#: assets/src/frontend/pages/userAccount/UserProfile.js:147
-msgid "Enter your phone number"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:208
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:268
-#: assets/js/frontend.js:381
-#: assets/src/admin/pages/bookings/FormField.js:514
-#: assets/src/admin/pages/meeting/LocationType.js:469
-#: assets/src/frontend/pages/bookings/ContactInfo.js:456
-#: assets/src/frontend/pages/bookings/ContactInfo.js:532
-msgid "A valid phone number is required!"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:208
-#: assets/src/admin/pages/bookings/FormField.js:531
-msgid "Date is required"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:208
-#: assets/js/chunk/9cc19297ce90352de77e.chunk.js:58
-#: assets/src/admin/pages/bookings/FormField.js:553
-#: assets/src/admin/pages/bookings/RescheduleModal.js:142
-msgid "Select time"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:208
-#: assets/src/admin/pages/bookings/FormField.js:572
-msgid "Select Time"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:208
-#: assets/js/chunk/9cc19297ce90352de77e.chunk.js:58
-#: assets/src/admin/pages/bookings/FormField.js:579
-#: assets/src/admin/pages/bookings/RescheduleModal.js:161
-msgid "Time is required"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:208
-#: assets/js/chunk/9cc19297ce90352de77e.chunk.js:68
-#: assets/js/frontend.js:634
-#: assets/src/admin/pages/bookings/FormField.js:635
-#: assets/src/admin/pages/bookings/TableHeader.js:128
-#: assets/src/frontend/pages/userAccount/TableHeader.js:108
-msgid "Status"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:208
-#: assets/src/admin/pages/bookings/FormField.js:637
-msgid "Select Booking status"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:208
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:268
-#: assets/js/chunk/ebdbae511295528c8021.chunk.js:118
-#: assets/js/frontend.js:381
-#: assets/src/admin/pages/bookings/FormField.js:653
-#: assets/src/admin/pages/meeting/LocationType.js:400
-#: assets/src/admin/pages/settings/Integrations.js:102
-#: assets/src/frontend/pages/bookings/ContactInfo.js:684
-msgid "Zoom"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:208
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:268
-#: assets/js/frontend.js:381
-#: assets/js/frontend.js:480
-#: assets/src/admin/pages/bookings/FormField.js:655
-#: assets/src/admin/pages/meeting/LocationType.js:429
-#: assets/src/frontend/pages/bookings/ContactInfo.js:686
-#: assets/src/frontend/pages/bookings/SidebarInfo.js:375
-msgid "Organizer Phone Number"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:208
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:268
-#: assets/js/frontend.js:381
-#: assets/src/admin/pages/bookings/FormField.js:656
-#: assets/src/admin/pages/meeting/LocationType.js:409
-#: assets/src/frontend/pages/bookings/ContactInfo.js:687
-msgid "In Person Meeting"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:208
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:268
-#: assets/js/frontend.js:381
-#: assets/src/admin/pages/bookings/FormField.js:657
-#: assets/src/admin/pages/meeting/LocationType.js:421
-#: assets/src/frontend/pages/bookings/ContactInfo.js:688
-msgid "Attendee Phone Number"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:248
-#: assets/js/chunk/ebdbae511295528c8021.chunk.js:48
-#: assets/src/admin/pages/meeting/AddGuest.js:44
-#: assets/src/admin/pages/settings/AddGuest.js:53
-msgid "Enable Guest(s)"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:248
-#: assets/js/chunk/ebdbae511295528c8021.chunk.js:48
-#: assets/src/admin/pages/meeting/AddGuest.js:47
-#: assets/src/admin/pages/settings/AddGuest.js:56
-msgid "Activate whether or not it is allowed to include guests on for a meeting"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:248
-#: assets/js/chunk/ebdbae511295528c8021.chunk.js:48
-#: assets/src/admin/pages/meeting/AddGuest.js:57
-#: assets/src/admin/pages/settings/AddGuest.js:65
-msgid "Number of Guest(s)"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:248
-#: assets/js/chunk/ebdbae511295528c8021.chunk.js:48
-#: assets/src/admin/pages/meeting/AddGuest.js:59
-#: assets/src/admin/pages/settings/AddGuest.js:67
-msgid "Set the maximum number of guests one user is allowed to bring."
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:258
-#: assets/js/chunk/ebdbae511295528c8021.chunk.js:98
-#: assets/src/admin/pages/meeting/CustomizeForm.js:86
-#: assets/src/admin/pages/settings/CustomizeForm.js:63
-msgid "Invitee Questions"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:258
-#: assets/js/chunk/ebdbae511295528c8021.chunk.js:98
-#: assets/src/admin/pages/meeting/CustomizeForm.js:110
-#: assets/src/admin/pages/settings/CustomizeForm.js:87
-msgid "Required"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:268
-#: assets/src/admin/pages/meeting/LocationType.js:118
-msgid "Google meet is not connected."
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:268
-#: assets/src/admin/pages/meeting/LocationType.js:130
-#: assets/src/admin/pages/meeting/LocationType.js:151
-msgid " Please configure"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:268
-#: assets/src/admin/pages/meeting/LocationType.js:139
-msgid "Zoom is not connected."
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:268
-#: assets/src/admin/pages/meeting/LocationType.js:203
-msgid "Location type"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:268
-#: assets/src/admin/pages/meeting/LocationType.js:250
-msgid "Add location"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:268
-#: assets/src/admin/pages/meeting/LocationType.js:338
-msgid "remove-location-type"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:268
-#: assets/src/admin/pages/meeting/LocationType.js:375
-msgid "Add Another Location"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:268
-#: assets/src/admin/pages/meeting/LocationType.js:443
-#: assets/src/admin/pages/meeting/LocationType.js:446
-msgid "Address"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:278
-#: assets/js/frontend.js:634
-#: assets/src/admin/pages/meeting/TicketPrice.js:19
-#: assets/src/frontend/pages/userAccount/TableHeader.js:90
-msgid "Price"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:278
-#: assets/src/admin/pages/meeting/TicketPrice.js:22
-msgid "Enter meeting price"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:288
-#: assets/src/admin/pages/meeting/UpdateMeeting.js:65
-msgid "Basic Info"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:288
-#: assets/src/admin/pages/meeting/UpdateMeeting.js:79
-msgid "Time and Availability"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:288
-#: assets/src/admin/pages/meeting/UpdateMeeting.js:93
-msgid "Recurring"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:288
-#: assets/js/chunk/ebdbae511295528c8021.chunk.js:168
-#: assets/src/admin/pages/meeting/UpdateMeeting.js:105
-#: assets/src/admin/pages/settings/index.js:81
-msgid "Booking Questions"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:288
-#: assets/src/admin/pages/meeting/UpdateMeeting.js:112
-msgid "Seats Plans"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:288
-#: assets/src/admin/pages/meeting/UpdateMeeting.js:124
-msgid "Copied the meeting link"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:288
-#: assets/src/admin/pages/meeting/UpdateMeeting.js:166
-msgid "Copy Meeting Link"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:288
-#: assets/src/admin/pages/meeting/UpdateMeeting.js:173
-msgid "Copy Link"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:288
-#: assets/src/admin/pages/meeting/UpdateMeeting.js:179
-msgid "Preview Meeting"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:288
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:68
-#: assets/src/admin/pages/meeting/MeetingCard.js:290
-#: assets/src/admin/pages/meeting/UpdateMeeting.js:188
-msgid "Preview"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:308
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:242
-msgid "Description"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:308
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:246
-msgid "Enter description"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:308
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:268
-msgid "Categorize your meeting"
-msgstr ""
-
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:308
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:308
 #: assets/js/chunk/d2461a5606c006aa5b73.chunk.js:18
 #: assets/js/chunk/d2461a5606c006aa5b73.chunk.js:48
 #: assets/src/admin/module/onboard/components/AvailableTimeSlots.js:97
@@ -2425,67 +2383,109 @@ msgstr ""
 msgid "Next"
 msgstr ""
 
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:318
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:318
 #: assets/src/admin/pages/meeting/steps/Integrations.js:126
 msgid "Fluent CRM Webhook"
 msgstr ""
 
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:318
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:318
 #: assets/src/admin/pages/meeting/steps/Integrations.js:134
 msgid "Enter fluent CRM webhook"
 msgstr ""
 
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:318
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:318
 #: assets/src/admin/pages/meeting/steps/Integrations.js:135
 msgid "this webhook is automatically copied from the global integration settings. if you want to change it, please click on the checkbox"
 msgstr ""
 
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:318
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:318
 #: assets/js/chunk/ebdbae511295528c8021.chunk.js:118
 #: assets/src/admin/pages/meeting/steps/Integrations.js:165
 #: assets/src/admin/pages/settings/Integrations.js:121
 msgid "Pabbly Webhook"
 msgstr ""
 
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:318
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:318
 #: assets/src/admin/pages/meeting/steps/Integrations.js:173
 msgid "Enter Pabbly webhook"
 msgstr ""
 
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:318
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:318
 #: assets/src/admin/pages/meeting/steps/Integrations.js:174
 #: assets/src/admin/pages/meeting/steps/Integrations.js:213
 msgid "This webhook is automatically copied from the global integration settings. if you want to change it, please click on the checkbox"
 msgstr ""
 
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:318
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:318
 #: assets/js/chunk/ebdbae511295528c8021.chunk.js:118
 #: assets/src/admin/pages/meeting/steps/Integrations.js:204
 #: assets/src/admin/pages/settings/Integrations.js:132
 msgid "Zapier Webhook"
 msgstr ""
 
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:318
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:318
 #: assets/src/admin/pages/meeting/steps/Integrations.js:212
 msgid "Enter zapier webhook"
 msgstr ""
 
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:338
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:338
+#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
+#: assets/src/admin/pages/meeting/steps/CreateStep.js:533
+#: assets/src/admin/pages/meeting/steps/TimeAvailability.js:274
+msgid "select team member"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:338
+#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
+#: assets/src/admin/pages/meeting/steps/CreateStep.js:537
+#: assets/src/admin/pages/meeting/steps/TimeAvailability.js:278
+msgid "Please select team member"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:338
+#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
+#: assets/src/admin/pages/meeting/steps/CreateStep.js:562
+#: assets/src/admin/pages/meeting/steps/TimeAvailability.js:303
+msgid "Select availability "
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:338
+#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
+#: assets/src/admin/pages/meeting/steps/CreateStep.js:361
+#: assets/src/admin/pages/meeting/steps/TimeAvailability.js:319
+msgid "Meeting date range (meeting availibility)"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:338
+#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
+#: assets/src/admin/pages/meeting/steps/CreateStep.js:367
+#: assets/src/admin/pages/meeting/steps/TimeAvailability.js:327
+msgid "If you don't specify a date, the meeting will automatically be scheduled for one year from now."
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:338
+#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
+#: assets/src/admin/pages/meeting/steps/CreateStep.js:513
+#: assets/src/admin/pages/meeting/steps/TimeAvailability.js:369
+msgid "meeting Time zone"
+msgstr ""
+
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:338
 #: assets/src/admin/pages/meeting/steps/TimeAvailability.js:398
 msgid "Minimum Notice Time for booking"
 msgstr ""
 
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:338
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:338
 #: assets/src/admin/pages/meeting/steps/TimeAvailability.js:405
 msgid "Minimum Notice time before the meeting"
 msgstr ""
 
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:338
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:338
 #: assets/src/admin/pages/meeting/steps/TimeAvailability.js:432
 msgid "Meeting visibility"
 msgstr ""
 
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:338
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:338
 #: assets/js/frontend.js:711
 #: assets/js/frontend.js:810
 #: assets/src/admin/pages/meeting/steps/TimeAvailability.js:467
@@ -2494,91 +2494,96 @@ msgstr ""
 msgid "Back"
 msgstr ""
 
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:358
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:368
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:358
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:368
 #: assets/src/admin/pages/shortcodes/BookingForm.js:91
 #: assets/src/admin/pages/shortcodes/MeetingList.js:75
 msgid "Generate Shortcode"
 msgstr ""
 
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:358
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:358
 #: assets/src/admin/pages/shortcodes/BookingForm.js:110
 msgid "Copy the shortcode and paste where you want to show booking form"
 msgstr ""
 
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:368
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:368
 #: assets/src/admin/pages/shortcodes/MeetingList.js:43
 msgid "Meeting Limit"
 msgstr ""
 
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:368
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:368
 #: assets/src/admin/pages/shortcodes/MeetingList.js:50
 msgid "Show Filters"
 msgstr ""
 
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:368
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:368
 #: assets/src/admin/pages/shortcodes/MeetingList.js:65
 msgid "Select Option"
 msgstr ""
 
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:388
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:388
 #: assets/src/admin/pages/shortcodes/index.js:22
 msgid "Get booking form shortcode"
 msgstr ""
 
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:388
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:388
 #: assets/src/admin/pages/shortcodes/index.js:50
 msgid "Booking form"
 msgstr ""
 
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:388
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:388
 #: assets/src/admin/pages/shortcodes/index.js:56
 msgid "Get meeting list shortcode"
 msgstr ""
 
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:388
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:388
 #: assets/src/admin/pages/shortcodes/index.js:83
 msgid "Meeting List"
 msgstr ""
 
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:388
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:388
 #: assets/src/admin/pages/shortcodes/index.js:90
 msgid "Get User Dashboard shortcode"
 msgstr ""
 
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:388
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:388
 #: assets/src/admin/pages/shortcodes/index.js:117
 msgid "User Dashboard"
 msgstr ""
 
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:738
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:738
 #: assets/src/common/nicheData.js:7
 msgid "Department"
 msgstr ""
 
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:738
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:738
 #: assets/src/common/nicheData.js:8
 msgid "Departments"
 msgstr ""
 
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:738
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:738
 #: assets/src/common/nicheData.js:11
 msgid "Doctor"
 msgstr ""
 
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:738
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:738
 #: assets/src/common/nicheData.js:15
 msgid "Appointment"
 msgstr ""
 
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:738
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:738
 #: assets/src/common/nicheData.js:16
 msgid "Appointments"
 msgstr ""
 
-#: assets/js/chunk/8b478e4bfbe094843eaa.chunk.js:738
+#: assets/js/chunk/2f39deb1a9d90f5df21e.chunk.js:738
 #: assets/src/common/nicheData.js:19
 msgid "Patient"
+msgstr ""
+
+#: assets/js/chunk/7e4f5762a7a530bbb112.chunk.js:28
+#: assets/src/admin/pages/meeting/steps/CreateStep.js:373
+msgid "Set meeting date"
 msgstr ""
 
 #: assets/js/chunk/9cc19297ce90352de77e.chunk.js:28
@@ -2702,8 +2707,8 @@ msgid "date"
 msgstr ""
 
 #: assets/js/chunk/9cc19297ce90352de77e.chunk.js:68
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:28
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:68
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:28
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:68
 #: assets/src/admin/pages/bookings/TableHeader.js:55
 #: assets/src/admin/pages/meeting/CategoryList.js:184
 #: assets/src/admin/pages/meeting/MeetingCard.js:215
@@ -2737,9 +2742,9 @@ msgstr ""
 #: assets/js/chunk/9cc19297ce90352de77e.chunk.js:78
 #: assets/js/chunk/9cc19297ce90352de77e.chunk.js:138
 #: assets/js/chunk/42ac18fa7511c1562003.chunk.js:38
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:68
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:78
 #: assets/js/chunk/e2d7175438a882b21edc.chunk.js:18
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:68
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:78
 #: assets/js/frontend.js:645
 #: assets/src/admin/pages/bookings/bookingLists.js:124
 #: assets/src/admin/pages/bookings/bookingLists.js:210
@@ -2762,9 +2767,9 @@ msgstr ""
 #: assets/js/chunk/9cc19297ce90352de77e.chunk.js:78
 #: assets/js/chunk/9cc19297ce90352de77e.chunk.js:138
 #: assets/js/chunk/42ac18fa7511c1562003.chunk.js:38
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:68
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:78
 #: assets/js/chunk/e2d7175438a882b21edc.chunk.js:18
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:68
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:78
 #: assets/js/frontend.js:645
 #: assets/src/admin/pages/bookings/bookingLists.js:126
 #: assets/src/admin/pages/bookings/bookingLists.js:212
@@ -2901,44 +2906,44 @@ msgid "Please create a meeting first to see the schedules in the calendar view."
 msgstr ""
 
 #: assets/js/chunk/9cc19297ce90352de77e.chunk.js:178
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:48
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:48
 #: assets/src/admin/pages/meeting/CreateOptionBtn.js:36
 #: assets/src/admin/pages/meeting/CreateOptionBtn.js:130
 msgid "One-to-Many"
 msgstr ""
 
 #: assets/js/chunk/9cc19297ce90352de77e.chunk.js:178
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:48
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:48
 #: assets/src/admin/pages/meeting/CreateOptionBtn.js:42
 msgid "Create a One-to-Many Meeting"
 msgstr ""
 
 #: assets/js/chunk/9cc19297ce90352de77e.chunk.js:178
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:48
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:48
 #: assets/src/admin/pages/meeting/CreateOptionBtn.js:98
 msgid "One-to-One"
 msgstr ""
 
 #: assets/js/chunk/9cc19297ce90352de77e.chunk.js:178
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:48
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:48
 #: assets/src/admin/pages/meeting/CreateOptionBtn.js:101
 msgid "Single organizer with single invitee. Best for having a one-to-one conversation."
 msgstr ""
 
 #: assets/js/chunk/9cc19297ce90352de77e.chunk.js:178
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:48
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:48
 #: assets/src/admin/pages/meeting/CreateOptionBtn.js:134
 msgid "Single organizer with multiple invitees. Best for taking classes and seminars."
 msgstr ""
 
 #: assets/js/chunk/9cc19297ce90352de77e.chunk.js:178
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:48
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:48
 #: assets/src/admin/pages/meeting/CreateOptionBtn.js:166
 msgid "One-to-Many With Seat plan"
 msgstr ""
 
 #: assets/js/chunk/9cc19297ce90352de77e.chunk.js:178
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:48
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:48
 #: assets/src/admin/pages/meeting/CreateOptionBtn.js:173
 msgid "One-to-Many meetings with the option to create seat plans. Best for restaurants, cinema halls, and conferences."
 msgstr ""
@@ -3232,6 +3237,104 @@ msgstr ""
 #: assets/js/chunk/277562178b33a6c1970a.chunk.js:18
 #: assets/src/admin/pages/bookings/Create.js:34
 msgid "Back to Calendar "
+msgstr ""
+
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:28
+#: assets/src/admin/pages/meeting/CategoryList.js:152
+msgid "Preview "
+msgstr ""
+
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:28
+#: assets/src/admin/pages/meeting/CategoryList.js:161
+msgid "Edit "
+msgstr ""
+
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:38
+#: assets/src/admin/pages/meeting/CategoryModal.js:135
+msgid "Please enter desired category name!"
+msgstr ""
+
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:38
+#: assets/src/admin/pages/meeting/CategoryModal.js:143
+msgid "Enter category name"
+msgstr ""
+
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:38
+#: assets/src/admin/pages/meeting/CategoryModal.js:159
+msgid "Select meeting"
+msgstr ""
+
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:58
+#: assets/src/admin/pages/meeting/Filters.js:89
+#: assets/src/admin/pages/meeting/Filters.js:109
+msgid "Select"
+msgstr ""
+
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:58
+#: assets/src/admin/pages/meeting/Filters.js:102
+msgid "Select status"
+msgstr ""
+
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:58
+#: assets/src/admin/pages/meeting/Filters.js:129
+msgid "Clear"
+msgstr ""
+
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:58
+#: assets/src/admin/pages/meeting/Filters.js:134
+msgid "Apply"
+msgstr ""
+
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:68
+#: assets/src/admin/pages/meeting/MeetingCard.js:174
+msgid "Share"
+msgstr ""
+
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:68
+#: assets/src/admin/pages/meeting/MeetingCard.js:184
+msgid "Are you sure to duplicate?"
+msgstr ""
+
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:68
+#: assets/src/admin/pages/meeting/MeetingCard.js:194
+msgid "Clone"
+msgstr ""
+
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:68
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:78
+#: assets/src/admin/pages/meeting/MeetingCard.js:204
+#: assets/src/admin/pages/meeting/MeetingList.js:97
+msgid "Are you sure delete?"
+msgstr ""
+
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:78
+#: assets/src/admin/pages/meeting/MeetingList.js:224
+msgid "Deselect All"
+msgstr ""
+
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:78
+#: assets/src/admin/pages/meeting/MeetingList.js:243
+msgid "Select All"
+msgstr ""
+
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:78
+#: assets/src/admin/pages/meeting/MeetingList.js:322
+msgid "Let's Create a Meeting! "
+msgstr ""
+
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:78
+#: assets/src/admin/pages/meeting/MeetingList.js:323
+msgid "Create a meeting to get started and see the schedules in the calendar view."
+msgstr ""
+
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:88
+#: assets/src/admin/pages/meeting/ShareMeetingModal.js:70
+msgid "Copy"
+msgstr ""
+
+#: assets/js/chunk/bf99ea5fabbe3bfa36af.chunk.js:118
+#: assets/src/common/Actions.js:77
+msgid "Filter"
 msgstr ""
 
 #: assets/js/chunk/d2461a5606c006aa5b73.chunk.js:18
@@ -3934,104 +4037,6 @@ msgstr ""
 #: assets/js/chunk/ebdbae511295528c8021.chunk.js:198
 #: assets/src/admin/pages/settings/paymentsForm/Stripe.js:88
 msgid "Enter  secret key"
-msgstr ""
-
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:28
-#: assets/src/admin/pages/meeting/CategoryList.js:152
-msgid "Preview "
-msgstr ""
-
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:28
-#: assets/src/admin/pages/meeting/CategoryList.js:161
-msgid "Edit "
-msgstr ""
-
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:38
-#: assets/src/admin/pages/meeting/CategoryModal.js:135
-msgid "Please enter desired category name!"
-msgstr ""
-
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:38
-#: assets/src/admin/pages/meeting/CategoryModal.js:143
-msgid "Enter category name"
-msgstr ""
-
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:38
-#: assets/src/admin/pages/meeting/CategoryModal.js:159
-msgid "Select meeting"
-msgstr ""
-
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:58
-#: assets/src/admin/pages/meeting/Filters.js:89
-#: assets/src/admin/pages/meeting/Filters.js:109
-msgid "Select"
-msgstr ""
-
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:58
-#: assets/src/admin/pages/meeting/Filters.js:102
-msgid "Select status"
-msgstr ""
-
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:58
-#: assets/src/admin/pages/meeting/Filters.js:129
-msgid "Clear"
-msgstr ""
-
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:58
-#: assets/src/admin/pages/meeting/Filters.js:134
-msgid "Apply"
-msgstr ""
-
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:68
-#: assets/src/admin/pages/meeting/MeetingCard.js:174
-msgid "Share"
-msgstr ""
-
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:68
-#: assets/src/admin/pages/meeting/MeetingCard.js:184
-msgid "Are you sure to duplicate?"
-msgstr ""
-
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:68
-#: assets/src/admin/pages/meeting/MeetingCard.js:194
-msgid "Clone"
-msgstr ""
-
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:68
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:78
-#: assets/src/admin/pages/meeting/MeetingCard.js:204
-#: assets/src/admin/pages/meeting/MeetingList.js:97
-msgid "Are you sure delete?"
-msgstr ""
-
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:78
-#: assets/src/admin/pages/meeting/MeetingList.js:224
-msgid "Deselect All"
-msgstr ""
-
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:78
-#: assets/src/admin/pages/meeting/MeetingList.js:243
-msgid "Select All"
-msgstr ""
-
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:78
-#: assets/src/admin/pages/meeting/MeetingList.js:322
-msgid "Let's Create a Meeting! "
-msgstr ""
-
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:78
-#: assets/src/admin/pages/meeting/MeetingList.js:323
-msgid "Create a meeting to get started and see the schedules in the calendar view."
-msgstr ""
-
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:88
-#: assets/src/admin/pages/meeting/ShareMeetingModal.js:70
-msgid "Copy"
-msgstr ""
-
-#: assets/js/chunk/f2feffc57089672fa5dd.chunk.js:118
-#: assets/src/common/Actions.js:77
-msgid "Filter"
 msgstr ""
 
 #: assets/js/frontend.js:304

@@ -1158,11 +1158,9 @@ class Api_Booking extends Api {
 
 
         $staff_id        = ! empty( $data['staff'] ) ? intval( $data['staff'] ) : 0;
-        $order_total     = ! empty( $data['order_total'] ) ? intval( $data['order_total'] ) : 0;
+        $order_total     = ! empty( $data['order_total'] ) ? floatval( $data['order_total'] ) : 0;
         $location_type   = ! empty( $data['location_type'] ) ? sanitize_text_field( $data['location_type'] ) : '';
-        $seats           = ! empty( $data['seats'] ) ? $data['seats'] : [];
-   
-
+        $seats           = ! empty( $data['seats'] ) ? $data['seats'] : []; 
      
         // Check if the seats are available
         if ($all_seats && $seats) {
@@ -1175,6 +1173,7 @@ class Api_Booking extends Api {
         }
 
         // Check if the price is matched
+   
         if ($total_price != $order_total) {
             return $this->create_error_response(__('Pricing is not matched', 'timetics'), 403);
         }

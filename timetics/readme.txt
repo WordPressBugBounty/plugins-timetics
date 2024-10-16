@@ -3,7 +3,7 @@ Contributors: arraytics, abrasel600, rezakhan995
 Tags: booking system, appointments, booking, scheduling, appointment booking
 Requires at least: 5.2
 Tested up to: 6.6
-Stable tag: 1.0.25
+Stable tag: 1.0.26
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -257,6 +257,11 @@ If you’re curious, pay a visit to **[Arraytics](https://arraytics.com/timetics
 18. screenshot-18
 
 == Changelog ==
+
+= 1.0.26 ( Oct 16, 2024 ) =
+Fix: security performance improved
+Fix: Timezone issue
+Tweak: Update price value string to float 
 
 = 1.0.25 ( August 20, 2024 ) =
 Fix: Frontend translation issue and updated pot file

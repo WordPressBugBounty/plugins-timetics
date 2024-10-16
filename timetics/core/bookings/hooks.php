@@ -372,25 +372,24 @@ class Hooks {
 	 */
 	public function timetics_add_cart_item_data( $cart_item_data ) {
         $session_data = WC()->session->get( 'timetics_data' );
-		$booking_id  = $session_data['booking_id'];
-		$booking     = new Booking( $booking_id );
-		$total_price = $booking->get_total();
-		
+        $booking_id  = $session_data['booking_id'];
+        $booking     = new Booking( $booking_id );
+        $total_price = floatval($booking->get_total()); // Ensure $total_price is a float
+        
         if ( is_array( $booking->get_seat() ) ) {
             $total_quantity = count( $booking->get_seat() );
-        }else {
+        } else {
             $total_quantity = 1;
         }
-
-		if( ! empty( $booking_id ) && $total_price !== 0 ) {
-			$cart_item_data['_timetics_variation_total_quantity'] = $total_quantity;
-			$cart_item_data['booking_id'] 		                  = $booking_id;
-
-            //for balancing the cart item price
-            $cart_item_data['_timetics_variation_total_price']    = $total_price / $total_quantity;
-		}
-
-		return $cart_item_data;
-
-	}
+    
+        if( ! empty( $booking_id ) && $total_price !== 0 ) {
+            $cart_item_data['_timetics_variation_total_quantity'] = $total_quantity;
+            $cart_item_data['booking_id'] = $booking_id;
+    
+            // For balancing the cart item price
+            $cart_item_data['_timetics_variation_total_price'] = $total_price / $total_quantity;
+        }
+    
+        return $cart_item_data;
+    }
 }

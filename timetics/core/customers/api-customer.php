@@ -494,8 +494,7 @@ class Api_Customer extends Api {
             'last_name'     => $customer->get_last_name(),
             'email'         => $customer->get_email(),
             'phone'         => $customer->get_phone(),
-            'image'         => $customer->get_image(),
-            'password'      => $customer->get_password(),
+            'image'         => $customer->get_image(), 
             'total_booking' => $customer->get_total_booking(),
         ];
     }

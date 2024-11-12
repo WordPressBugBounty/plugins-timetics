@@ -3,7 +3,7 @@ Contributors: arraytics,themewinter, abrasel600, rezakhan995
 Tags: booking system, appointments, booking, scheduling, appointment booking
 Requires at least: 5.2
 Tested up to: 6.6
-Stable tag: 1.0.26
+Stable tag: 1.0.27
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -257,6 +257,11 @@ If you’re curious, pay a visit to **[Arraytics](https://arraytics.com/timetics
 18. screenshot-18
 
 == Changelog ==
+
+= 1.0.27 ( November 12, 2024 ) =
+Fix: Fixed an issue where the booking time slot did not match when using the WordPress language setting.
+ 
+
 
 = 1.0.26 ( Oct 16, 2024 ) =
 Fix: security performance improved

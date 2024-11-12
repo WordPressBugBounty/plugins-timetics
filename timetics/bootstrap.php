@@ -23,6 +23,7 @@ final class Bootstrap {
 
 	private $file;
 	public $version;
+    private $has_pro;
 
     /**
      * Throw Error While Trying To Clone Object
@@ -236,6 +237,7 @@ final class Bootstrap {
         Base\Custom_Endpoint::instance()->init();
 
         global $current_screen;
+        $this->has_pro = class_exists('TimeticsPro');
 
         $this->handle_buy_pro_module();
 
@@ -398,23 +400,31 @@ final class Bootstrap {
 	public function handle_buy_pro_module() {
         $page = isset( $_GET['page'] ) ? sanitize_text_field( $_GET['page'] ) : '';
 
+
         if ( 'timetics' !== $page ) {
             return;
         }
 
+ 
 		/**
 		 * Show banner (codename: jhanda)
 		 */
 		$filter_string = 'timetics,timetics-free-only';
+        
+        if( $this->has_pro ) {
+            
+            $filter_string .= ',timetics-pro';
+            $filter_string = str_replace(',timetics-free-only', '', $filter_string);
+
+        }
+        
 
 		\Wpmet\Libs\Banner::instance('timetics')
 			// ->is_test(true)
 			->set_filter(ltrim($filter_string, ','))
 			->set_api_url('https://demo.themewinter.com/public/jhanda')
-			->set_plugin_screens('edit-timetics')
-			->set_plugin_screens('timetics_page_timetics_sales_report')
-			->set_plugin_screens('edit-timetics-attendee')
-  			->set_plugin_screens('timetics_page_timetics_get_help')
+			->set_plugin_screens('timetics')
+			->set_plugin_screens('toplevel_page_timetics') 
  			->call();
 		// show get-help and upgrade-to-premium menu.
 		// $this->handle_get_help_and_upgrade_menu();

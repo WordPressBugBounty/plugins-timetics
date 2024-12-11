@@ -4,7 +4,7 @@
  * Plugin Name:       Timetics
  * Plugin URI:        https://arraytics.com/timetics/
  * Description:       Schedule, Appointment and Seat Booking plugin.
- * Version:           1.0.27
+ * Version:           1.0.28
  * Requires at least: 5.2
  * Requires PHP:      7.3
  * Author:            Arraytics
@@ -56,7 +56,7 @@ final class Timetics {
      * @return string
      */
     public static function get_version() {
-        return '1.0.27';
+        return '1.0.28';
     }
 
     /**
@@ -104,7 +104,7 @@ final class Timetics {
      */
     private function __construct() {
         // Always load translation.
-        add_action( 'plugins_loaded', array( $this, 'load_text_domain' ) );
+        add_action( 'init', array( $this, 'load_text_domain' ) );
 
         // Initialize plugin functionalities or quit.
         $this->requirements_met() ? $this->initialize_modules() : $this->quit();

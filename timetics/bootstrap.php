@@ -420,7 +420,7 @@ final class Bootstrap {
         
 
 		\Wpmet\Libs\Banner::instance('timetics')
-			// ->is_test(true)
+			->is_test(true)
 			->set_filter(ltrim($filter_string, ','))
 			->set_api_url('https://demo.themewinter.com/public/jhanda')
 			->set_plugin_screens('timetics')

@@ -2,8 +2,8 @@
 Contributors: arraytics,themewinter, abrasel600, rezakhan995
 Tags: booking system, appointments, booking, scheduling, appointment booking
 Requires at least: 5.2
-Tested up to: 6.6
-Stable tag: 1.0.27
+Tested up to: 6.7
+Stable tag: 1.0.28
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -257,6 +257,13 @@ If you’re curious, pay a visit to **[Arraytics](https://arraytics.com/timetics
 18. screenshot-18
 
 == Changelog ==
+= 1.0.28 ( December 11, 2024 ) =
+Fix: Resolved text domain compatibility issue with the latest WordPress.
+Fix: Addressed issue where a customer could delete another customer.
+Fix: Resolved Flatpicker JS conflict with WPCafe.
+Fix: Fixed additional text display issue in booking questions.
+Fix: Resolved required field issue in booking questions.
+Tweak: WordPress 6.7 Compatibility.
 
 = 1.0.27 ( November 12, 2024 ) =
 Fix: Fixed an issue where the booking time slot did not match when using the WordPress language setting.

@@ -992,8 +992,8 @@
 }
 .toplevel_page_timetics .ant-form-item-label > label.ant-form-item-required:not(.ant-form-item-required-mark-optional):before {
   position: absolute;
-  right: -13px;
-  top: 0;
+  right: 0px;
+  top: 4px;
 }
 .toplevel_page_timetics .ant-input-number-handler-wrap {
   display: none;
@@ -1838,7 +1838,7 @@
   background: transparent;
 }
 
-.flatpickr-input {
+.timetics-single-booking-wrapper .flatpickr-input {
   display: none;
 }
 
@@ -2032,6 +2032,11 @@
 }
 .tt-ticket-price-variation-wrapper .tt-ticket-price-variation p {
   margin: 8px 0;
+}
+
+.tt-booking-body-wrap .timetics-input .ant-form-item-extra, .timetics-category-meeting .tt-category-booking-wrap .timetics-input .ant-form-item-extra {
+  margin-top: 5px;
+  font-style: italic;
 }
 
 .timetics-user-account-wrapper .user-dashboard-container {

@@ -992,8 +992,8 @@
 }
 .toplevel_page_timetics .ant-form-item-label > label.ant-form-item-required:not(.ant-form-item-required-mark-optional):before {
   position: absolute;
-  right: -13px;
-  top: 0;
+  right: 0px;
+  top: 4px;
 }
 .toplevel_page_timetics .ant-input-number-handler-wrap {
   display: none;

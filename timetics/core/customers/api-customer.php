@@ -89,7 +89,7 @@ class Api_Customer extends Api {
                     'methods'             => \WP_REST_Server::DELETABLE,
                     'callback'            => [$this, 'delete_item'],
                     'permission_callback' => function () {
-                        return current_user_can( 'timetics-customer' );
+                        return current_user_can( 'manage_options' );
                     },
                 ],
             ]
@@ -494,7 +494,7 @@ class Api_Customer extends Api {
             'last_name'     => $customer->get_last_name(),
             'email'         => $customer->get_email(),
             'phone'         => $customer->get_phone(),
-            'image'         => $customer->get_image(), 
+            'image'         => $customer->get_image(),
             'total_booking' => $customer->get_total_booking(),
         ];
     }

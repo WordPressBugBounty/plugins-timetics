@@ -1,6 +1,6 @@
-===AI-powered Booking System for Event Scheduling & Appointment Booking - WP Timetics===
-Contributors: arraytics,themewinter, abrasel600, rezakhan995
-Tags: booking system,booking , appointments, appointment booking, scheduling
+===AI-powered Booking System for Daily Meetings, & Appointments - WP Timetics===
+Contributors: arraytics, themewinter, abrasel600
+Tags: booking system, booking calendar, appointment, scheduling
 Requires at least: 5.2
 Tested up to: 6.7
 Stable tag: 1.0.28
@@ -8,31 +8,15 @@ Requires PHP: 7.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-📅 WP Timetics – WP Timetics is a AI-powered booking system that automates scheduling and appointment booking processes. Perfect for service providers and scheduling. 
+With WP Timetics, schedule appointments, and make payments online. Sending personalized emails, customizable seat map, and managing time are all simple.
 
 == Description ==
 
-Introducing *[WP Timetics](https://arraytics.com/timetics)*, the most powerful booking system for schedule appointment and meeting solution on WordPress! 🚀
+Introducing *[WP Timetics](https://arraytics.com/timetics)*, the most powerful booking system for schedule appointment and meeting solution for WordPress! 🚀
 
-🗓️ WP Timetics simplifies your online appointments with Unlimited Meetings, Google Meet or Zoom integration, Visual Seat Map, Automated Notifications, Detailed Analytics, multiple Payment Methods and many more useful features.
+🗓️ WP Timetics simplifies your online appointments with **📅 Unlimited Meetings**, **🤖 13+ integrations integration**, Fully Customizable **🪑 Visual Seat Map**, **🔔 Automated Notifications**, **📈 Detailed Analytics**, **🧾 multiple Payment Methods** alongside many other **💯 50+** useful features.
 
-💁 Our booking plugin is suitable for all types of niches and provides the ultimate booking solution. Either you need a booking system for your salon to manage customer serials, or you need an automated fitness website for your gym. This plugin easily handles all of this, including recurring appointment booking, multi-tier ticketing, multiple meetings to hybrid meetings. 
-
-### WP Timetics Appointment Booking System is Designed for Whom?  
-Our Booking System and Appointment WordPress Plugin is designed to cater a wide range of industries, ensuring efficient scheduling and management of appointments. Below are the specific applications for various professions:
-
-*📅 Day-to-day Meetings* - With WP Timetics appointment and booking solution you can arrange your regular meeting which includes, team meetings, interview schedule, support LIVE chats, etc.
-*🗣️ Consultants* - Can organize client meetings with this appointment booking system: set time slots, manage bookings, send reminders and boost client satisfaction.
-*✂ Salon* - Clients can easily book their preferred services at convenient times, reducing no-shows, managing multiple services and optimizing staff schedules. 
-*🤼 Coaches Sessions* - Allow clients to select from various coaching packages and times. This flexibility helps coaches manage their scheduled appointments.
-*🧑‍🏫 Teachers and Mentors* - To schedule classes or tutoring sessions, allowing students to booking slots according to their convenience. 
-*🧔 Event Managers* - Efficiently handle multiple bookings for events, from corporate meetings to weddings.The booking plugin allows for easy management to payment processing.
-*🎵 Musicians* - Musicians can benefit from the appointment scheduling capabilities for gigs or lessons. The plugin allows them to set availability, manage bookings, and even integrate payment options for a seamless client experience.
-*💪 Fitness & Gyms Trainers* - This booking system manages class schedule appointments, personal training sessions, and group bookings in an easy way.
-*🛠️ Service & Maintenance* - Service providers in maintenance sectors can schedule appointments for repairs or consultations through this booking calendar. 
-*📅 Variety of Events* - The plugin is capable enough to manage various events, allowing organizers to create custom booking forms according to specific event needs.
-
-WP Timetics isn’t just limited to the professions mentioned above—it’s a versatile solution designed to adapt to any business or individual who works on booking systems and appointment booking. Manage all your bookings and create the smoothest booking experience ever. 
+💁 It is suitable for all types of niches and provides the **ultimate booking solution**. Either you need a booking system for your salon to manage customer serials, or you need an automated fitness website for your gym. This plugin easily handles all of this, including **recurring appointment booking**, **customizable seat plan**, **WhatApp and Twilio integrated** .
 
 **A few more helpful links here to get started 👇**
 
@@ -40,98 +24,248 @@ WP Timetics isn’t just limited to the professions mentioned above—it’s a v
 
 https://youtu.be/qBqTz2wF3kk
 
+### WP Timetics Appointment Booking System is Designed for Whom?  
+Our Booking System and Appointment Plugin for WordPress is designed to cater a wide range of industries, ensuring efficient scheduling and management of appointments. Below are the specific applications for various professions:
+
+**📅 Day-to-day Meetings**
+With WP Timetics appointment and booking solution you can arrange your regular meeting which includes, team meetings, interviews, LIVE chats, etc.
+
+**🗣️ Consultants** 
+Can organize client meetings with this appointment booking system: set time slots, manage bookings, send reminders and boost client satisfaction.
+
+**💇 Salon**
+Clients can easily book their preferred services at convenient times, reducing no-shows, managing multiple services and optimizing staff schedules.
+ 
+**🤼 Coaches Sessions**
+Allow clients to select from various coaching packages and times. This flexibility helps coaches manage their scheduled appointments.
+
+**🧑‍🏫 Teachers and Mentors** 
+WP Timetics can help in schedule classes or tutoring sessions, allowing students to booking slots according to their convenience.
+
+**🧔 Event Managers**
+Efficiently handle multiple bookings for any events, from corporate to weddings. The booking plugin allows for easy management to payment processing.
+
+**🎵 Musicians**
+Musicians can benefit from the appointment scheduling capabilities. The plugin allows to set availability, manage bookings, and payment options.
+
+**💪 Fitness & Gyms Trainers**
+Timetics booking system manages class schedule appointments, personal training sessions, and group bookings in the most convenient way.
+
+**🛠️ Service & Maintenance**
+Service providers in maintenance sectors can schedule appointments for repairs or consultations through WP Timetics booking calendar, easily!
+
+**📅 Variety of Events**
+The plugin is capable enough to manage various events, allowing organizers to create custom booking forms according to specific event needs.
+
+WP Timetics isn’t just limited to the professions mentioned above—it’s a versatile solution designed to adapt to **any business** or individuals who are in need of appointment bookings in their daily life.
+ 
+In other words, With WP Timetics anyone can manage all your appointments and create the smoothest booking experience ever. 
+
 
 ### 🚀 [WP Timetics](https://arraytics.com/introducing-timetics-wordpress-booking-plugin/) - ✨ Booking System Features 
 
 WP Timetics empowers your business by handling all kinds of booking systems, from appointment scheduling to receiving payments. Also, discover the ultimate features of WP Timetics Pro, which is designed to provide the best flexibility and exclusive booking calendar options. Boost your business with confidence and efficiency!
 
-#### ➡️ [Unlimited Features for Appointment Booking](https://docs.arraytics.com/docs/timetics/bookings/new-booking-for-meeting/) 
-These features showcase WP Timetics as a powerful booking system for businesses that need scalability and flexibility to manage high volumes of bookings and appointments.
-* **Unlimited Meetings**: Ensures a seamless appointment booking system by allowing you to schedule unlimited meetings without any additional cost.
-* **Unlimited Bookings**: Accept unlimited bookings with no extra charge, providing a scalable and efficient scheduling solution.
-* **Unlimited Team Members**: Add unlimited team members to your appointment booking system and let them manage individual profiles, availability calendars, and appointments.
+#### 📅 [Unlimited Features for Appointment Booking](https://docs.arraytics.com/docs/timetics/bookings/new-booking-for-meeting/) 
+Features that makes WP Timetics a powerful booking system for businesses that need scalability and flexibility to manage high volumes of bookings and appointments.
 
-#### ➡️ [Comprehensive Booking Management](https://docs.arraytics.com/docs/timetics/meetings/one-on-one-meeting/)
+
+**Unlimited Meetings** 
+Seamless appointment booking system allows you to schedule unlimited meetings.
+
+**Unlimited Bookings**
+Unlimited bookings with no extra charge, providing a scalable scheduling solution.
+
+**Unlimited Team Members**
+Add unlimited team members to your appointment booking system with individual profiles.
+
+
+#### 📝 [Comprehensive Booking Management](https://docs.arraytics.com/docs/timetics/meetings/one-on-one-meeting/)
 These features help businesses create a reliable and user-friendly appointment booking and scheduling system that simplifies meeting management.
-* **Availability Management**: Manage your scheduling system by setting up availability, sharing it with clients, and booking convenient appointment slots.
-* **Booking Status Display**: Track and manage appointment bookings effortlessly with a clear booking status shown in the booking list.
-* **One-to-One Meetings**: Customize appointment booking details, such as meeting location (online/offline), duration, and pricing for personal one-to-one sessions.
-* **Add Guest Option**: Allow clients to include additional guests when booking their appointments.
-* **Date and Time Format Support**: Use both 12-hour and 24-hour formats to tailor the booking system for a global audience.
 
-#### ➡️ [User and Team Management](https://arraytics.com/reasons-your-team-will-love-wp-timetics/)
-WP Timetics simplifies team collaboration and ensures clients have a hassle-free appointment scheduling experience with automated notifications and a well-organized booking interface.
-* **Team Management**: WP Timetics allows you to manage team availability, confirm appointments, assign bookings, and organize the scheduling system seamlessly.
-* **Team Email Notification**: Team members receive automated notifications for new appointments and upcoming bookings.
-* **Customer Email Notification**: Improve your booking system by reducing no-shows with automated client reminders for their appointments.
-* **Timezone Auto Detection**: Clients from different time zones can schedule appointments easily, as the plugin automatically detects their local time.
-* **Set Country Code for Phone Number**: Customize phone number fields to make the booking system more user-friendly.
-* [User Dashboard](https://docs.arraytics.com/docs/timetics/user-dashboard/): Clients can reschedule, cancel, or check their booking history through a dedicated dashboard, ensuring smooth appointment management.
+**Availability Management**
+Manage schedule system by setting up availability, sharable booking appointment slots.
 
-#### ➡️ [User-Friendly Features for Smooth Scheduling](https://docs.arraytics.com/docs/timetics/shortcodes/)
+**Booking Status Display**
+Track appointment bookings effortlessly with a clear booking status in booking list.
+
+**One-to-One Meetings**
+Customize appointment booking details e.g. meeting location online/offline, duration, and pricing (if needed).
+
+**Add Guest Option**
+Allow clients to include additional guests when booking their appointments.
+
+**Date & Time Format Support**
+Use both 12-hour and 24-hour formats to tailor the booking system for a global audience.
+
+
+#### 👨‍💻 [User & Team Management](https://arraytics.com/reasons-your-team-will-love-wp-timetics/)
+WP Timetics simplifies team collaboration and ensures clients have a hassle-free appointment scheduling experience with automated notifications and organized booking interface.
+
+**Team Management**
+Manage team availability, appointments, bookings, and organize the scheduling system.
+
+**Team Email Notification**
+Team members receive automated notifications for new appointments and upcoming bookings.
+
+**Customer Email Notification**
+Improve booking system by reducing no-shows with automated client reminders in appointments.
+
+**Timezone Auto Detection**
+With WP Timetics clients from different time zones can schedule appointments easily.
+
+**Set Country Code for Phone Number**
+Customize phone number fields to make the booking system more user-friendly.
+
+**[User Dashboard](https://docs.arraytics.com/docs/timetics/user-dashboard/)**
+Clients can reschedule, cancel, or check their booking history through a dedicated dashboard, ensuring smooth appointment management.
+
+
+#### ⚙️ [User-Friendly Features for Smooth Scheduling](https://docs.arraytics.com/docs/timetics/shortcodes/)
 These user-friendly features enhance the overall usability of the appointment scheduling system, saving time and simplifying workflows.
-* **User Onboarding**: The onboarding feature helps new users set up their appointment booking system quickly with a step-by-step setup wizard.
-* **Shortcodes**: Effortlessly add booking forms and meeting lists to your website to streamline the scheduling process.
-* **Meeting List Shortcode**: Share your booking system across platforms for a seamless appointment booking experience.
 
-#### ➡️[Appointment Rescheduling and Recurring Features](https://docs.arraytics.com/docs/timetics/bookings/recurring-bookings/)
-* **Reschedule Appointments(Pro)**: Allow clients to reschedule their meetings and send email reminders about updated bookings.
-* **Recurring Appointments(Pro)**: Automate popular appointments with recurring scheduling to save time and improve workflow efficiency.
+**User Onboarding**
+Onboarding helps new users setup appointment booking system quickly with setup wizard.
 
-#### ➡️ [AI-Powered Booking and Scheduling](https://docs.arraytics.com/docs/timetics/integrations/openai-integration/)
-* **AI-Powered Experience(Pro)**: Transform your booking system with AI-powered recommendations. The system analyzes previous appointment history to suggest suitable booking slots for clients.
+**Shortcodes**
+Effortlessly add booking forms and meeting lists for streamline the scheduling process.
 
-#### ➡️Calendar Synchronization for Appointment Management
-* **All-Sync Calendar(Pro)**: WP Timetics integrates seamlessly with Google Calendar, iCal, Outlook Calendar, and others, providing a unified booking calendar for managing all appointments and events efficiently.
-* **iCal Integration(Pro)**: Keep track of future appointments with iCal synchronization for an enhanced booking system.
-* **Outlook Calendar Integration(Pro)**: Manage and view your scheduled appointments and meetings via Microsoft Outlook.
+**Meeting List Shortcode**
+Share booking system across platforms for a seamless appointment booking experience.
 
-#### ➡️ [Visual Event and Appointment Booking Features](https://docs.arraytics.com/docs/timetics/one-to-many-with-seat-mappro/)
-* **Visual Seating Arrangement(Pro)**: Simplify event booking with a visual seat plan, where customers can choose seats and make reservations.
-* **Multi-Tiered Tickets(Pro)**: Create and sell tiered tickets (e.g., VIP, Gold, Platinum) to enhance your scheduling system for events.
-* **One-to-Many Meeting Type(Pro)**: Host group meetings, training sessions, or events where one host can engage with multiple participants.
-* **One-to-Many with Seat Plan(Pro)**: Combine group meetings with seat selection for conferences, salons, or theater bookings.
 
-#### ➡️[Customization and Flexibility](https://docs.arraytics.com/docs/timetics/bookings/)
-* **Customizable Booking Form(Pro)**: Add custom fields to collect specific client information during the appointment booking process.
-* **Added Additional Notes(Pro)**: Allow clients to provide extra details while making reservations.
-* **Availability Preference(Pro)**: Adjust your appointment booking system for public holidays or downtime by overwriting availability schedules.
-* **Calendar View(Pro)**: The admin calendar provides a clear overview of upcoming and current appointments for easy scheduling.
+#### 🔁 [Appointment Rescheduling & Recurring Features](https://docs.arraytics.com/docs/timetics/bookings/recurring-bookings/)
+With WP Timetics appointment and booking system you can set recurring events, schedules and appointments in just a few clicks.
 
-#### ➡️[Host Management and Data Management]()
-* **Select Multiple Hosts(Pro)**: Add multiple hosts to meetings for large-scale group appointments.
-* **Export & Import(Pro)**: Easily import and export booking data in formats like CSV or Excel.
+**Reschedule Appointments (Pro)** 
+Allow clients to reschedule meetings and send email reminders about updated bookings.
 
-#### ➡️ [Integration for Advanced Appointment Scheduling](https://docs.arraytics.com/docs/timetics/integrations/)
+**Recurring Appointments (Pro)**
+Automate workflow with popular appointments on recurring scheduling to save time .
+
+
+#### 🤖 [AI-Powered Booking and Scheduling](https://docs.arraytics.com/docs/timetics/integrations/openai-integration/)
+
+**AI-Powered Experience (Pro)**
+Transform your booking system with AI-powered recommendations. The system analyzes previous appointment history to suggest suitable booking slots for clients.
+
+
+#### 🗓️ Calendar Synchronization for Appointment Management
+WP Timetics integrates seamlessly with **Google Calendar**, **iCal**, **Outlook** Calendar, and others, providing a unified booking calendar for managing all appointments.
+
+**Google Calendar (Pro)** 
+WP Timetics integrates seamlessly with Google Calendar to manage all of your meetings and appointments.
+
+**iCal Integration (Pro)**
+Keep track of appointments with iCal synchronization for an enhanced booking system.
+
+**Outlook Calendar (Pro)** 
+Manage and view your scheduled appointments and meetings via Microsoft Outlook.
+
+
+#### 📍 [Visual Event, Meetings & Appointment Booking Features](https://docs.arraytics.com/docs/timetics/one-to-many-with-seat-mappro/)
+Nowadays to tends to attend meeting online and/or offline, with WP Timetics however, you can add and customize your venue seat plan in just a few clicks. Alongside adding seat types seamlessly.
+
+**Visual Seating Arrangement (Pro)**
+Customize event booking with visual seat plan, where customers select seats and reserve.
+
+**Multi-Tiered Tickets (Pro)**
+Create tiered tickets (e.g. **VIP**, **Gold**, **Platinum**) enhance scheduling system.
+
+**One-to-Many Meeting Type (Pro)**
+Host group meetings, sessions, where one host can engage with multiple participants.
+
+**One-to-Many with Seat Plan (Pro)**
+Combine group meetings with seat selection for conferences, salons, or theater bookings.
+
+
+#### 🖌️ [Customization & Flexibility](https://docs.arraytics.com/docs/timetics/bookings/)
+WP Timetics is all about customization and flexibility in which you can customize booking form, preferences, calendar views, add additional infos.
+
+**Customizable Booking Form (Pro)**
+Add custom fields to collect specific client info in the appointment booking process.
+
+**Added Additional Notes (Pro)**
+Allow clients to provide extra details while making reservations.
+
+**Availability Preference (Pro)**
+Edit appointment booking system for holidays or downtime by overwriting availability.
+
+**Calendar View (Pro)**
+Admin calendar provides overview of upcoming and current appointments for easy scheduling.
+
+
+#### 📊 [Host Management & Data Management](https://docs.arraytics.com/docs/timetics/import-export-data/)
+Managing host and data management can be quite crutial task to deal with, but not anymore with WP Timetics you can work on that seamlessly, alongside managing data of your booking system.
+
+**Select Multiple Hosts (Pro)**
+Add multiple hosts to meetings for large-scale group appointments.
+
+**Export & Import (Pro)**
+Easily import and export booking data in formats like CSV or Excel.
+
+
+#### ➕ [Multiple Integrations for Advanced Appointment Scheduling](https://docs.arraytics.com/docs/timetics/integrations/)
 These integrations add significant value to the appointment scheduling workflow, making the booking system highly functional for both online and offline businesses.
-* **Google Meet Integration**: Easily schedule and manage online appointments with Google Meet integrated into the appointment booking system.
-* **Google Calendar Integration**: Sync your booking system with Google Calendar to streamline scheduling and avoid missed appointments.
-* **Zoom Integration(Pro)**: Schedule online meetings effortlessly with Zoom integrated into your scheduling system.
-* **FluentCRM Integration(Pro)**: Use FluentCRM for email marketing and manage event bookings more efficiently.
-* **Pabbly Integration(Pro)**: Automate data workflows by connecting your booking system with other software.
-* **Zapier Integration(Pro)**: Integrate Zapier to enable seamless data transfer and automate workflows across platforms.
-* **WhatsApp Integration(Pro)**: Send appointment reminders through SMS or WhatsApp via Twilio integration.
 
-#### ➡️ [Payment Gateway Integration](https://docs.arraytics.com/docs/timetics/payment-type/)
-WP Timetics offers seamless payment gateway integrations to enhance the appointment booking system and provide flexibility for clients:
-* **Stripe**: Secure and smooth payment processing for appointments.
-* **Local Payment**: Enable local payment methods to accommodate clients with regional preferences.
-* **WooCommerce**: Integrate WooCommerce to expand payment options and manage transactions effortlessly.
-* **PayPal (Pro)**: Add PayPal as a trusted and globally recognized payment solution.
+**Google Meet**
+Easily schedule and manage online appointments with Google Meet.
 
-#### ➡️ Analytics for Appointment Booking Performance
+**Google Calendar**
+Sync your booking system with Google Calendar to streamline scheduling.
+
+**Zoom (Pro)**
+Schedule online meetings effortlessly with Zoom into your scheduling system.
+
+**FluentCRM (Pro)**
+Use FluentCRM for email marketing and manage event bookings more efficiently.
+
+**Pabbly Integration (Pro)**
+Automate data workflows by connecting your booking system with other software.
+
+**Zapier (Pro)**
+Enable Zapier for seamless data transfer and automate workflows across platforms.
+
+**WhatsApp (Pro)**
+Send appointment reminders through Twilio messages directly to your clients/users.
+
+**SMS Reminder (Pro)**
+Send booking SMS reminders through Twilio messages directly to your clients/users.
+
+
+#### 🧾 [Payment Gateways](https://docs.arraytics.com/docs/timetics/payment-type/)
+WP Timetics offers seamless payment gateway integrations to enhance the appointment booking system and provide flexibility for clients.
+
+**Stripe**
+With Stripe secure and smooth payment processing for appointments.
+
+**PayPal (Pro)**
+Add PayPal to booking system a trusted and globally recognized payment solution.
+
+**Local Payment**
+Enable local payment methods to accommodate clients with regional preferences.
+
+**WooCommerce**
+Integrate WooCommerce to expand payment options and manage transactions effortlessly.
+
+
+#### 💹 Analytics for Appointment Booking Performance
 These insights empower businesses to make better decisions for their booking system and optimize appointment management strategies.
-* **Sales Analytics**: Use data-driven insights and an intuitive dashboard to track appointment bookings and improve scheduling performance.
+
+**Sales Analytics**
+Use data-driven insights and an intuitive dashboard to track appointment bookings and improve scheduling performance.
 
 
 
 ## 📚 Support and Documentation
 
-* Simply visit our **[Documentation](https://docs.arraytics.com/timetics/) for any step-by-step tutorial & documentation.**
+* Simply visit our [Documentation](https://docs.arraytics.com/timetics/)
+* For any questions, ask them away on [WP Timetics Forum](https://wordpress.org/support/plugin/timetics/).
+* Help us improve, input your valuable suggestions [WP Timetics Roadmap](https://arraytics.com/timetics-roadmaps/).
 
-* For any questions, ask them away on **[WP Timetics Forum](https://wordpress.org/support/plugin/timetics/).**
 
-* Help us improve, input your valuable suggestions **[WP Timetics Roadmap](https://arraytics.com/timetics-roadmaps/).**
+So, why wait? 📅 Schedule like a Champion with WP Timetics 🚀
+
 
 == Screenshots ==
 1. screenshot-1
@@ -152,36 +286,60 @@ These insights empower businesses to make better decisions for their booking sys
 16. screenshot-16
 17. screenshot-17
 18. screenshot-18
-19. screenshot-19
-20. screenshot-20
-21. screenshot-21
-22. screenshot-22
+
+
+## Did you like WP Timetics WordPress Appointment Scheduling Plugin?
+
+🙌 Join our All-Time Active [Facebook Group](https://www.facebook.com/groups/492321335116367)
+🎥 Learn actionable tutorials on [WP Timetics YouTube Channel](https://youtube.com/playlist?list=PLkqKWn6EHYbr2O6EvASj6UoVl3Fy1IWL5&si=13ZdM6uD-cRz1Eme)
+🤝 Give us your useful [rating on WordPress.org](https://wordpress.org/support/plugin/timetics/reviews/?rate=5#new-post)
+
 
 ## 🔥 Now, What’s Next for You?
 
 If you’re impressed with WP Timetics: WordPress Appointment Scheduling Plugin, please check out our other awesome WordPress plugins: 
 
-📅 **[WP Eventin](https://wordpress.org/plugins/wp-event-solution/)**: Make event management easy with features like **multi-tiered ticketing, recurring events, attendee tracking, RSVP, and PayPal payment integration**. Take it further with a **certificate builder and QR code ticketing** for streamlined check-ins.
+📅 **[Eventin](https://wordpress.org/plugins/wp-event-solution/)**
+All-in-one event management plugin for WordPress.
 
-🍔 **[WPCafe](https://wordpress.org/plugins/wp-cafe/)**: Manage Online Food Ordering, Restaurant Menu, Delivery, and Reservations for WooCommerce.
+🍽️ **[WPCafe](https://wordpress.org/plugins/wp-cafe/)** 
+Manage Food Ordering, Restaurant Menu, Delivery, and Reservations for WooCommerce.
 
-↗️ **[Poptics](https://wordpress.org/plugins/poptics/)**: Convert Every **Lead into Sale** with Conversion-Driven Popups!.
-
-If you’re curious, pay a visit to **[Arraytics](https://arraytics.com/timetics/)** to learn more about our expert solutions in WordPress scheduling, event management, food ordering, restaurant reservation and lots of **[Marketing Tips & Tricks!](https://arraytics.com/blog/)** to grow your business. 🎉
-
-### 🚨 Did you like WP Timetics WordPress Appointment Scheduling Plugin?
-
-* Join our All-Time Active **[Facebook Group](https://www.facebook.com/groups/492321335116367).**
-
-* Learn actionable tutorials on **[WP Timetics YouTube Channel](https://youtube.com/playlist?list=PLkqKWn6EHYbr2O6EvASj6UoVl3Fy1IWL5&si=13ZdM6uD-cRz1Eme).**
-
-* Give us your igniting **[Rating on WordPress](https://wordpress.org/support/plugin/timetics/reviews/?rate=5#new-post) and give us your inspiring support.**
+🎨 **[Poptics](https://wordpress.org/plugins/poptics/)**
+Create Conversion-Driven Popups and convert your leads into sales.
 
 
-### So, why wait? 📅 Schedule like a Champion with WP Timetics 🚀
+If you’re curious, pay a visit to 👉 **[Arraytics](https://arraytics.com/timetics/)** to learn more about our expert solutions in WordPress scheduling, event management, restaurant reservation, food ordering and lots of **[marketing tips & tricks!](https://arraytics.com/blog/)** to grow your business. 🎉
 
-== Changelog ==
- 
+
+== Frequently Asked Questions ==
+
+= How many appointments and/or bookings I Could add with WP Timetics? =
+
+Well, with WP Timetics you can add unlimited bookings, meetings, appointments and also teammates.
+
+= Do you have recurring meeting feature available? =
+
+Yes, we do! WP Timetics offers recurring booking and appointments, you can also set auto reminders too.
+
+= Can I add a Customize venue seating map?  =
+
+With WP Timetics booking system you can simply create and customize your exact venue location's seating plan. Additionally, can also add different seat types (e.g. VIP, Platinum etc) if needed.
+
+= Can connect and/or transfer my data with WP Timetics booking plugin? =
+
+We have Pabbly and Zapier integration available, so yes! You can surely inhance your work flow with WP Timetics.
+
+= Does WP Timetics have PayPal payment gateway? =
+
+Of course, WP Timetics has PayPal payment option, apart from that we have WooCommerce, Stripe and local payment gateways.
+
+= Is it possible to sent SMS reminder with WP Timetics booking plugin? =
+
+WP Timetics has twilio integrated by which you can sent direct SMS as well as WhatsApp message reminders in seconds.
+
+
+== Changelog == 
 = 1.0.28 ( December 11, 2024 ) =
 Fix: Resolved text domain compatibility issue with the latest WordPress.
 Fix: Addressed issue where a customer could delete another customer.
@@ -192,8 +350,6 @@ Tweak: WordPress 6.7 Compatibility.
 
 = 1.0.27 ( November 12, 2024 ) =
 Fix: Fixed an issue where the booking time slot did not match when using the WordPress language setting.
- 
-
 
 = 1.0.26 ( Oct 16, 2024 ) =
 Fix: security performance improved
@@ -452,20 +608,20 @@ Fix  : Stripe payment error handle to front-end.
 
 ### Automatic installation
 The automatic installation is the easiest option, as WordPress handles the file transfers for you, so you don't need to leave your web browser at all during the installation process.
-*Log in to Your WordPress Dashboard: Access your WordPress admin panel.
-*Navigate to Plugins: On the left sidebar, click on **Plugins**, then select **Add New**.
-*In the search bar at the top right, type **"WP Timetics"** to find the plugin.
-*Install the Plugin: Once you locate WP Timetics in the search results, click the **Install Now** button next to it. WordPress will automatically download and install the plugin.
-*After installation, click on the **Activate** button that appears. This will enable the plugin on your site.
+ * Log in to Your WordPress Dashboard: Access your WordPress admin panel.
+ * Navigate to Plugins: On the left sidebar, click on **Plugins**, then select **Add New**.
+ * In the search bar at the top right, type **WP Timetics** to find the plugin.
+ * Install the Plugin: Once you locate WP Timetics in the search results, click the **Install Now** button next to it. WordPress will automatically download and install the plugin.
+ * After installation, click on the **Activate** button that appears. This will enable the plugin on your site.
 
 ### Manual installation
 To manually install, download our product from the WordPress directory and upload it to your web server using FTP or CPanel.
 
-*Download the plugin and unzip it
-*Using an FTP program or CPanel upload the unzipped plugin folder to your WordPress installation’s wp-content/plugins/ directory.
-*Activate the plugin from the Plugins menu (Dashboard > Plugins > Installed Plugins) within the WordPress admin.
+ * Download the plugin and unzip it
+ * Using an FTP program or CPanel upload the unzipped plugin folder to your WordPress installation’s wp-content/plugins/ directory.
+ * Activate the plugin from the Plugins menu (Dashboard > Plugins > Installed Plugins) within the WordPress admin.
 
 ### Upgrading
 The automatic updates for this plugin function smoothly. However, if you make any customizations to the plugin, be sure to create a backup before updating. In some cases, you may be faced with permalink issues after an update.
 
-If this happens, simply navigate to **WordPress > Settings > Permalinks** and click the **Save Changes** button to refresh your permalink settings."
+If this happens, simply navigate to **WordPress > Settings > Permalinks** and click the **Save Changes** button to refresh your permalink settings.

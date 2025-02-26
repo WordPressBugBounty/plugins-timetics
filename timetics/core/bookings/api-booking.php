@@ -19,6 +19,7 @@ use Timetics\Core\Emails\Update_Event_Customer_Email;
 use Timetics\Core\Emails\Update_Event_Email;
 use Timetics\Core\Staffs\Staff;
 use Timetics\Utils\Singleton;
+use TimeticsPro\Core\SeatPlan\SeatPlan;
 use WP_Error;
 use WP_HTTP_Response;
 use WP_Query;
@@ -38,15 +39,15 @@ class Api_Booking extends Api {
      *
      * @var string
      */
-    protected $rest_base = 'bookings'; 
-    
+    protected $rest_base = 'bookings';
+
     /**
      * Booking Type
      *
      * @var string
      */
-    protected $type = '';    
-    
+    protected $type = '';
+
     /**
      * Register rest routes
      *
@@ -614,7 +615,7 @@ class Api_Booking extends Api {
             if( 'timetics-event' == $type ){
                 return;
             }
-            
+
             $is_email_to_customer = timetics_get_option( 'booking_created_customer');
             $is_email_to_host     = timetics_get_option( 'booking_created_host');
 
@@ -629,7 +630,7 @@ class Api_Booking extends Api {
             }
 
             do_action( 'timetics_booking_payment', $booking );
-            
+
         }
 
         /**
@@ -668,10 +669,10 @@ class Api_Booking extends Api {
 
      /**
      * Booking Appointment
-     * 
+     *
      * @param   array  $data    All the data of booking
-     * @param   integer $id     Booking id      
-     * 
+     * @param   integer $id     Booking id
+     *
      * @return JSON
      */
     protected function booking_appointment ($data, $id) {
@@ -733,14 +734,14 @@ class Api_Booking extends Api {
         $booking_entry      = new Booking_Entry();
 
         // Validate booking
-       
+
          $validation =  $this->validate_booking( $appointment, $data );
          if(is_wp_error($validation)){
             return $validation;
          }
-      
 
-        
+
+
         if ( 'created' === $action && ! $this->is_available_slot( $meeting, [
             'staff_id'   => $staff->get_id(),
             'start_date' => $start_date,
@@ -826,7 +827,7 @@ class Api_Booking extends Api {
                 'end_date'            => $end_date,
                 'start_time'          => $start_time,
                 'end_time'            => $end_time,
-                'order_total'         => $order_total,
+                'order_total'         => $this->calculate_order_total( $data ),
                 'post_status'         => $status,
                 'location'            => $location,
                 'location_type'       => $location_type,
@@ -836,7 +837,7 @@ class Api_Booking extends Api {
         );
 
         $booking = apply_filters( 'timetics/bookings/booking/set', $booking );
-        
+
         $booking->save();
 
         // Fire when booking is completed.
@@ -848,7 +849,7 @@ class Api_Booking extends Api {
                 $booking->delete_event();
                 $is_email_to_customer = timetics_get_option( 'booking_canceled_customer');
                 $is_email_to_host     = timetics_get_option( 'booking_canceled_host');
-                
+
                 if ( $is_email_to_host ) {
                     $cancel_event_email = new Cancel_Event_Email( $booking );
                     $cancel_event_email->send();
@@ -942,7 +943,7 @@ class Api_Booking extends Api {
 
         return new WP_HTTP_Response( $data, 200 );
     }
- 
+
     /**
      * Prepare item for response
      *
@@ -1150,7 +1151,7 @@ class Api_Booking extends Api {
      * @return mixed Returns an error response if the validation fails, otherwise returns nothing.
      */
     public function validate_booking($appointment_id, $data) {
-        $meeting = new Appointment($appointment_id); 
+        $meeting = new Appointment($appointment_id);
         $all_seats = (array) $meeting->get_seats();
         $meeting_price = $meeting->get_price();
         $meeting_locations = (array) $meeting->get_locations();
@@ -1160,8 +1161,8 @@ class Api_Booking extends Api {
         $staff_id        = ! empty( $data['staff'] ) ? intval( $data['staff'] ) : 0;
         $order_total     = ! empty( $data['order_total'] ) ? floatval( $data['order_total'] ) : 0;
         $location_type   = ! empty( $data['location_type'] ) ? sanitize_text_field( $data['location_type'] ) : '';
-        $seats           = ! empty( $data['seats'] ) ? $data['seats'] : []; 
-     
+        $seats           = ! empty( $data['seats'] ) ? $data['seats'] : [];
+
         // Check if the seats are available
         if ($all_seats && $seats) {
             $total_price = $order_total;
@@ -1173,7 +1174,7 @@ class Api_Booking extends Api {
         }
 
         // Check if the price is matched
-   
+
         if ($total_price != $order_total) {
             return $this->create_error_response(__('Pricing is not matched', 'timetics'), 403);
         }
@@ -1182,11 +1183,11 @@ class Api_Booking extends Api {
         if (!in_array($staff_id, $meeting->get_staff_ids())) {
             return $this->create_error_response(__('Team member not matched', 'timetics'), 403);
 
-        } 
+        }
         // Check if the location type is matched
         if (!in_array($location_type, array_column($meeting_locations, 'location_type'))) {
             return  $this->create_error_response(__('Location type not matched', 'timetics'), 403);
-        } 
+        }
     }
 
     /**
@@ -1196,7 +1197,39 @@ class Api_Booking extends Api {
      * @param int $status_code The HTTP status code.
      * @return WP_HTTP_Response The error response.
      */
-    public function create_error_response($message, $status_code) { 
+    public function create_error_response($message, $status_code) {
         return new WP_Error( 'timezone_error', $message, ['status' => $status_code] );
+    }
+
+    /**
+     * Calculate order total
+     *
+     * @param   array  $data  Request data
+     *
+     * @return  integer
+     */
+    private function calculate_order_total($data) {
+        $seats          = ! empty( $data['seats'] ) ? $data['seats'] : [];
+        $meeting_id =   ! empty( $data['appointment'] ) ? $data['appointment'] : 0;
+        $total_price = 0;
+
+        if ( class_exists( SeatPlan::class ) && $seats ) {
+            foreach( $seats as $seat ) {
+                $seat_object = SeatPlan::find( $seat );
+                $total_price += $seat_object->price;
+            }
+
+            return $total_price;
+        }
+
+        $meeting = new Appointment( $meeting_id );
+
+        $prices = $meeting->get_price();
+
+        if ( $prices && is_array( $prices ) ) {
+            return $prices[0]['ticket_price'];
+        }
+
+        return 0;
     }
 }

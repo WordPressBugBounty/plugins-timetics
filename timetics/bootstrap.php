@@ -211,6 +211,10 @@ final class Bootstrap {
 		 * Core helpers.
 		 */
 		require_once TIMETICS_PLUGIN_DIR . 'utils/global-helper.php';
+        require_once TIMETICS_PLUGIN_DIR . 'core/staffs/calendars/CalendarSyncFacade.php';
+        require_once TIMETICS_PLUGIN_DIR . 'core/staffs/calendars/CalendarSyncFactory.php';
+        require_once TIMETICS_PLUGIN_DIR . 'core/staffs/calendars/CalendarSyncInterface.php';
+        require_once TIMETICS_PLUGIN_DIR . 'core/staffs/calendars/GoogleCalendarSync.php';
     }
 
     /**
@@ -405,26 +409,26 @@ final class Bootstrap {
             return;
         }
 
- 
+
 		/**
 		 * Show banner (codename: jhanda)
 		 */
 		$filter_string = 'timetics,timetics-free-only';
-        
+
         if( $this->has_pro ) {
-            
+
             $filter_string .= ',timetics-pro';
             $filter_string = str_replace(',timetics-free-only', '', $filter_string);
 
         }
-        
+
 
 		\Wpmet\Libs\Banner::instance('timetics')
 			->is_test(true)
 			->set_filter(ltrim($filter_string, ','))
 			->set_api_url('https://demo.themewinter.com/public/jhanda')
 			->set_plugin_screens('timetics')
-			->set_plugin_screens('toplevel_page_timetics') 
+			->set_plugin_screens('toplevel_page_timetics')
  			->call();
 		// show get-help and upgrade-to-premium menu.
 		// $this->handle_get_help_and_upgrade_menu();

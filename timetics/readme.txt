@@ -3,7 +3,7 @@ Contributors: arraytics, themewinter, abrasel600
 Tags: appointment booking, booking calendar, appointments, scheduling, booking system
 Requires at least: 5.2
 Tested up to: 6.7
-Stable tag: 1.0.29
+Stable tag: 1.0.30
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: [https://www.gnu.org/licenses/gpl-2.0.html](https://www.gnu.org/licenses/gpl-2.0.html)
@@ -269,6 +269,19 @@ Of course, WP Timetics has PayPal payment option, apart from that we have WooCom
 WP Timetics has twilio integrated by which you can sent direct SMS as well as WhatsApp message reminders in seconds.
 
 == Changelog ==
+
+= 1.0.30 ( March 13, 2025 ) =
+Fix : Shortcode copy clip board couldn't work
+Fix : Set booked seat color and other's booked seat different color
+Fix : Dashboard filter couldn't work
+Fix : Couldn't create customer when booking from frontend
+Fix : Team member couldn't update assigned appointment
+Fix : A staff can view another staff bookings
+Fix : Admin unable to edit or delete staff meetings
+
+= 1.0.29 ( February 26, 2025 ) =
+Fix: Calculate order total from meeting price.
+
 = 1.0.28 ( December 11, 2024 ) =
 Fix: Resolved text domain compatibility issue with the latest WordPress.
 Fix: Addressed issue where a customer could delete another customer.
@@ -276,9 +289,6 @@ Fix: Resolved Flatpicker JS conflict with WPCafe.
 Fix: Fixed additional text display issue in booking questions.
 Fix: Resolved required field issue in booking questions.
 Tweak: WordPress 6.7 Compatibility.
-
-= 1.0.29 ( February 26, 2024 ) =
-Fix: Calculate order total from meeting price.
 
 = 1.0.27 ( November 12, 2024 ) =
 Fix: Fixed an issue where the booking time slot did not match when using the WordPress language setting.

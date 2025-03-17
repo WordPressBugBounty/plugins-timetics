@@ -123,8 +123,8 @@ class Booking {
      */
     public function get_customer_id() {
         return $this->get_prop( 'customer' );
-    }    
-    
+    }
+
     /**
      * Get attendee id
      *
@@ -133,8 +133,8 @@ class Booking {
     public function get_attendees() {
         $attendees = $this->get_prop( 'attendees' );
         return $attendees ? $attendees : [];
-    }    
-    
+    }
+
     /**
      * Get custom url
      *
@@ -161,8 +161,8 @@ class Booking {
      */
     public function get_speaker_id() {
         return $this->get_prop( 'speaker' );
-    }    
-    
+    }
+
     /**
      * Get booking type
      *
@@ -179,7 +179,7 @@ class Booking {
      */
     public function get_event_id() {
         return $this->get_prop( 'event' );
-    }    
+    }
 
     /**
      * Get customer
@@ -242,8 +242,8 @@ class Booking {
      */
     public function get_location_type() {
         return $this->get_prop( 'location_type' );
-    }    
-    
+    }
+
     /**
      * Get booking time
      *
@@ -737,7 +737,7 @@ class Booking {
             ];
             // @codingStandardsIgnoreEnd
         }
-        
+
         $post = new WP_Query( $args );
 
         return [
@@ -963,4 +963,36 @@ class Booking {
 
         do_action( 'timetics_booking_notification', $this, $action );
     }
+
+    /**
+     * Get booking ids by appointment id
+     *
+     * @param   array  Collection of appointment ids
+     *
+     * @return  array Collection of booking ids
+     */
+    public static function get_booking_ids_by_appointment( $appointment_ids, $per_page = -1 ) {
+        if ( empty( $appointment_ids ) ) {
+            return [];
+        }
+
+        $query = new WP_Query([
+            'post_type'      => 'timetics-booking',
+            'post_status'    => 'any',
+            'posts_per_page' => $per_page,
+            'meta_query'     => [
+                [
+                    'key'     => '_tt_booking_appointment',
+                    'value'   => $appointment_ids,
+                    'compare' => 'IN',
+                ],
+            ],
+        ]);
+
+        return [
+            'total' => $query->found_posts,
+            'items' => $query->posts,
+        ];
+    }
+
 }

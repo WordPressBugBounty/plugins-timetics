@@ -725,3 +725,28 @@ if ( ! function_exists( 'timetics_get_current_user' ) ) {
         return $user_data;
     }
 }
+
+if ( ! function_exists( 'timetics_connected_platforms' ) ) {
+
+    /**
+     * Get connected platforms
+     *
+     * @param   integer  $id
+     *
+     * @return  array       Connected platform lists
+     */
+    function timetics_connected_platforms( $id ) {
+        $integrations = timetics_get_staff_integrations( $id );
+        $integration_names = [];
+
+        if ( $integrations ) {
+            foreach ( $integrations as $integration ) {
+                if ( $integration['connected'] ) {
+                    $integration_names[] = $integration['id'];
+                }
+            }
+        }
+
+        return $integration_names;
+    }
+}

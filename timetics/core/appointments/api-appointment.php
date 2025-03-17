@@ -94,16 +94,12 @@ class Api_Appointment extends Api {
             [
                 'methods'             => \WP_REST_Server::EDITABLE,
                 'callback'            => [$this, 'update_item'],
-                'permission_callback' => function () {
-                    return current_user_can( 'read_meeting' );
-                },
+                'permission_callback' => [ $this, 'update_item_permissions_check' ],
             ],
             [
                 'methods'             => \WP_REST_Server::DELETABLE,
                 'callback'            => [$this, 'delete_item'],
-                'permission_callback' => function () {
-                    return current_user_can( 'read_meeting' );
-                },
+                'permission_callback' => [$this, 'delete_item_permissions_check' ],
             ],
         ] );
 
@@ -373,7 +369,7 @@ class Api_Appointment extends Api {
      * @return JSON  Updated appointment data
      */
     public function update_item( $request ) {
-        
+
         $appointment_id = (int) $request['appointment_id'];
         $appoint        = new Appointment( $appointment_id );
 
@@ -437,6 +433,33 @@ class Api_Appointment extends Api {
         }
 
         return $this->save_appointment( $request, $appointment_id );
+    }
+
+    /**
+     * Update permission check
+     *
+     * @param   WP_Rest_Request  $request
+     *
+     * @return  bool
+     */
+    public function update_item_permissions_check( $request ) {
+        $appoinment_id = (int) $request['appointment_id'];
+        $appointment   = new Appointment( $appoinment_id );
+
+        $staff_ids       = $appointment->get_staff_ids();
+        $author          = $appointment->get_author();
+        $current_user_id = get_current_user_id();
+
+        if (
+            current_user_can( 'manage_options' )
+            || current_user_can( 'read_meeting' )
+            ||  in_array( $current_user_id, $staff_ids )
+            || $author == $current_user_id
+        ) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -512,6 +535,31 @@ class Api_Appointment extends Api {
         ];
 
         return rest_ensure_response( $response );
+    }
+
+    /**
+     * Delete item permission check
+     *
+     * @param   WP_Rest_Request  $request
+     *
+     * @return  bool
+     */
+    public function delete_item_permissions_check( $request ) {
+        $appoinment_id = (int) $request['appointment_id'];
+        $appointment   = new Appointment( $appoinment_id );
+
+        $staff_ids       = $appointment->get_staff_ids();
+        $author          = $appointment->get_author();
+        $current_user_id = get_current_user_id();
+
+        if (
+            current_user_can( 'manage_options' )
+            || $author == $current_user_id
+        ) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -660,18 +708,7 @@ class Api_Appointment extends Api {
         $action                = $id ? 'update' : 'created';
 
         if ( $id ) {
-            $current_user_id = get_current_user_id();
             $dulicate = $appoint->get_duplicate_nuber();
-
-            if ( $appoint->get_author() != $current_user_id ) {
-                $data = [
-                    'success' => 0,
-                    'message' => __( 'You are not allowed to update this meeting.', 'timetics' ),
-                ];
-
-                return new WP_HTTP_Response( $data, 403 );
-            }
-
             if ( $dulicate && strpos( $name, '-Duplicate' ) == 0 ) {
                 $appoint->update([
                     'duplicate' => 0

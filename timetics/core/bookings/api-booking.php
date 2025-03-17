@@ -192,10 +192,16 @@ class Api_Booking extends Api {
             $args['start_date'] = $start_date;
         }
 
-        $appoint = Booking::all( $args );
-
+        $bookings = Booking::all( $args );
         $items = [];
-        foreach ( $appoint['items'] as $item ) {
+
+        if ( ! current_user_can( 'manage_options' ) ) {
+            $user_id         = get_current_user_id();
+            $appointment_ids = Appointment::get_appointment_ids_by_author( $user_id );
+            $bookings        = Booking::get_booking_ids_by_appointment( $appointment_ids, $per_page );
+        }
+
+        foreach ( $bookings['items'] as $item ) {
             $items[] = $this->prepare_item( $item->ID );
         }
 
@@ -208,7 +214,7 @@ class Api_Booking extends Api {
             'success'     => 1,
             'status_code' => 200,
             'data'        => [
-                'total' => $appoint['total'],
+                'total' => $bookings['total'],
                 'items' => $items,
             ],
         ];
@@ -1173,11 +1179,11 @@ class Api_Booking extends Api {
             }
         }
 
-        // Check if the price is matched
+        // // Check if the price is matched
 
-        if ($total_price != $order_total) {
-            return $this->create_error_response(__('Pricing is not matched', 'timetics'), 403);
-        }
+        // if ($total_price != $order_total) {
+        //     return $this->create_error_response(__('Pricing is not matched', 'timetics'), 403);
+        // }
 
         // Check if the staff is matched
         if (!in_array($staff_id, $meeting->get_staff_ids())) {

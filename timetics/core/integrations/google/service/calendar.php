@@ -13,6 +13,80 @@ class Calendar {
     const TIMETICS_TIMEZONE_URI   = 'https://www.googleapis.com/calendar/v3/users/me/settings/timezone';
     const TIMETICS_CALENDAR_EVENT = 'https://www.googleapis.com/calendar/v3/calendars/primary/events/';
 
+
+    /**
+     * Get events from the calendar for the last 3 months.
+     *
+     * @param int $user_id Team member ID.
+     *
+     * @return array List of calendar events.
+     */
+    public function get_events($user_id) {
+        $access_token = timetics_get_google_access_token($user_id);
+
+        if ( ! $access_token ) {
+            return ['error' => 'Access token not found or expired.'];
+        }
+
+        // Define the time range for the last 3 months
+        $three_months_ago = date('c', strtotime('-3 months'));
+        $now = date('c'); // Current date-time in RFC3339 format
+
+        // API URL with time range filter
+        $api_url = add_query_arg([
+            'timeMin' => $three_months_ago,
+            'timeMax' => $now,
+            'orderBy' => 'startTime',
+            'singleEvents' => 'true',
+        ], self::TIMETICS_CALENDAR_EVENT);
+
+        // Set headers
+        $args = [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $access_token,
+                'Content-Type'  => 'application/json',
+            ],
+        ];
+
+        // Fetch data from Google Calendar API
+        $response = wp_remote_get(self::TIMETICS_CALENDAR_EVENT, $args);
+
+        if ( is_wp_error( $response ) ) {
+            return ['error' => $response->get_error_message()];
+        }
+
+        $body   = wp_remote_retrieve_body( $response );
+        $events = json_decode($body, true);
+
+        if ( empty( $events['items'] ) ) {
+            return ['message' => 'No events found for the last 3 months.'];
+        }
+
+        // Filter required fields
+        $filtered_events = [];
+        foreach ( $events['items'] as $event ) {
+            if ( empty( $event['start'] ) ) {
+                continue;
+            }
+            // error_log(print_r($event['start'], true));
+            $start = ! empty($event['start']['dateTime']) ? $event['start']['dateTime'] : $event['start']['date'];
+            $end = ! empty($event['end']['dateTime']) ? $event['end']['dateTime'] : $event['end']['date'];
+
+
+            $filtered_events[] = [
+                'start_date' => date('Y-m-d', strtotime($start)),
+                'start_time' => date('H:i:s', strtotime($start)),
+                'end_date'   => date('Y-m-d', strtotime($end)),
+                'end_time'   => date('H:i:s', strtotime($end)),
+                'summary'    => $event['summary'] ?? '',
+                'description'=> $event['description'] ?? '',
+            ];
+        }
+
+        return $filtered_events;
+    }
+
+
     /**
      * Create event
      *

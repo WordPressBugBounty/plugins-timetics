@@ -210,7 +210,9 @@ class Appointment extends PostModel {
      * @return  array
      */
     public function get_staff_ids() {
-        return $this->get_prop( 'staff' );
+        $ids = $this->get_prop( 'staff' );
+
+        return is_array( $ids ) ? array_values( $ids ) : [];
     }
 
     /**
@@ -885,5 +887,24 @@ class Appointment extends PostModel {
 
         // Get the converted timestamp
         return $datetime;
+    }
+
+    /**
+     * Get appointmentt ids by author id
+     *
+     * @param   integer  $author_id  Appointment author id
+     *
+     * @return  array    Appointment ids
+     */
+    public static function get_appointment_ids_by_author( $author_id ) {
+        $query = new WP_Query([
+            'post_type'      => 'timetics-appointment',
+            'post_status'    => 'any',
+            'author'         => $author_id,
+            'posts_per_page' => -1,
+            'fields'         => 'ids'
+        ]);
+
+        return $query->posts;
     }
 }

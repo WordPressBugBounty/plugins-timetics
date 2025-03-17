@@ -317,9 +317,9 @@ class Hooks {
         $booking    = new Booking( $booking_id );
         $meeting_id = $booking->get_appointment();
         if( !empty($data['seats']) && is_array( $data['seats'])) {
-            $quantity   = count( $data['seats'] ); 
+            $quantity   = count( $data['seats'] );
         }else {
-            $quantity   = 1; 
+            $quantity   = 1;
         }
         $price      = $booking->get_total();
 
@@ -337,7 +337,7 @@ class Hooks {
         // Preparing for add to cart.
         $meeting    = new Appointment( $meeting_id );
         $product_id = $meeting->get_wc_product_id();
-        
+
 
         if ( ! $product_id ) {
             $product    = new Product();
@@ -370,7 +370,7 @@ class Hooks {
         }
 
         return get_woocommerce_currency();
-    }    
+    }
 
     /**
      * Create a category if woocommerce loaded
@@ -390,7 +390,7 @@ class Hooks {
         $session = WC()->session;
         if ( (is_checkout() || is_cart()) && $session ) {
             $timetics_data = $session->get('timetics_data');
-            if( isset($timetics_data) ) { 
+            if( isset($timetics_data) ) {
             ?>
             <style type="text/css">
                 .wc-block-components-order-summary .wc-block-components-order-summary-item__individual-prices {

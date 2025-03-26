@@ -1167,32 +1167,31 @@ class Api_Booking extends Api {
         $staff_id        = ! empty( $data['staff'] ) ? intval( $data['staff'] ) : 0;
         $order_total     = ! empty( $data['order_total'] ) ? floatval( $data['order_total'] ) : 0;
         $location_type   = ! empty( $data['location_type'] ) ? sanitize_text_field( $data['location_type'] ) : '';
+        $start_date     = ! empty( $data['start_date'] ) ? sanitize_text_field( $data['start_date'] ) : '';
+        $timezone       = ! empty( $data['timezone'] ) ? sanitize_text_field( $data['timezone'] ) : '';
+        $start_time       = ! empty( $data['start_time'] ) ? sanitize_text_field( $data['start_time'] ) : '';
+        $status       = ! empty( $data['status'] ) ? sanitize_text_field( $data['status'] ) : '';
         $seats           = ! empty( $data['seats'] ) ? $data['seats'] : [];
+        $timeslots       = $meeting->get_avilable_timeslots( $start_date, $staff_id, $timezone );
 
-        // Check if the seats are available
-        if ($all_seats && $seats) {
-            $total_price = $order_total;
-        } else if (is_array($meeting_price) && !empty($meeting_price)) {
-            foreach ($meeting_price as $price) {
-                $price = (isset($price['ticket_price']) && !empty($price['ticket_price'])) ? $price['ticket_price'] : 0;
-                $total_price += $price;
+        if ( ! $meeting->is_appointment() ) {
+            return $this->create_error_response( __( 'Invalid meeting.', 'timetics' ), 422 );
+        }
+
+        if ( 'cancel' !== $status ) {
+            if ( ! in_array( date('g:ia', strtotime( $start_time ) ), $timeslots ) ) {
+                return $this->create_error_response( __( 'Invalid timeslot.', 'timetics' ), 422 );
             }
-        }
 
-        // // Check if the price is matched
+            // Check if the staff is matched
+            if ( ! in_array( $staff_id, $meeting->get_staff_ids() ) ) {
+                return $this->create_error_response(__('Team member not matched', 'timetics'), 403);
 
-        // if ($total_price != $order_total) {
-        //     return $this->create_error_response(__('Pricing is not matched', 'timetics'), 403);
-        // }
-
-        // Check if the staff is matched
-        if (!in_array($staff_id, $meeting->get_staff_ids())) {
-            return $this->create_error_response(__('Team member not matched', 'timetics'), 403);
-
-        }
-        // Check if the location type is matched
-        if (!in_array($location_type, array_column($meeting_locations, 'location_type'))) {
-            return  $this->create_error_response(__('Location type not matched', 'timetics'), 403);
+            }
+            // Check if the location type is matched
+            if ( ! in_array( $location_type, array_column( $meeting_locations, 'location_type' ) ) ) {
+                return  $this->create_error_response(__('Location type not matched', 'timetics'), 403);
+            }
         }
     }
 

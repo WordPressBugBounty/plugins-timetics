@@ -907,4 +907,39 @@ class Appointment extends PostModel {
 
         return $query->posts;
     }
+
+    /**
+     * Get meeting available time slot
+     *
+     * @param   string  $date        Start date
+     * @param   integer  $staff_id   Meeting assigned staff id
+     * @param   string  $timze_zone  Booking timezone
+     *
+     * @return  array   Available timeslots
+     */
+    public function get_avilable_timeslots( $date, $staff_id, $timze_zone = '' ) {
+        $day_name         = ucfirst( date( 'D', strtotime( $date ) ) );
+        $schedule         = $this->get_schedule();
+        $interval         = $this->get_interval();
+        $tartget_schedule = [];
+
+        $slots = [];
+
+        if ( ! empty( $schedule[$staff_id] ) ) {
+            $tartget_schedule = $schedule[$staff_id][$day_name];
+        }
+
+        foreach ( $tartget_schedule as $day ) {
+            $start = strtotime( $day['start'] );
+            $end   = strtotime( $day['end'] );
+
+            for ( $time = $start; $time <= $end; $time += $interval ) {
+                $datetime = $this->convert_timezone( $time, $timze_zone );
+                $slot     = $datetime->format( 'g:ia' );
+                $slots[]  = $slot;
+            }
+        }
+
+        return $slots;
+    }
 }

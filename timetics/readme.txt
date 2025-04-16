@@ -2,8 +2,8 @@
 Contributors: arraytics, themewinter, abrasel600
 Tags: appointment booking, booking calendar, appointments, scheduling, booking system
 Requires at least: 5.2
-Tested up to: 6.7
-Stable tag: 1.0.31
+Tested up to: 6.8
+Stable tag: 1.0.32
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: [https://www.gnu.org/licenses/gpl-2.0.html](https://www.gnu.org/licenses/gpl-2.0.html)
@@ -269,6 +269,9 @@ Of course, WP Timetics has PayPal payment option, apart from that we have WooCom
 WP Timetics has twilio integrated by which you can sent direct SMS as well as WhatsApp message reminders in seconds.
 
 == Changelog ==
+= 1.0.32 ( April 16, 2025 ) =
+Fix : PHP 7.4 compatibility added
+Tweak: WordPress 6.8 compatibility 
 
 = 1.0.31 ( March 25, 2025 ) =
 Fix : Timeslot validation vulnarable issue

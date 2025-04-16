@@ -16,12 +16,15 @@ class CalendarSyncFactory {
         $services = [];
 
         foreach ( $calendars as $calendar ) {
-            $services[] = match ( $calendar ) {
-                'google-calendar' => new GoogleCalendarSync(),
-                // 'apple'  => new AppleCalendarSync(),
-                // 'zoom'   => new ZoomSync(),
-                default  => null,
-            };
+            switch ( $calendar ) {
+                case 'google-calendar':
+                    $services[] = new GoogleCalendarSync();
+                    break;
+
+                default:
+                    // Do nothing for unsupported platforms
+                    break;
+            }
         }
 
         return array_filter( $services ); // Remove any `null` values

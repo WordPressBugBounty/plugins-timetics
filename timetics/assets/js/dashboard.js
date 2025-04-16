@@ -116,7 +116,7 @@ module.exports = ReactDOM;
 /******/ 		// This function allow to reference async chunks
 /******/ 		__webpack_require__.u = (chunkId) => {
 /******/ 			// return url for filenames based on template
-/******/ 			return "chunk/" + {"vendors-node_modules_reduxjs_toolkit_dist_redux-toolkit_esm_js-node_modules_dayjs_dayjs_min_j-ca2e24":"7031216f899ff694d01a","assets_src_admin_index_js":"80feda57d9155a54ebe9","vendors-node_modules_chart_js_auto_auto_js-node_modules_react-chartjs-2_dist_index_js":"283c7958d2ca191df6a7","assets_src_admin_pages_overview_index_js":"6e4c439aa0b83379596d","assets_src_admin_pages_staff_index_js":"03b0e4d7106eb153aaf2","assets_src_admin_libs_staffLib_js":"01fad2ec7dc67eb56e84","assets_src_admin_hooks_useBulkDelete_js-assets_src_admin_services_exportImportApi_js":"00a8e54a5a09f572a7f0","assets_src_admin_hooks_useDebounceSearch_js":"f8193b183a4508eebca5","assets_src_admin_pages_staff_staffList_js":"42ac18fa7511c1562003","assets_src_admin_pages_staff_Create_js":"d5b658df3de6c137b3fa","assets_src_admin_pages_staff_Update_js":"9314603dd26e14bd556b","assets_src_admin_pages_meeting_index_js":"6986a4e1094f04a08935","vendors-node_modules_react-quill_lib_index_js-node_modules_react-quill_dist_quill_snow_css":"6f7a67601bc7774ca348","assets_src_admin_pages_settings_index_js":"ebdbae511295528c8021","assets_src_admin_pages_customers_index_js":"0a6d960d487e8cab55a5","assets_src_admin_pages_customers_CustomerList_js":"e2d7175438a882b21edc","assets_src_admin_pages_bookings_index_js":"7cac369bd95cb5cec561","assets_src_admin_pages_bookings_Create_js":"277562178b33a6c1970a","assets_src_admin_pages_bookings_Edit_js":"0858b12b12f4fb9660a8","vendors-node_modules_dayjs_plugin_isSameOrAfter_js-node_modules_dayjs_plugin_isToday_js-node_-97987c":"914e0865b9e4663e9d7d","assets_src_admin_pages_bookings_bookingLists_js":"9cc19297ce90352de77e","assets_src_admin_pages_meeting_CreateMeeting_js":"7e4f5762a7a530bbb112","assets_src_admin_pages_meeting_MeetingList_js":"bf99ea5fabbe3bfa36af","assets_src_admin_module_onboard_index_js":"d2461a5606c006aa5b73"}[chunkId] + ".chunk.js";
+/******/ 			return "chunk/" + {"vendors-node_modules_reduxjs_toolkit_dist_redux-toolkit_esm_js-node_modules_dayjs_dayjs_min_j-ca2e24":"7031216f899ff694d01a","assets_src_admin_index_js":"72aaf148273c61110467","vendors-node_modules_chart_js_auto_auto_js-node_modules_react-chartjs-2_dist_index_js":"283c7958d2ca191df6a7","assets_src_admin_pages_overview_index_js":"6e4c439aa0b83379596d","assets_src_admin_pages_staff_index_js":"03b0e4d7106eb153aaf2","assets_src_admin_libs_staffLib_js":"01fad2ec7dc67eb56e84","assets_src_admin_hooks_useBulkDelete_js-assets_src_admin_services_exportImportApi_js":"00a8e54a5a09f572a7f0","assets_src_admin_hooks_useDebounceSearch_js":"f8193b183a4508eebca5","assets_src_admin_pages_staff_staffList_js":"42ac18fa7511c1562003","assets_src_admin_pages_staff_Create_js":"d5b658df3de6c137b3fa","assets_src_admin_pages_staff_Update_js":"e88830198dd9f0518a9e","assets_src_admin_pages_meeting_index_js":"6986a4e1094f04a08935","vendors-node_modules_antd_es_form_index_js-node_modules_react-quill_lib_index_js-node_modules-b40bfa":"73691365cefbc619a6a4","assets_src_admin_pages_settings_index_js":"e76f1ca4f3853ad92c3c","assets_src_admin_pages_customers_index_js":"0a6d960d487e8cab55a5","assets_src_admin_pages_customers_CustomerList_js":"e2d7175438a882b21edc","assets_src_admin_pages_bookings_index_js":"7cac369bd95cb5cec561","assets_src_admin_pages_bookings_Create_js":"277562178b33a6c1970a","assets_src_admin_pages_bookings_Edit_js":"0858b12b12f4fb9660a8","vendors-node_modules_dayjs_plugin_isSameOrAfter_js-node_modules_dayjs_plugin_isToday_js-node_-97987c":"914e0865b9e4663e9d7d","assets_src_admin_pages_bookings_bookingLists_js":"9cc19297ce90352de77e","assets_src_admin_pages_meeting_CreateMeeting_js":"7e4f5762a7a530bbb112","assets_src_admin_pages_meeting_MeetingList_js":"bf99ea5fabbe3bfa36af","assets_src_admin_module_onboard_index_js":"d2461a5606c006aa5b73"}[chunkId] + ".chunk.js";
 /******/ 		};
 /******/ 	})();
 /******/ 	
@@ -130,6 +130,21 @@ module.exports = ReactDOM;
 /******/ 				if (typeof window === 'object') return window;
 /******/ 			}
 /******/ 		})();
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/harmony module decorator */
+/******/ 	(() => {
+/******/ 		__webpack_require__.hmd = (module) => {
+/******/ 			module = Object.create(module);
+/******/ 			if (!module.children) module.children = [];
+/******/ 			Object.defineProperty(module, 'exports', {
+/******/ 				enumerable: true,
+/******/ 				set: () => {
+/******/ 					throw new Error('ES Modules may not assign module.exports or exports.*, Use ESM export syntax, instead: ' + module.id);
+/******/ 				}
+/******/ 			});
+/******/ 			return module;
+/******/ 		};
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */

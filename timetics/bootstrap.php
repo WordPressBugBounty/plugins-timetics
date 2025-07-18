@@ -265,7 +265,23 @@ final class Bootstrap {
      * @return void
      */
     public function admin_scripts( $handle ) {
-        if ( 'toplevel_page_timetics' !== $handle ) {
+
+        if('plugins.php' === $handle){
+
+            wp_register_script( 'timetics-feedback-modal', TIMETICS_ASSETS_URL . 'js/feedback-modal.js', [ 'wp-plugins', 'wp-i18n', 'wp-element', 'wp-dom', 'wp-data' ], TIMETICS_VERSION, true );
+            wp_enqueue_script( 'timetics-feedback-modal', TIMETICS_ASSETS_URL . 'js/feedback-modal.js', [], TIMETICS_VERSION, true );
+            wp_register_style( 'timetics-feedback-modal', TIMETICS_ASSETS_URL . 'css/feedback-modal.css', [], TIMETICS_VERSION, 'all' );
+            wp_enqueue_style( 'timetics-feedback-modal', TIMETICS_ASSETS_URL . 'css/feedback-modal.css', [], TIMETICS_VERSION, 'all' );
+
+            $feedback_obj = array(
+                'site_url'            => site_url()
+            );
+
+            wp_localize_script( 'timetics-feedback-modal', 'timetics_feedback', $feedback_obj );
+
+        }
+
+        if ( 'toplevel_page_timetics' !== $handle) {
             return;
         }
         global $wp_locale;
@@ -316,6 +332,7 @@ final class Bootstrap {
      * @return void
      */
     public function frontend_scripts() {
+
         wp_register_style( 'timetics-vendor', TIMETICS_ASSETS_URL . 'css/vendor.css', [], TIMETICS_VERSION, 'all' );
         wp_register_style( 'timetics-frontend', TIMETICS_ASSETS_URL . 'css/frontend.css', [], TIMETICS_VERSION, 'all' );
 
@@ -426,7 +443,7 @@ final class Bootstrap {
 		\Wpmet\Libs\Banner::instance('timetics')
 			->is_test(true)
 			->set_filter(ltrim($filter_string, ','))
-			->set_api_url('https://demo.themewinter.com/public/jhanda')
+			->set_api_url('https://product.themewinter.com/auth/public/jhanda')
 			->set_plugin_screens('timetics')
 			->set_plugin_screens('toplevel_page_timetics')
  			->call();

@@ -4,7 +4,7 @@
  * Plugin Name:       Timetics
  * Plugin URI:        https://arraytics.com/timetics/
  * Description:       Schedule, Appointment and Seat Booking plugin.
- * Version:           1.0.32
+ * Version:           1.0.37
  * Requires at least: 5.2
  * Requires PHP:      7.3
  * Author:            Arraytics
@@ -56,7 +56,7 @@ final class Timetics {
      * @return string
      */
     public static function get_version() {
-        return '1.0.32';
+        return '1.0.37';
     }
 
     /**
@@ -221,6 +221,21 @@ final class Timetics {
      */
     public function init() {
         Timetics\Bootstrap::instantiate( self::get_plugin_file() );
+
+        // Add autoload from composer for integrating uninstallation form
+        if (file_exists(plugin_dir_path( __FILE__ ) . '/vendor/autoload.php')) {
+            require_once plugin_dir_path( __FILE__ ) . '/vendor/autoload.php';
+        }
+
+        if ( class_exists( 'UninstallerForm\UninstallerForm' ) ) {
+            \UninstallerForm\UninstallerForm::init(
+                'Timetics',         // Plugin name
+                'timetics',         // Plugin Slug
+                __FILE__,
+                'timetics',          // Text Domain Name
+                'timetics-feedback-modal'  // plugins-admin-script-handler
+            );
+        }
     }
 
     /**
@@ -243,6 +258,14 @@ final class Timetics {
 
         // Update option for onboard settings.
         $timetics_onboard_setup = get_option( 'timetics_onboard_setup' );
+
+        $timetics_demo_data = get_option( 'timetics_demo_data' );
+
+        if ( ! $timetics_demo_data ) {
+            $dummy_data_generator = new Timetics\Core\DummyData\Dummy_Data_Generator();
+            $dummy_data_generator->generate();
+            update_option( 'timetics_demo_data', true );
+        }
 
         if ( ! $timetics_onboard_setup ) {
             update_option( 'timetics_onboard_settings', true );

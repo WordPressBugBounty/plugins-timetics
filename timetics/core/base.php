@@ -10,6 +10,7 @@
 namespace Timetics\Core;
 
 use Hooks;
+use Timetics;
 use Timetics\Core\Appointments\ApiAppointmentTaxonomy;
 use Timetics\Core\Appointments\Appointment;
 use Timetics\Core\Bookings\Booking;
@@ -17,6 +18,7 @@ use Timetics\Core\DummyData\Api_Faker;
 use Timetics\Core\Services\Service;
 use Timetics\Core\Staff\Staff;
 use Timetics\Core\Staffs\Staff as StaffsStaff;
+use Timetics\Core\Integrations\Google\Service\Google_Calendar_Sync;
 use Timetics\Utils\Singleton;
 
 /**
@@ -54,6 +56,7 @@ class Base {
         Appointments\Hooks::instance()->init();
         Api_Faker::instance();
         ApiAppointmentTaxonomy::instance();
+        Google_Calendar_Sync::instance();
     }
 }
 

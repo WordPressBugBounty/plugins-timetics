@@ -89,14 +89,14 @@ class Client {
      */
     public function get_auth_url() {
         $auth_url = add_query_arg(
-            [
+            array(
 				'client_id'     => $this->client_id,
 				'scope'         => urlencode_deep( $this->auth_scope ),
 				'redirect_uri'  => $this->redirect_uri,
 				'response_type' => 'code',
 				'access_type'   => 'offline',
 
-			], self::TIMETICS_AUTH_URL
+			), self::TIMETICS_AUTH_URL
         );
 
         return $auth_url;
@@ -107,11 +107,11 @@ class Client {
      *
      * @return  void
      */
-    public function set_auth_config( $args = [] ) {
-        $defaults = [
+    public function set_auth_config( $args = array() ) {
+        $defaults = array(
             'client_id'      => '',
             'client_secrete' => '',
-        ];
+        );
 
         $args = wp_parse_args( $args, $defaults );
 
@@ -151,15 +151,15 @@ class Client {
             throw new InvalidArgumentException( 'Invalid code' );
         }
 
-        $args = [
+        $args = array(
             'client_id'     => $this->client_id,
             'client_secret' => $this->client_secrete,
             'code'          => $code,
             'redirect_uri'  => $this->redirect_uri,
             'grant_type'    => 'authorization_code',
-        ];
+        );
 
-        $response = wp_remote_post( self::TIMETICS_TOKEN_URI, [ 'body' => $args ] );
+        $response = wp_remote_post( self::TIMETICS_TOKEN_URI, array( 'body' => $args ) );
 
         $status_code = wp_remote_retrieve_response_code( $response );
 
@@ -178,15 +178,15 @@ class Client {
      * @return  void
      */
     public function fetch_access_token_with_refresh_token( $refresh_token ) {
-        $args = [
+        $args = array(
             'client_id'     => $this->client_id,
             'client_secret' => $this->client_secrete,
             'refresh_token' => $refresh_token,
             'redirect_uri'  => $this->redirect_uri,
             'grant_type'    => 'refresh_token',
-        ];
+        );
 
-        $response = wp_remote_post( self::TIMETICS_TOKEN_URI, [ 'body' => $args ] );
+        $response = wp_remote_post( self::TIMETICS_TOKEN_URI, array( 'body' => $args ) );
 
         $status_code = wp_remote_retrieve_response_code( $response );
 
@@ -208,16 +208,16 @@ class Client {
      */
     public function revoke( $token ) {
         $response = wp_remote_post(
-            self::TIMETICS_REVOKE_URI, [
-                'headers' => [
+            self::TIMETICS_REVOKE_URI, array(
+                'headers' => array(
                     'content-type' => 'application/x-www-form-urlencoded',
-                ],
-                'body'    => build_query(
-                    [
-                        'token' => $token,
-                    ]
                 ),
-            ]
+                'body'    => build_query(
+                    array(
+                        'token' => $token,
+                    )
+                ),
+            )
         );
 
         $status_code = wp_remote_retrieve_response_code( $response );

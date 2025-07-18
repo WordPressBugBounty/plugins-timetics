@@ -61,7 +61,7 @@ class Hooks {
         }
 
         foreach ( $reminder_time as $time ) {
-            $timestamp = '';
+            $timestamp = null;
             $duration  = $time['duration-time'];
 
             switch ( $time['custom_duration_type'] ) {
@@ -76,7 +76,7 @@ class Hooks {
                 break;
             }
 
-            $timestamp = $booking_timestamp - $timestamp;
+            $timestamp = intval($booking_timestamp)- intval($timestamp);
 
             if ( ! wp_next_scheduled( 'timetics_booking_remainder_' . $booking_id ) ) {
                 wp_schedule_single_event( $timestamp, 'timetics_booking_remainder_' . $booking_id, [$booking_id] );
@@ -375,21 +375,21 @@ class Hooks {
         $booking_id  = $session_data['booking_id'];
         $booking     = new Booking( $booking_id );
         $total_price = floatval($booking->get_total()); // Ensure $total_price is a float
-        
+
         if ( is_array( $booking->get_seat() ) ) {
             $total_quantity = count( $booking->get_seat() );
         } else {
             $total_quantity = 1;
         }
-    
+
         if( ! empty( $booking_id ) && $total_price !== 0 ) {
             $cart_item_data['_timetics_variation_total_quantity'] = $total_quantity;
             $cart_item_data['booking_id'] = $booking_id;
-    
+
             // For balancing the cart item price
             $cart_item_data['_timetics_variation_total_price'] = $total_price / $total_quantity;
         }
-    
+
         return $cart_item_data;
     }
 }

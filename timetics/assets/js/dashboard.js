@@ -15,7 +15,7 @@
   \*********************************/
 /***/ ((__unused_webpack_module, __unused_webpack_exports, __webpack_require__) => {
 
-eval("Promise.all(/*! import() */[__webpack_require__.e(\"vendors-node_modules_reduxjs_toolkit_dist_redux-toolkit_esm_js-node_modules_dayjs_dayjs_min_j-ca2e24\"), __webpack_require__.e(\"assets_src_admin_index_js\")]).then(__webpack_require__.bind(__webpack_require__, /*! ./admin */ \"./assets/src/admin/index.js\"));\n\n//# sourceURL=webpack://timetics/./assets/src/dashboard.js?");
+eval("{Promise.all(/*! import() */[__webpack_require__.e(\"vendors-node_modules_reduxjs_toolkit_dist_redux-toolkit_esm_js-node_modules_dayjs_dayjs_min_j-086c36\"), __webpack_require__.e(\"assets_src_admin_index_js\")]).then(__webpack_require__.bind(__webpack_require__, /*! ./admin */ \"./assets/src/admin/index.js\"));\n\n//# sourceURL=webpack://timetics/./assets/src/dashboard.js?\n}");
 
 /***/ }),
 
@@ -116,7 +116,7 @@ module.exports = ReactDOM;
 /******/ 		// This function allow to reference async chunks
 /******/ 		__webpack_require__.u = (chunkId) => {
 /******/ 			// return url for filenames based on template
-/******/ 			return "chunk/" + {"vendors-node_modules_reduxjs_toolkit_dist_redux-toolkit_esm_js-node_modules_dayjs_dayjs_min_j-ca2e24":"7031216f899ff694d01a","assets_src_admin_index_js":"72aaf148273c61110467","vendors-node_modules_chart_js_auto_auto_js-node_modules_react-chartjs-2_dist_index_js":"283c7958d2ca191df6a7","assets_src_admin_pages_overview_index_js":"6e4c439aa0b83379596d","assets_src_admin_pages_staff_index_js":"03b0e4d7106eb153aaf2","assets_src_admin_libs_staffLib_js":"01fad2ec7dc67eb56e84","assets_src_admin_hooks_useBulkDelete_js-assets_src_admin_services_exportImportApi_js":"00a8e54a5a09f572a7f0","assets_src_admin_hooks_useDebounceSearch_js":"f8193b183a4508eebca5","assets_src_admin_pages_staff_staffList_js":"42ac18fa7511c1562003","assets_src_admin_pages_staff_Create_js":"d5b658df3de6c137b3fa","assets_src_admin_pages_staff_Update_js":"e88830198dd9f0518a9e","assets_src_admin_pages_meeting_index_js":"6986a4e1094f04a08935","vendors-node_modules_antd_es_form_index_js-node_modules_react-quill_lib_index_js-node_modules-b40bfa":"73691365cefbc619a6a4","assets_src_admin_pages_settings_index_js":"e76f1ca4f3853ad92c3c","assets_src_admin_pages_customers_index_js":"0a6d960d487e8cab55a5","assets_src_admin_pages_customers_CustomerList_js":"e2d7175438a882b21edc","assets_src_admin_pages_bookings_index_js":"7cac369bd95cb5cec561","assets_src_admin_pages_bookings_Create_js":"277562178b33a6c1970a","assets_src_admin_pages_bookings_Edit_js":"0858b12b12f4fb9660a8","vendors-node_modules_dayjs_plugin_isSameOrAfter_js-node_modules_dayjs_plugin_isToday_js-node_-97987c":"914e0865b9e4663e9d7d","assets_src_admin_pages_bookings_bookingLists_js":"9cc19297ce90352de77e","assets_src_admin_pages_meeting_CreateMeeting_js":"7e4f5762a7a530bbb112","assets_src_admin_pages_meeting_MeetingList_js":"bf99ea5fabbe3bfa36af","assets_src_admin_module_onboard_index_js":"d2461a5606c006aa5b73"}[chunkId] + ".chunk.js";
+/******/ 			return "chunk/" + {"vendors-node_modules_reduxjs_toolkit_dist_redux-toolkit_esm_js-node_modules_dayjs_dayjs_min_j-086c36":"05ece79a749ff1e80355","assets_src_admin_index_js":"155a29dd7454f6dcb040","vendors-node_modules_chart_js_auto_auto_js-node_modules_react-chartjs-2_dist_index_js":"59e61839e793cc907906","assets_src_admin_pages_overview_index_js":"b80872070afc5edc7759","assets_src_admin_pages_staff_index_js":"c833fca65f9a17d14255","assets_src_admin_libs_staffLib_js":"488d92e5954853129e2a","assets_src_admin_hooks_useBulkDelete_js-assets_src_admin_hooks_useDebounceSearch_js-assets_sr-527efb":"906eef8e2554c111aa3d","assets_src_admin_pages_staff_staffList_js":"1b79c2da85ee3f7d8327","assets_src_admin_pages_staff_Create_js":"49915f773329daae62cb","assets_src_admin_pages_staff_Update_js":"8c3cb7fff2bbe8a84a5f","assets_src_admin_pages_meeting_index_js":"e6d1d63b2894971ba953","vendors-node_modules_ant-design_icons_es_icons_QuestionCircleOutlined_js-node_modules_antd_es-747d6e":"cfef3a04b469b59cab8f","assets_src_admin_pages_settings_index_js":"c062376ca4440cf70586","assets_src_admin_pages_customers_index_js":"2b31eb24b34614a2114a","assets_src_admin_pages_customers_CustomerList_js":"17d5239756fe8dba4522","assets_src_admin_pages_bookings_index_js":"5d30251da7805e48609c","assets_src_admin_pages_bookings_Create_js":"a940e43d730fd78b8565","assets_src_admin_pages_bookings_Edit_js":"45560335a07eb479c476","vendors-node_modules_dayjs_plugin_isSameOrAfter_js-node_modules_dayjs_plugin_isToday_js-node_-97987c":"2bc1dfc0e6a042e94c34","assets_src_admin_pages_bookings_bookingLists_js":"84a1a9dfd5de2c4920f1","assets_src_admin_pages_meeting_CreateMeeting_js":"7848166070a3e49692b4","assets_src_admin_pages_meeting_MeetingList_js":"0da0f62a27e6aba6be98","assets_src_admin_module_onboard_index_js":"efa1499b0e8143655148"}[chunkId] + ".chunk.js";
 /******/ 		};
 /******/ 	})();
 /******/ 	
@@ -224,7 +224,7 @@ module.exports = ReactDOM;
 /******/ 		if (__webpack_require__.g.importScripts) scriptUrl = __webpack_require__.g.location + "";
 /******/ 		var document = __webpack_require__.g.document;
 /******/ 		if (!scriptUrl && document) {
-/******/ 			if (document.currentScript)
+/******/ 			if (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT')
 /******/ 				scriptUrl = document.currentScript.src;
 /******/ 			if (!scriptUrl) {
 /******/ 				var scripts = document.getElementsByTagName("script");
@@ -237,7 +237,7 @@ module.exports = ReactDOM;
 /******/ 		// When supporting browsers where an automatic publicPath is not supported you must specify an output.publicPath manually via configuration
 /******/ 		// or pass an empty string ("") and set the __webpack_public_path__ variable from your code to use your own logic.
 /******/ 		if (!scriptUrl) throw new Error("Automatic publicPath is not supported in this browser");
-/******/ 		scriptUrl = scriptUrl.replace(/#.*$/, "").replace(/\?.*$/, "").replace(/\/[^\/]+$/, "/");
+/******/ 		scriptUrl = scriptUrl.replace(/^blob:/, "").replace(/#.*$/, "").replace(/\?.*$/, "").replace(/\/[^\/]+$/, "/");
 /******/ 		__webpack_require__.p = scriptUrl;
 /******/ 	})();
 /******/ 	

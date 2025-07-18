@@ -705,7 +705,7 @@ class Api_Appointment extends Api {
         $guest_limit           = ! empty( $data['guest_limit'] ) ? intval( $data['guest_limit'] ) : 1;
         $capacity              = ! empty( $data['capacity'] ) ? intval( $data['capacity'] ) : 1;
         $appointment_id        = ! empty( $data['appointment'] ) ? intval( $data['appointment'] ) : 1;
-        $action                = $id ? 'update' : 'created';
+        $action                = $id ? 'updated' : 'created';
 
         if ( $id ) {
             $dulicate = $appoint->get_duplicate_nuber();
@@ -823,7 +823,7 @@ class Api_Appointment extends Api {
         $response = [
             'status_code' => 201,
             'success'     => 1,
-            'message'     => sprintf( esc_html__( 'Succssfully %s appointment', 'timetics' ), $action ),
+            'message'     => sprintf( esc_html__( 'Successfully %s appointment', 'timetics' ), $action ),
             'data'        => $item,
         ];
 
@@ -902,6 +902,17 @@ class Api_Appointment extends Api {
                     }
                     break;
                 case 'zoom':
+                    // Check if zoom addon plugin is active
+                    if ( ! is_plugin_active( 'timetics-zoom-addon/timetics-zoom-addon.php' ) ) {
+                        $errors[] = sprintf( '%s %s', $staff->get_display_name(), esc_html__( 'Zoom addon plugin is not active. Please activate the plugin then try again', 'timetics' ) );
+                        break;
+                    }
+
+                    // if zoom_connection_type is server_to_server then no need to check for zoom connection
+                    if ( timetics_get_option( 'zoom_connection_type' ) == 'server_to_server' ) {
+                        break;
+                    }
+
                     if ( ! timetics_is_zoom_connected( $staff_id ) ) {
                         $errors[] = sprintf( '%s %s', $staff->get_display_name(), esc_html__( 'is not connected to zoom. Please connect to zoom then try again', 'timetics' ) );
                     }

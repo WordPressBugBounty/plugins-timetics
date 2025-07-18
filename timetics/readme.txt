@@ -1,20 +1,20 @@
 ===Appointment Booking and Scheduling Calendar Plugin - WP Timetics ===
-Contributors: arraytics, themewinter, abrasel600
+Contributors: arraytics, ehsanriyadh
 Tags: appointment booking, booking calendar, appointments, scheduling, booking system
 Requires at least: 5.2
-Tested up to: 6.8
-Stable tag: 1.0.32
+Tested up to: 6.8.1
+Stable tag: 1.0.37
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: [https://www.gnu.org/licenses/gpl-2.0.html](https://www.gnu.org/licenses/gpl-2.0.html)
 
-Appointment Booking Plugin: unlimited appointments, calendar sync, and advanced features. Simplify scheduling with automation. Start for free today!
+Free AI-powered scheduling and booking calendar plugin with 2-way Calendar sync, Zoom, unlimited appointments, events and sell Tiered Tickets. 
 
 == Description ==
 
 Introducing [WP Timetics](https://arraytics.com/timetics), the most powerful appointment booking and scheduling calendar plugin for WordPress! 🚀 Enhance your productivity, save time, and never miss a reminder again.
 
-🗓️ WP Timetics simplifies your online appointment booking with **📅 [Unlimited Meetings](https://docs.arraytics.com/docs/timetics/meetings/meeting-category/)**, **🤖 [13+ integrations](https://docs.arraytics.com/docs/timetics/integrations/)**, **🔔 [Automated Notifications](https://docs.arraytics.com/docs/timetics/notifications/email-notification/)**, **📈 Detailed Analytics**, **🧾 [Multiple Payment Methods](https://docs.arraytics.com/docs/timetics/payment-type/)** alongside many other ** 🪄 50+** useful features.
+🗓️ WP Timetics simplifies your online appointment booking with **📅 [Unlimited Meetings](https://docs.arraytics.com/docs/timetics/meetings/meeting-category/)**, **🤖 [13+ integrations](https://docs.arraytics.com/docs/timetics/integrations/)**, **🔔 [Automated Notifications](https://docs.arraytics.com/docs/timetics/notifications/email-notification/)**, **📈 Detailed Analytics**, **🧾 [Multiple Payment Methods](https://docs.arraytics.com/docs/timetics/payment-type/)** alongside many other 🪄 50 useful features.
 
 💁 It is suitable for various niches and provides the **ultimate appointment booking solution**. Either you need a booking system for your **education service, sales, marketing, career counseling or Recruiting interviews**. With this appointment booking plugin you can easily handles all of this, including **recurring appointments booking**, **rescheduling appointments**, **customizable seat plans**, **[WhatsApp](https://docs.arraytics.com/docs/timetics/integrations/whatsapp-integration/)** and **Twilio SMS options**.
 
@@ -24,7 +24,7 @@ Introducing [WP Timetics](https://arraytics.com/timetics), the most powerful app
 
 https://youtu.be/qBqTz2wF3kk
 
-Need help setting up your Appointment Booking calendar Website? 👉 [Let Us Know](https://arraytics.com/support/).
+Need help setting up your Appointment Booking calendar Website? 👉 [Let Us Know](https://arraytics.com/support/).
 
 ### WP Timetics Appointments Booking System is Designed for Whom?
 
@@ -104,7 +104,7 @@ WP Timetics simplifies team collaboration and ensures clients have a hassle-free
 - **Customer Email Notification:** Reducing no-shows with automated client reminders.
 - **Timezone Auto Detection:** Offer appointments globally with automatic time zone conversion.
 - **Set Country Code for Phone Number:** Customize phone number fields option.
-- [**User Dashboard](https://docs.arraytics.com/docs/timetics/user-dashboard/):** Clients can reschedule, cancel, or check their booking history through a dedicated dashboard, ensuring smooth appointments management.
+- **[User Dashboard](https://docs.arraytics.com/docs/timetics/user-dashboard/):** Clients can reschedule, cancel, or check their booking history through a dedicated dashboard, ensuring smooth appointments management.
 
 ### ⚙️ [User-Friendly Features for Smooth Scheduling](https://docs.arraytics.com/docs/timetics/shortcodes/)
 
@@ -139,7 +139,7 @@ WP Timetics integrates seamlessly with **Google Calendar**, **iCal**, **Outlook*
 Nowadays people tend to attend meetings online and/or offline, with WP Timetics, you can add and customize your venue seat plan in just a few clicks. Alongside adding seat types seamlessly.
 
 - **Visual Seating Arrangement (Pro):** Customers select seats and reserve with a visual seat plan.
-- [**Multi-Tiered Tickets](https://arraytics.com/how-to-create-multi-tiered-tickets-pricing/) (Pro):** Create tiered tickets (e.g. **VIP**, **Gold**, **Platinum**).
+- **[Multi-Tiered Tickets](https://arraytics.com/how-to-create-multi-tiered-tickets-pricing/) (Pro):** Create tiered tickets (e.g. **VIP**, **Gold**, **Platinum**).
 - **One-to-Many Meeting Type (Pro):** Where one host can engage with multiple participants.
 - **One-to-Many with Seat Plan (Pro):** Combine group meetings with seat selection for conferences, salons, or theater bookings.
 
@@ -150,7 +150,7 @@ WP Timetics is all about customization and flexibility in which you can customiz
 - **Customizable Booking Form (Pro):** Add custom fields to collect specific client information.
 - **Added Additional Notes (Pro):** Allow clients to provide extra details while making reservations.
 - **Availability Preference (Pro):** Edit holidays or downtime appointments by overwriting the availability calendar.
-- [**Calendar View (Pro)](https://docs.arraytics.com/docs/timetics/bookings/calendar-view/):** Admin calendar provides an overview of upcoming and current appointments for easy scheduling.
+- **[Calendar View (Pro)](https://docs.arraytics.com/docs/timetics/bookings/calendar-view/):** Admin calendar provides an overview of upcoming and current appointments for easy scheduling.
 
 ### 📊 [Host Management & Data Management](https://docs.arraytics.com/docs/timetics/import-export-data/)
 
@@ -226,11 +226,15 @@ So, why wait? 📅 Schedule like a Champion with WP Timetics 🚀
 
 If you’re impressed with WP Timetics: WordPress Appointments Scheduling Plugin, please check out our other awesome WordPress plugins:
 
-📅 **[Eventin](https://wordpress.org/plugins/wp-event-solution/):** All-in-one event management plugin for WordPress.
+📅 **[Eventin](https://wordpress.org/plugins/wp-event-solution/):** Free All-in-one event calendar plugin for WordPress.
 
-🍽️ **[WPCafe](https://wordpress.org/plugins/wp-cafe/):** Manage online Food Ordering, Restaurant Menu, Delivery, and Reservations.
+🍽️ **[WPCafe](https://wordpress.org/plugins/wp-cafe/):** Manage online Food Ordering, Restaurant Menu, Delivery, and Reservations with Free WPCafe  Plugin. 
 
-🎨 **[Poptics](https://wordpress.org/plugins/poptics/):** Create Conversion-Driven Popups and convert your leads into sales.
+🎨 **[Poptics](https://wordpress.org/plugins/poptics/):** Create Conversion-Driven Popups and convert your leads into sales with Free Poptics Plugin. 
+
+📅 **[Booktics](https://wordpress.org/plugins/booktics/):** Best free WordPress Booking Plugin for Service Businesses. 
+
+
 
 If you’re curious, pay a visit to 👉 [**Arraytics**](https://arraytics.com/timetics/) to learn more about our expert solutions in WordPress scheduling, event management, restaurant reservation, food ordering and lots of [**marketing tips & tricks!**](https://arraytics.com/blog/) to grow your business. 🎉
 
@@ -269,9 +273,29 @@ Of course, WP Timetics has PayPal payment option, apart from that we have WooCom
 WP Timetics has twilio integrated by which you can sent direct SMS as well as WhatsApp message reminders in seconds.
 
 == Changelog ==
+
+= 1.0.37 ( July 17, 2025 ) =
+New: Seamless two-way sync with Google Calendar
+New: Two-way integration with Outlook Calendar
+
+= 1.0.36 ( June 02, 2025 ) =
+Tweak   : Improved admin UI for better usability.
+Fix     : Enhanced 404 error page handling.
+
+= 1.0.35 ( May 21, 2025 ) =
+Tweak 			: Improved admin dashboard notification experience
+Fix       		: Meeting duration update issue fixed
+
+= 1.0.34 ( May 14, 2025 ) =
+Tweak 	: Refined user interface for improved visual consistency and user experience
+
+= 1.0.33 ( May 5, 2025 ) =
+Fix 	: Google auth redirect issue
+Tweak 	: Zoom connect issue
+
 = 1.0.32 ( April 16, 2025 ) =
-Fix : PHP 7.4 compatibility added
-Tweak: WordPress 6.8 compatibility 
+Fix 	: PHP 7.4 compatibility added
+Tweak 	: WordPress 6.8 compatibility
 
 = 1.0.31 ( March 25, 2025 ) =
 Fix : Timeslot validation vulnarable issue
@@ -550,7 +574,7 @@ Fix  : Stripe payment error handle to front-end.
 
 ### Minimum Requirements
 
-- WordPress version 5.2 or higher (Tested up to 6.7.1)
+- WordPress version 5.2 or higher (Tested up to 6.8)
 *PHP version 7.3 or higher
 
 ### Automatic installation

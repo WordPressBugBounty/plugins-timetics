@@ -995,4 +995,67 @@ class Booking {
         ];
     }
 
+    /**
+     * Get Google Calendar Event ID for this booking
+     *
+     * @return string
+     */
+    public function get_google_event_id() {
+        return $this->get_metadata( 'google_event_id' );
+    }
+
+    /**
+     * Set Google Calendar Event ID for this booking
+     *
+     * @param string $event_id
+     * @return bool
+     */
+    public function set_google_event_id( $event_id ) {
+        return $this->save_metadata( 'google_event_id', $event_id );
+    }
+
+    public function set_sync_status( $status ) {
+        return $this->save_metadata( 'google_calendar_sync_status', $status );
+    }
+
+    public function get_sync_status() {
+        return $this->get_metadata( 'google_calendar_sync_status' );
+    }
+    /**
+     * Get all Google Event IDs for all bookings
+     *
+     * @return array
+     */
+    public function get_all_google_event_ids() {
+        $meta_key = $this->meta_prefix . 'google_event_id';
+    
+        $posts = get_posts(
+            array(
+                'post_type'      => 'any',
+                'posts_per_page' => -1,
+                'meta_query'     => array(
+                    array(
+                        'key'     => $meta_key,
+                        'value'   => '',
+                        'compare' => '!=',
+                    ),
+                ),
+                'fields'         => 'ids',
+            )
+        );
+
+        if ( empty( $posts ) ) {
+            return array();
+        }
+
+        $event_ids = array();
+        foreach ( $posts as $post_id ) {
+            $event_id = get_post_meta( $post_id, $meta_key, true );
+            if ( ! empty( $event_id ) ) {
+                $event_ids[] = $event_id;
+            }
+        }
+
+        return $event_ids;
+    }
 }

@@ -3,9 +3,15 @@
 use Timetics\Core\Appointments\Appointment as Appointment;
 use Timetics\Core\Staffs\Staff;
 
-$meetings = Appointment::all([
+$args = [
     'posts_per_page' => $limit
-]);
+];
+
+if ( ! current_user_can( 'manage_options' ) ) {
+    $args['visibility'] = 'enabled';
+}
+
+$meetings = Appointment::all($args);
 
 $staffs = Staff::all();
 $terms = get_terms( [

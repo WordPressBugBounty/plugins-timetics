@@ -68,12 +68,13 @@ class Calendar {
             if ( empty( $event['start'] ) ) {
                 continue;
             }
-            // error_log(print_r($event['start'], true));
+            
             $start = ! empty($event['start']['dateTime']) ? $event['start']['dateTime'] : $event['start']['date'];
             $end = ! empty($event['end']['dateTime']) ? $event['end']['dateTime'] : $event['end']['date'];
 
 
             $filtered_events[] = [
+                'id' => $event['id'] ?? '',
                 'start_date' => date('Y-m-d', strtotime($start)),
                 'start_time' => date('H:i:s', strtotime($start)),
                 'end_date'   => date('Y-m-d', strtotime($end)),
@@ -86,6 +87,37 @@ class Calendar {
         return $filtered_events;
     }
 
+    /**
+     * Get event by ID
+     *
+     * @param   string  $event_id
+     *
+     * @return JSON | WP_Error
+     */
+    public function get_event( $event_id , $user_id = null ) {
+        if ( ! $user_id ) {
+            $user_id = get_current_user_id();
+        }
+
+        $access_token = timetics_get_google_access_token( $user_id );
+
+        $data = [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $access_token,
+            ],
+        ];
+
+        $response = wp_remote_get(self::TIMETICS_CALENDAR_EVENT . $event_id, $data);
+
+        if ( is_wp_error( $response ) ) {
+            return ['error' => $response->get_error_message()];
+        }
+
+        $body   = wp_remote_retrieve_body( $response );
+        $event  = json_decode($body, true);
+
+        return $event;
+    }
 
     /**
      * Create event

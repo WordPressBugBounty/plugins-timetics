@@ -70,11 +70,32 @@ class Auth {
     public function google_auth( $code = '' ) {
         $client = timetics_get_google_client();
 
-        $client->add_scope( Calendar::scope() );
-        $data = $client->fetch_access_token_with_auth_code( $code );
-        $data['code'] = $code;
+        // If no code is provided, redirect to Google's authorization page
+        if ( empty($code) ) {
+            $client->add_scope( Calendar::scope() );
+            $auth_url = $client->get_auth_url();
+            wp_redirect($auth_url);
+            exit;
+        }
 
-        timetics_update_google_auth( get_current_user_id(), $data );
+        try {
+            $client->add_scope( Calendar::scope() );
+            $data = $client->fetch_access_token_with_auth_code( $code );
+            $data['code'] = $code;
+
+            timetics_update_google_auth( get_current_user_id(), $data );
+
+            wp_redirect(admin_url('admin.php?page=timetics#/settings'));
+            exit;
+        } catch (\Exception $e) {
+            $error_message = sprintf(
+                '<p>%s</p><p><a href="%s" class="button button-primary">Go Back</a></p>',
+                esc_html( $e->getMessage() ),
+                esc_url( admin_url('admin.php?page=timetics#/settings') )
+            );
+
+            wp_die($error_message, esc_html__('Google Auth Error', 'timetics'), array('back_link' => true));
+        }
     }
 
     /**

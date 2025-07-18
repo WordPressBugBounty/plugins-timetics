@@ -15,7 +15,7 @@
   \**************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react-router-dom */ \"./node_modules/react-router/dist/index.js\");\n\nfunction Bookings() {\n  return /*#__PURE__*/React.createElement(\"div\", {\n    className: \"tt-staff-list\"\n  }, /*#__PURE__*/React.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_0__.Outlet, null));\n}\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Bookings);\n\n//# sourceURL=webpack://timetics/./assets/src/admin/pages/bookings/index.js?");
+eval("{__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react-router-dom */ \"./node_modules/react-router/dist/index.js\");\n\nfunction Bookings() {\n  return /*#__PURE__*/React.createElement(\"div\", {\n    className: \"tt-staff-list\"\n  }, /*#__PURE__*/React.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_0__.Outlet, null));\n}\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Bookings);\n\n//# sourceURL=webpack://timetics/./assets/src/admin/pages/bookings/index.js?\n}");
 
 /***/ })
 

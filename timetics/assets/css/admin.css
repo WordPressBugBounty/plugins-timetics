@@ -2,7 +2,7 @@
   !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./assets/src/scss/admin.scss ***!
   \*********************************************************************************************************************/
 :root {
-  --tt-primary-color: #3161f1;
+  --tt-primary-color: #0060e5;
   --tt-primary-color-70: #4c93ff;
   --tt-primary-color-50: #78aeff;
   --tt-primary-color-25: #a5c9ff;
@@ -25,12 +25,7 @@
   --tt-disable-color: #cecfd1;
   --tt-state-color-01: #06a78a;
   --tt-state-color-02: #f1a208;
-  --tt-primary-gradient: linear-gradient(180deg, #3263f8 0%, #254ec8 100%);
-  --tt-primary-gradient-reverse: linear-gradient(
-      170deg,
-      #3263f8 0%,
-      #254ec8 100%
-  );
+  --tt-primary-saturated: #0056cc;
   --tt-secondary-gradient: linear-gradient(180deg, #45505e 0%, #0a1018 100%);
 }
 
@@ -483,7 +478,7 @@
   background: linear-gradient(210.38deg, #ffffff 11.21%, rgba(255, 255, 255, 0.8) 87.98%);
 }
 .toplevel_page_timetics .ant-switch.ant-switch-checked {
-  background: var(--tt-primary-gradient);
+  background: var(--tt-primary-color);
 }
 .toplevel_page_timetics .ant-switch.ant-switch-checked .ant-switch-handle {
   left: calc(100% - 20px);
@@ -506,7 +501,7 @@
   border-radius: 0;
 }
 .toplevel_page_timetics .ant-checkbox.ant-checkbox-checked .ant-checkbox-inner {
-  background: var(--tt-primary-gradient);
+  background: var(--tt-primary-color);
   border-color: var(--tt-primary-color);
 }
 .toplevel_page_timetics .ant-checkbox.ant-checkbox-checked:after {
@@ -518,7 +513,7 @@
   left: 50%;
   top: 50%;
   border-radius: 2px;
-  background: var(--tt-primary-gradient);
+  background: var(--tt-primary-color);
 }
 .toplevel_page_timetics .ant-checkbox + span {
   position: relative;
@@ -622,7 +617,7 @@
   height: 3px;
 }
 .toplevel_page_timetics .ant-tabs-ink-bar {
-  background: var(--tt-primary-gradient);
+  background: var(--tt-primary-color);
   border-radius: 10px 10px 0 0;
 }
 .toplevel_page_timetics .tt-settings-wrapper .ant-typography.ant-typography-secondary {
@@ -774,7 +769,8 @@
 .toplevel_page_timetics .ant-tooltip .ant-tooltip-arrow-content {
   --antd-arrow-background-color: var(--tt-secondary-color);
 }
-.toplevel_page_timetics .ant-select-single:not(.ant-select-customize-input, .tt-location-type-select) .ant-select-selector {
+.toplevel_page_timetics .ant-select-single:not(.ant-select-customize-input,
+.tt-location-type-select) .ant-select-selector {
   line-height: 40px;
   padding: 0 40px 0 20px;
   border-radius: 6px;
@@ -851,14 +847,15 @@
 .toplevel_page_timetics .ant-btn:not(.dynamic-delete-button, .ant-btn-warning, .tt-link-btn):hover, .toplevel_page_timetics .ant-btn:not(.dynamic-delete-button, .ant-btn-warning, .tt-link-btn):focus {
   color: var(--tt-primary-color);
   border-color: var(--tt-primary-color);
+  background-color: inherit;
 }
 .toplevel_page_timetics .ant-btn.ant-btn-primary {
-  background-image: var(--tt-primary-gradient);
+  background: var(--tt-primary-color);
   color: #fff;
   border: none;
 }
 .toplevel_page_timetics .ant-btn.ant-btn-primary:hover, .toplevel_page_timetics .ant-btn.ant-btn-primary:focus {
-  background-image: var(--tt-primary-gradient-reverse);
+  background: var(--tt-primary-saturated) !important;
   color: #fff;
 }
 .toplevel_page_timetics .ant-btn.ant-btn-primary .anticon svg {
@@ -2401,6 +2398,14 @@
 
 .flatpickr-input {
   display: none;
+}
+
+.tt-meeting-overlap-checkbox {
+  display: inline-flex;
+  align-items: center;
+  font-size: 14px;
+  gap: 5px;
+  margin-top: 5px;
 }
 
 .timetics-onboard .tt-onboard-header {

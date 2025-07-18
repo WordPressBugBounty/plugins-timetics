@@ -46,7 +46,7 @@ class Shortcode {
      */
     public function booking_form( $attribute ) {
         wp_enqueue_style( 'timetics-vendor' );
-        wp_enqueue_style( 'timetics-frontend' ); 
+        wp_enqueue_style( 'timetics-frontend' );
         wp_enqueue_script( 'timetics-flatpickr-scripts' );
         wp_enqueue_script( 'timetics-frontend-scripts' );
         wp_enqueue_script( 'calendar-locale' );
@@ -56,6 +56,13 @@ class Shortcode {
             'id' => $id,
         ];
         $controls      = json_encode( $data_controls );
+
+        $visibility = get_post_meta( $id, '_tt_apointment_visibility', true );
+        $is_visible = 'enabled' === $visibility;
+
+        if ( ! $is_visible && ! current_user_can( 'manage_options' ) ) {
+            return '<div class="timetics-shortcode-wrapper"><p>' . esc_html__( 'This booking form is not available.', 'timetics' ) . '</p></div>';
+        }
 
         ob_start();
         ?>
@@ -73,7 +80,7 @@ class Shortcode {
      */
     public function user_dashboard( $attribute ) {
         wp_enqueue_style( 'timetics-vendor' );
-        wp_enqueue_style( 'timetics-frontend' ); 
+        wp_enqueue_style( 'timetics-frontend' );
         wp_enqueue_script( 'timetics-frontend-scripts' );
 
         $id            =  get_current_user_id();
@@ -106,7 +113,7 @@ class Shortcode {
 
     public function eventin_seat_plan() {
         wp_enqueue_style( 'timetics-vendor' );
-        wp_enqueue_style( 'timetics-frontend' ); 
+        wp_enqueue_style( 'timetics-frontend' );
         wp_enqueue_script( 'timetics-flatpickr-scripts' );
         wp_enqueue_script( 'timetics-frontend-scripts' );
     }
@@ -118,7 +125,7 @@ class Shortcode {
      */
     public function meeting_list( $attribute ) {
         wp_enqueue_style( 'timetics-vendor' );
-        wp_enqueue_style( 'timetics-frontend' ); 
+        wp_enqueue_style( 'timetics-frontend' );
         wp_enqueue_script( 'timetics-flatpickr-scripts' );
         wp_enqueue_script( 'timetics-frontend-scripts' );
         wp_enqueue_script( 'calendar-locale' );
@@ -151,7 +158,7 @@ class Shortcode {
      */
     public function category_meetings( $attribute ) {
         wp_enqueue_style( 'timetics-vendor' );
-        wp_enqueue_style( 'timetics-frontend' ); 
+        wp_enqueue_style( 'timetics-frontend' );
         wp_enqueue_script( 'timetics-flatpickr-scripts' );
         wp_enqueue_script( 'timetics-frontend-scripts' );
         wp_enqueue_script( 'calendar-locale' );

@@ -384,6 +384,7 @@ class ApiAppointmentTaxonomy extends Api {
             'type'                  => $appointment->get_type(),
             'locations'             => $appointment->get_locations(),
             'price'                 => $appointment->get_price(),
+            'visibility'            => $appointment->get_visibility(),
         ];
 
         return $data;

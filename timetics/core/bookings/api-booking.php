@@ -95,16 +95,12 @@ class Api_Booking extends Api {
                 [
                     'methods'             => \WP_REST_Server::READABLE,
                     'callback'            => [$this, 'get_item'],
-                    'permission_callback' => function () {
-                        return true;
-                    },
+                    'permission_callback' => [$this, 'get_item_permission_callback'],
                 ],
                 [
                     'methods'             => \WP_REST_Server::EDITABLE,
                     'callback'            => [$this, 'update_item'],
-                    'permission_callback' => function () {
-                        return true;
-                    },
+                    'permission_callback' => [$this, 'update_item_permission_callback'],
                 ],
                 [
                     'methods'             => \WP_REST_Server::DELETABLE,
@@ -1236,5 +1232,31 @@ class Api_Booking extends Api {
         }
 
         return 0;
+    }
+
+    /**
+     * Update item permission callback
+     * @param WP_Rest_Request $request
+     * @return bool
+     */
+    public function update_item_permission_callback($request){
+        $nonce = $request->get_header('X-WP-Nonce');
+        if (wp_verify_nonce($nonce, 'wp_rest')) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Get item permission callback
+     * @param WP_Rest_Request $request
+     * @return bool
+     */
+    public function get_item_permission_callback($request){
+        $nonce = $request->get_header('X-WP-Nonce');
+        if (wp_verify_nonce($nonce, 'wp_rest')) {
+            return true;
+        }
+        return false;
     }
 }

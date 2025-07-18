@@ -28,6 +28,15 @@ class Hooks {
      * @return void
      */
     public function init() {
+        add_action( 'init', array( $this, 'boot' ), 5);
+    }
+
+    /**
+     * Boot the service
+     *
+     * @return void
+     */
+    public function boot() {
         $this->category = new Service_Taxonomy();
     }
 }

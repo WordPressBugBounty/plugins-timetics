@@ -276,8 +276,6 @@ class Api_Settings extends Api {
             "zoom_client_id",
             "zoom_client_secret",
             "zoom_auth_redirect_uri",
-            "apple_calendar",
-            "outlook_calendar",
             "fluentcrm_webhook",
             "zapier_webhook",
             "twillo_account_id",
@@ -294,7 +292,10 @@ class Api_Settings extends Api {
             "stripe_pub_key",
             "stripe_secret_key",
             "paypal_client_id",
-            "paypal_client_secret"
+            "paypal_client_secret",
+            "outlook_app_client_id",
+            "outlook_app_client_secret",
+            "outlook_auth_redirect_uri",
         ];
        
        

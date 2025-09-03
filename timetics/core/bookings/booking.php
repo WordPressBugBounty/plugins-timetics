@@ -90,6 +90,7 @@ class Booking {
         'parent'                => 0,
         'cancel_reason'         => '',
         'custom_location_url'   => '',
+        'security_token'        => ''
     ];
 
     /**
@@ -1057,5 +1058,27 @@ class Booking {
         }
 
         return $event_ids;
+    }
+
+    /**
+     * Get name.
+     *
+     * @since 1.0.0
+     *
+     * @return string
+     */
+    public function get_security_token() {
+        return $this->get_prop( 'security_token' );
+    }    
+
+    /**
+     * Generate and store a secure reschedule token for a booking
+     *
+     * @param int $booking_id
+     * @return string The generated token
+     */
+    public function generate_security_token() {
+        $token = bin2hex(random_bytes(4)); // 8 hex chars
+        return $token;
     }
 }

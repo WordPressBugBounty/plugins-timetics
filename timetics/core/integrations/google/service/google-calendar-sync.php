@@ -15,6 +15,8 @@ use Timetics\Core\Customers\Customer;
 use Timetics\Core\Appointments\Appointment;
 use WP_Error;
 use Timetics\Utils\Singleton;
+use DateTime;
+use DateTimeZone;
 
 /**
  * Class Google_Calendar_Sync
@@ -62,6 +64,7 @@ class Google_Calendar_Sync {
             // Add hooks
             add_action( 'timetics_after_booking_schedule', array( $this, 'sync_booking_to_google_calendar' ), 10, 4 );
             add_filter( 'timetics/admin/booking/get_items', array( $this, 'get_events_from_google' ) );
+            add_filter( 'timetics_schedule_data_for_selected_date', array( $this, 'block_timeslots_by_google_events' ), 10, 5 );
         } catch ( \Throwable $e ) {
             error_log( $e->getMessage() );
         }
@@ -152,8 +155,9 @@ class Google_Calendar_Sync {
             }
 
             $booking->set_sync_status( 'synced' );
-        } catch ( \Exception $e ) {
-            return new WP_Error( 'google_calendar_sync_error', $e->getMessage() );
+        } catch ( \Throwable $e ) {
+            // If sync fails silenty exits to ensure no other process gets hampered
+            error_log( $e->getMessage() );
         }
     }
 
@@ -198,10 +202,11 @@ class Google_Calendar_Sync {
                     'end_time' => $event['end_time'] ?? '',
                     'source' => 'google',
                     'status' => 'approved',
-                    'random_id' => 'I' . $event['id'] ?? '',
+                    'random_id' => 'I' . ( $event['id'] ?? '' ),
                     'appointment' => array(
                         'id' => $event['id'] ?? '',
                         'name' => $event['summary'] ?? '',
+                        'timezone' => $event['timezone'] ?? '',
                     ),
                 );
             }
@@ -210,6 +215,81 @@ class Google_Calendar_Sync {
             return array_merge( $bookings, $google_events );
         } catch ( \Throwable $e ) {
             return $bookings;
+        }
+    }
+
+    /**
+     * Block timeslots by Google events
+     *
+     * @param array $data 
+     * @param int $staff_id 
+     * @param int $meeting_id 
+     * @param string $timezone 
+     *
+     * @return array Modified bookings array with Google Calendar events
+     */
+    public function block_timeslots_by_google_events( $data, $staff_id, $meeting_id, $timezone ) {
+        try {
+            // Fixing minor array format issue
+            $time_slot_data = $data[0];
+            
+            if ( ! timetics_get_option( 'google_calendar_overlap', false ) ) {
+                return $data;
+            }
+
+            $date_of_event = $time_slot_data['date'];
+
+            $date_obj_start = new DateTime( $date_of_event . ' 00:00:00', new DateTimeZone( $timezone ) );
+            $date_obj_end   = new DateTime( $date_of_event . ' 23:59:59', new DateTimeZone( $timezone ) );
+
+            $staff_id = get_current_user_id();
+            $google_events = $this->calendar->get_events( $staff_id, [
+                'timeMin'      => rawurlencode($date_obj_start->format( DateTime::RFC3339 )),
+                'timeMax'      => rawurlencode($date_obj_end->format( DateTime::RFC3339 )),
+                'orderBy'      => 'startTime',
+                'singleEvents' => 'true',
+                'timeZone'     => $timezone,
+            ]);
+
+            // if theres no google calendar event for the staff member, return the data as it is
+            if ( is_wp_error( $google_events ) || empty( $google_events ) ) {
+                return $data;
+            }
+
+            // Process each timeslot for the day
+            $updated_slots = [];
+
+            foreach ( $time_slot_data['slots'] as $slot ) {
+                $slot_start_time = strtotime( $slot['start_time'] );
+
+                // Check against each Google Calendar event
+                foreach ( $google_events as $event ) {
+                    $event_start = strtotime( $event['start_time'] );
+                    $event_end   = strtotime( $event['end_time'] );
+
+                    // If the slot overlaps with the event, mark it as unavailable
+                    if ( $slot_start_time >= $event_start && $slot_start_time < $event_end ) {
+                        $slot['status'] = 'unavailable';
+                        break; // No need to check more events if already unavailable
+                    }
+                }
+
+                if ( $slot['status'] === 'unavailable' ) {
+                    continue;
+                }
+
+                $updated_slots[] = $slot;
+            }
+
+            $time_slot_data['slots'] = $updated_slots;
+
+            // return the data with updated timeslots in its original format
+            $data[0] = $time_slot_data;
+
+            return $data;
+        } catch (\Throwable $e) {
+            // Silenty reverts to normal behavior incase of error
+            return $data;
         }
     }
 }

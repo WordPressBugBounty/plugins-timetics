@@ -706,6 +706,10 @@ class Api_Appointment extends Api {
         $capacity              = ! empty( $data['capacity'] ) ? intval( $data['capacity'] ) : 1;
         $appointment_id        = ! empty( $data['appointment'] ) ? intval( $data['appointment'] ) : 1;
         $action                = $id ? 'updated' : 'created';
+        $buffer_time_before_value = ! empty( $data['buffer_time_before_value'] ) ? $data['buffer_time_before_value'] : 0;
+        $buffer_time_before_unit  = ! empty( $data['buffer_time_before_unit'] ) ? $data['buffer_time_before_unit'] : 'min';
+        $buffer_time_after_value  = ! empty( $data['buffer_time_after_value'] ) ? $data['buffer_time_after_value'] : 0;
+        $buffer_time_after_unit   = ! empty( $data['buffer_time_after_unit'] ) ? $data['buffer_time_after_unit'] : 'min';
 
         if ( $id ) {
             $dulicate = $appoint->get_duplicate_nuber();
@@ -804,6 +808,10 @@ class Api_Appointment extends Api {
             'custom_fields'         => $custom_fields,
             'guest_enabled'         => $guest_enabled,
             'guest_limit'           => $guest_limit,
+            'buffer_time_before_value' => $buffer_time_before_value,
+            'buffer_time_before_unit' => $buffer_time_before_unit,
+            'buffer_time_after_value' => $buffer_time_after_value,
+            'buffer_time_after_unit' => $buffer_time_after_unit,
 
         ];
 
@@ -823,7 +831,7 @@ class Api_Appointment extends Api {
         $response = [
             'status_code' => 201,
             'success'     => 1,
-            'message'     => sprintf( esc_html__( 'Successfully %s appointment', 'timetics' ), $action ),
+            'message'     => sprintf( esc_html__( 'Successfully %s meeting', 'timetics' ), $action ),
             'data'        => $item,
         ];
 
@@ -875,6 +883,10 @@ class Api_Appointment extends Api {
             'guest_enabled'         => $appointment->get_guest_enabled(),
             'guest_limit'           => $appointment->get_guest_limit(),
             'author'                => $appointment->get_author(),
+            'buffer_time_before_value' => $appointment->get_buffer_time_before_value(),
+            'buffer_time_before_unit' => $appointment->get_buffer_time_before_unit(),
+            'buffer_time_after_value' => $appointment->get_buffer_time_after_value(),
+            'buffer_time_after_unit' => $appointment->get_buffer_time_after_unit(),
         ];
 
         return apply_filters( 'timetics_meeting_json_data', $data, $appointment );

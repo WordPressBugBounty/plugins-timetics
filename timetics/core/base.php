@@ -19,6 +19,7 @@ use Timetics\Core\Services\Service;
 use Timetics\Core\Staff\Staff;
 use Timetics\Core\Staffs\Staff as StaffsStaff;
 use Timetics\Core\Integrations\Google\Service\Google_Calendar_Sync;
+use Timetics\Core\BookingCalendars\Api_Booking_Calendar;
 use Timetics\Utils\Singleton;
 
 /**
@@ -57,6 +58,7 @@ class Base {
         Api_Faker::instance();
         ApiAppointmentTaxonomy::instance();
         Google_Calendar_Sync::instance();
+        Api_Booking_Calendar::instance();
     }
 }
 

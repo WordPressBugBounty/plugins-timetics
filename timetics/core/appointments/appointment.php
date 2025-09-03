@@ -66,6 +66,10 @@ class Appointment extends PostModel {
         'blocked_schedule'        => '',
         'price'                   => '',
         'buffer_time'             => '',
+        'buffer_time_before_value'=> '',
+        'buffer_time_before_unit' => '',
+        'buffer_time_after_value' => '',
+        'buffer_time_after_unit'  => '',
         'timezone'                => '',
         'availability'            => '',
         'visibility'              => '',
@@ -340,6 +344,42 @@ class Appointment extends PostModel {
         return $this->get_prop( 'buffer_time' );
     }
 
+    /**
+     * Returns the amount of buffer time before the appointment (without unit like minute or hour)
+     *
+     * @return integer
+     */
+    public function get_buffer_time_before_value() {
+        return $this->get_prop( 'buffer_time_before_value' );
+    }
+
+    /**
+     * Returns the unit of buffer time before the appointment (like minute or hour)
+     *
+     * @return string
+     */
+    public function get_buffer_time_before_unit() {
+        return $this->get_prop( 'buffer_time_before_unit' );
+    }
+
+    /**
+     * Returns the amount of buffer time after the appointment (without unit like minute or hour)
+     *
+     * @return integer
+     */
+    public function get_buffer_time_after_value() {
+        return $this->get_prop( 'buffer_time_after_value' );
+    }
+
+    /**
+     * Returns the unit of buffer time after the appointment (like minute or hour)
+     *
+     * @return string
+     */
+    public function get_buffer_time_after_unit() {
+        return $this->get_prop( 'buffer_time_after_unit' );
+    }
+
     public function get_timezone() {
         return $this->get_prop( 'timezone' );
     }
@@ -395,6 +435,36 @@ class Appointment extends PostModel {
      */
     public function get_notifications() {
         return $this->get_prop( 'notifications' );
+    }
+
+    /**
+     * Returns the buffer time before the appointment in seconds
+     *
+     * @return integer seconds
+     */
+    public function get_buffer_time_before_in_seconds() {
+        $buffer_time_value = (int) $this->get_buffer_time_before_value() ?? 0;
+
+        if ( 'hr' === $this->get_buffer_time_before_unit() ) {
+            return $buffer_time_value * 60 * 60;
+        }
+
+        return $buffer_time_value * 60;
+    }
+
+    /**
+     * Returns the buffer time after the appointment in seconds
+     *
+     * @return integer seconds
+     */
+    public function get_buffer_time_after_in_seconds() {
+        $buffer_time_value = (int) $this->get_buffer_time_after_value() ?? 0;
+
+        if ( 'hr' === $this->get_buffer_time_after_unit() ) {
+            return $buffer_time_value * 60 * 60;
+        }
+
+        return $buffer_time_value * 60;
     }
 
     /**
@@ -785,26 +855,37 @@ class Appointment extends PostModel {
      *
      * @param   string  $date      [$date description]
      * @param   integer  $staff_id  [$staff_id description]
+     * @param   string  $timze_zone  [$timze_zone description]
      *
      * @return  array
      */
-    private function get_schedule_by_date( $date, $staff_id, $timze_zone = '' ) {
+    private function get_schedule_by_date( $date, $staff_id, $time_zone = '' ) {
         $day_name         = ucfirst( date( 'D', strtotime( $date ) ) );
         $schedule         = $this->get_schedule();
         $interval         = $this->get_interval();
-        $tartget_schedule = [];
+        $target_schedule = [];
 
         $slots = [];
 
         if ( ! empty( $schedule[$staff_id] ) ) {
-            $tartget_schedule = $schedule[$staff_id][$day_name];
+            $target_schedule = $schedule[$staff_id][$day_name];
         }
 
-        foreach ( $tartget_schedule as $day ) {
+        foreach ( $target_schedule as $day ) {
             $start = strtotime( $day['start'] );
             $end   = strtotime( $day['end'] );
 
-            for ( $time = $start; $time <= $end; $time += $interval ) {
+            // Get buffer times in seconds
+            $buffer_before = $this->get_buffer_time_before_in_seconds();
+            $buffer_after = $this->get_buffer_time_after_in_seconds();
+            
+            // Adjust the start time to include buffer before
+            $adjusted_start = $start + $buffer_before;
+            
+            // Adjust the end time to ensure we have enough time for the slot + buffer after
+            $min_slot_duration = $interval + $buffer_after;
+
+            for ( $time = $adjusted_start; $time + $min_slot_duration <= $end; $time += $interval + $buffer_after + $buffer_before ) {
                 $booked_entry = $this->get_booking_entries( $date, $time, $staff_id );
                 $status       = 'available';
                 $capacity     = $this->get_capacity();
@@ -818,7 +899,7 @@ class Appointment extends PostModel {
                     $booked = $booked_entry->get_booked();
                 }
 
-                $datetime = $this->convert_timezone( $time, $timze_zone );
+                $datetime = $this->convert_timezone( $time, $time_zone );
 
                 $slot = [
                     'status'     => $status,
@@ -917,7 +998,7 @@ class Appointment extends PostModel {
      *
      * @return  array   Available timeslots
      */
-    public function get_avilable_timeslots( $date, $staff_id, $timze_zone = '' ) {
+    public function get_avilable_timeslots( $date, $staff_id, $time_zone = '' ) {
         $day_name         = ucfirst( date( 'D', strtotime( $date ) ) );
         $schedule         = $this->get_schedule();
         $interval         = $this->get_interval();
@@ -925,7 +1006,7 @@ class Appointment extends PostModel {
 
         $slots = [];
 
-        if ( ! empty( $schedule[$staff_id] ) ) {
+        if ( isset($schedule[$staff_id]) && ! empty(array_filter($schedule[$staff_id])) ) {
             $tartget_schedule = $schedule[$staff_id][$day_name];
         }
 
@@ -934,7 +1015,7 @@ class Appointment extends PostModel {
             $end   = strtotime( $day['end'] );
 
             for ( $time = $start; $time <= $end; $time += $interval ) {
-                $datetime = $this->convert_timezone( $time, $timze_zone );
+                $datetime = $this->convert_timezone( $time, $time_zone );
                 $slot     = $datetime->format( 'g:ia' );
                 $slots[]  = $slot;
             }

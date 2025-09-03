@@ -4,7 +4,7 @@
  * Plugin Name:       Timetics
  * Plugin URI:        https://arraytics.com/timetics/
  * Description:       Schedule, Appointment and Seat Booking plugin.
- * Version:           1.0.37
+ * Version:           1.0.41
  * Requires at least: 5.2
  * Requires PHP:      7.3
  * Author:            Arraytics
@@ -56,7 +56,7 @@ final class Timetics {
      * @return string
      */
     public static function get_version() {
-        return '1.0.37';
+        return '1.0.41';
     }
 
     /**
@@ -227,15 +227,56 @@ final class Timetics {
             require_once plugin_dir_path( __FILE__ ) . '/vendor/autoload.php';
         }
 
-        if ( class_exists( 'UninstallerForm\UninstallerForm' ) ) {
-            \UninstallerForm\UninstallerForm::init(
-                'Timetics',         // Plugin name
-                'timetics',         // Plugin Slug
-                __FILE__,
-                'timetics',          // Text Domain Name
-                'timetics-feedback-modal'  // plugins-admin-script-handler
-            );
-        }
+        if (class_exists('UninstallerForm\UninstallerForm') && is_callable(['\UninstallerForm\UninstallerForm', 'init'])) {
+
+			$reflection = new ReflectionMethod('\UninstallerForm\UninstallerForm', 'init');
+
+			// Maximum number of parameters allowed
+			$totalParams = $reflection->getNumberOfParameters();
+
+			if($totalParams === 6) {
+				add_filter( 'rest_request_before_callbacks', function( $response, $handler, $request ) {
+					if ( $request->get_route() === '/timetics/v1/feedback' ) {
+						$params = $request->get_json_params();
+
+						if ( empty( $params['email'] ) ) {
+							$params['email'] = get_option( 'admin_email' );
+							$request->set_body( wp_json_encode( $params ) );
+						}
+					}
+					return $response;
+				}, 10, 3 );
+
+				\UninstallerForm\UninstallerForm::init(
+                    'Timetics',         // Plugin name
+                    'timetics',         // Plugin Slug
+                    __FILE__,
+                    'timetics',          // Text Domain Name
+                    'timetics-feedback-modal',  // plugins-admin-script-handler
+                    'https://arraytics.com/?fluentcrm=1&route=contact&hash=13cce8a6-c038-4997-91e7-4a2326cc1124'
+				);
+			} else {
+				add_filter( 'rest_request_before_callbacks', function( $response, $handler, $request ) {
+					if ( $request->get_route() === '/timetics/v1/feedback' ) {
+						$params = $request->get_json_params();
+
+						if ( empty( $params['email'] ) ) {
+							$params['email'] = get_option( 'admin_email' );
+							$request->set_body( wp_json_encode( $params ) );
+						}
+					}
+					return $response;
+				}, 10, 3 );
+
+				\UninstallerForm\UninstallerForm::init(
+                    'Timetics',         // Plugin name
+                    'timetics',         // Plugin Slug
+                    __FILE__,
+                    'timetics',          // Text Domain Name
+                    'timetics-feedback-modal'
+				);
+			}
+		}
     }
 
     /**

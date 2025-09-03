@@ -545,6 +545,7 @@ class Api_Booking extends Api {
         }
 
         $days = $meeting->prepare_schedule( $start_date, $end_date, $staff_id, $timezone );
+        $days = apply_filters( 'timetics_schedule_data_for_selected_date', $days, $staff_id, $meeting_id,  $timezone );
 
         $data = [
             'today'                 => gmdate( 'Y-m-d' ),
@@ -707,6 +708,7 @@ class Api_Booking extends Api {
         $cancel_reason   = ! empty( $data['cancel_reason'] ) ? $data['cancel_reason'] : [];
         $booking_time   = ! empty( $data['booking_createAt'] ) ? $data['booking_createAt'] : '';
         $action          = $id ? 'updated' : 'created';
+        $appointment_token = ! empty( $data['appointment_token'] ) ? sanitize_text_field( $data['appointment_token'] ) : '';
 
         $validate = $this->validate(
             $data, [
@@ -806,37 +808,42 @@ class Api_Booking extends Api {
             return new WP_Error( 'booking_cancel_error', __( 'This booking alreay canceled', 'timetics' ) );
         }
 
-        $booking->set_props(
-            [
-                'customer'            => $customer->get_id(),
-                'appointment'         => $meeting->get_id(),
-                'appointment_name'    => $meeting->get_name(),
-                'staff'               => $staff->get_id(),
-                'customer_fname'      => $customer->get_first_name(),
-                'customer_lname'      => $customer->get_last_name(),
-                'customer_email'      => $customer->get_email(),
-                'customer_phone'      => $customer->get_phone(),
-                'staff_fname'         => $staff->get_first_name(),
-                'staff_lname'         => $staff->get_last_name(),
-                'staff_email'         => $staff->get_email(),
-                'meeting_name'        => $meeting->get_name(),
-                'meeting_description' => $meeting->get_description(),
-                'meeting_type'        => $meeting->get_type(),
-                'booking_time'        => $booking_time,
-                'description'         => $description,
-                'start_date'          => $start_date,
-                'date'                => $date,
-                'end_date'            => $end_date,
-                'start_time'          => $start_time,
-                'end_time'            => $end_time,
-                'order_total'         => $this->calculate_order_total( $data ),
-                'post_status'         => $status,
-                'location'            => $location,
-                'location_type'       => $location_type,
-                'timezone'            => $timezone,
-                'cancel_reason'       => $cancel_reason,
-            ]
-        );
+        $booking_props = [
+            'customer'            => $customer->get_id(),
+            'appointment'         => $meeting->get_id(),
+            'appointment_name'    => $meeting->get_name(),
+            'staff'               => $staff->get_id(),
+            'customer_fname'      => $customer->get_first_name(),
+            'customer_lname'      => $customer->get_last_name(),
+            'customer_email'      => $customer->get_email(),
+            'customer_phone'      => $customer->get_phone(),
+            'staff_fname'         => $staff->get_first_name(),
+            'staff_lname'         => $staff->get_last_name(),
+            'staff_email'         => $staff->get_email(),
+            'meeting_name'        => $meeting->get_name(),
+            'meeting_description' => $meeting->get_description(),
+            'meeting_type'        => $meeting->get_type(),
+            'booking_time'        => $booking_time,
+            'description'         => $description,
+            'start_date'          => $start_date,
+            'date'                => $date,
+            'end_date'            => $end_date,
+            'start_time'          => $start_time,
+            'end_time'            => $end_time,
+            'order_total'         => $this->calculate_order_total( $data ),
+            'post_status'         => $status,
+            'location'            => $location,
+            'location_type'       => $location_type,
+            'timezone'            => $timezone,
+            'cancel_reason'       => $cancel_reason,
+        ];
+
+        if( 'created' == $action ){
+            $booking_props['security_token'] = $booking->generate_security_token();
+        }
+
+        $booking->set_props( $booking_props );
+
 
         $booking = apply_filters( 'timetics/bookings/booking/set', $booking );
 
@@ -985,6 +992,7 @@ class Api_Booking extends Api {
             'location_type' => $booking->get_location_type(),
             'description'   => $booking->get_description(),
             'cancel_reason' => $booking->get_cancel_reason(),
+            'security_token'=> $booking->get_security_token(),
             'customer'      => [
                 'id'         => $customer->get_id(),
                 'full_name'  => $customer->get_display_name(),
@@ -1159,7 +1167,6 @@ class Api_Booking extends Api {
         $meeting_locations = (array) $meeting->get_locations();
         $total_price = 0;
 
-
         $staff_id        = ! empty( $data['staff'] ) ? intval( $data['staff'] ) : 0;
         $order_total     = ! empty( $data['order_total'] ) ? floatval( $data['order_total'] ) : 0;
         $location_type   = ! empty( $data['location_type'] ) ? sanitize_text_field( $data['location_type'] ) : '';
@@ -1169,13 +1176,14 @@ class Api_Booking extends Api {
         $status       = ! empty( $data['status'] ) ? sanitize_text_field( $data['status'] ) : '';
         $seats           = ! empty( $data['seats'] ) ? $data['seats'] : [];
         $timeslots       = $meeting->get_avilable_timeslots( $start_date, $staff_id, $timezone );
+        $meeting_has_buffer_time = $meeting->get_buffer_time_after_in_seconds() > 0 || $meeting->get_buffer_time_before_in_seconds() > 0;
 
         if ( ! $meeting->is_appointment() ) {
             return $this->create_error_response( __( 'Invalid meeting.', 'timetics' ), 422 );
         }
 
         if ( 'cancel' !== $status ) {
-            if ( ! in_array( date('g:ia', strtotime( $start_time ) ), $timeslots ) ) {
+            if ( ! $meeting_has_buffer_time && ! in_array( date('g:ia', strtotime( $start_time ) ), $timeslots ) ) {
                 return $this->create_error_response( __( 'Invalid timeslot.', 'timetics' ), 422 );
             }
 
@@ -1241,9 +1249,33 @@ class Api_Booking extends Api {
      */
     public function update_item_permission_callback($request){
         $nonce = $request->get_header('X-WP-Nonce');
-        if (wp_verify_nonce($nonce, 'wp_rest')) {
+
+        $booking_id = (int) $request->get_param('booking_id');
+        $appointment_token = $request->get_param('appointment_token');
+
+        // If no token provided, this might be an old link. Verify with nonce for that case temporarily
+        if ( !empty($booking_id) && empty($appointment_token) && wp_verify_nonce($nonce, 'wp_rest')) {
+            return wp_verify_nonce($nonce, 'wp_rest');
+        }
+        
+        if (empty($booking_id) || empty($appointment_token)) {
+            return false;
+        }
+
+        $booking = new Booking($booking_id);
+        
+        if (!$booking->is_booking()) {
+            return false;
+        }
+
+        // Get the stored security token from booking meta
+        $stored_token = $booking->get_security_token();
+        
+        // Check if the provided token matches the stored token and have nonce verified
+        if ($appointment_token === $stored_token && !empty($stored_token) && wp_verify_nonce($nonce, 'wp_rest') ) {
             return true;
         }
+    
         return false;
     }
 
@@ -1254,7 +1286,7 @@ class Api_Booking extends Api {
      */
     public function get_item_permission_callback($request){
         $nonce = $request->get_header('X-WP-Nonce');
-        if (wp_verify_nonce($nonce, 'wp_rest')) {
+        if (wp_verify_nonce($nonce, 'wp_rest') && current_user_can( 'manage_timetics' ) ) {
             return true;
         }
         return false;

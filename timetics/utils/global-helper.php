@@ -404,6 +404,7 @@ if ( ! function_exists( 'timetics_update_default_settings' ) ) {
     function timetics_update_default_settings() {
         $settings = [
             'google_auth_redirect_uri' => timetics_get_auth_redirect_uri( 'google-auth' ),
+            'outlook_auth_redirect_uri'=> timetics_get_auth_redirect_uri( 'outlook-auth' ),
             'default_booking_status'   => 'pending',
             'currency'                 => 'USD',
             'primary_color'            => '#3161F1',

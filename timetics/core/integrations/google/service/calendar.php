@@ -11,17 +11,18 @@ namespace Timetics\Core\Integrations\Google\Service;
  */
 class Calendar {
     const TIMETICS_TIMEZONE_URI   = 'https://www.googleapis.com/calendar/v3/users/me/settings/timezone';
-    const TIMETICS_CALENDAR_EVENT = 'https://www.googleapis.com/calendar/v3/calendars/primary/events/';
+    const TIMETICS_CALENDAR_EVENT = 'https://www.googleapis.com/calendar/v3/calendars/primary/events';
 
 
     /**
      * Get events from the calendar for the last 3 months.
      *
      * @param int $user_id Team member ID.
+     * @param array $api_filters Additional API filters for google calendar API
      *
      * @return array List of calendar events.
      */
-    public function get_events($user_id) {
+    public function get_events( $user_id, $api_filters = array() ) {
         $access_token = timetics_get_google_access_token($user_id);
 
         if ( ! $access_token ) {
@@ -30,15 +31,20 @@ class Calendar {
 
         // Define the time range for the last 3 months
         $three_months_ago = date('c', strtotime('-3 months'));
-        $now = date('c'); // Current date-time in RFC3339 format
+        $three_months_ahead = date('c', strtotime('+3 months')); // 3 months ahead date-time in RFC3339 format
 
-        // API URL with time range filter
-        $api_url = add_query_arg([
-            'timeMin' => $three_months_ago,
-            'timeMax' => $now,
+        $filters = array(
+            'timeMin' => rawurlencode($three_months_ago),
+            'timeMax' => rawurlencode($three_months_ahead),
             'orderBy' => 'startTime',
             'singleEvents' => 'true',
-        ], self::TIMETICS_CALENDAR_EVENT);
+        );
+
+        // add additional api filters if needed
+        $filters = array_merge( $filters, $api_filters );
+
+        // API URL with time range filter
+        $api_url = add_query_arg( $filters, self::TIMETICS_CALENDAR_EVENT);
 
         // Set headers
         $args = [
@@ -49,17 +55,16 @@ class Calendar {
         ];
 
         // Fetch data from Google Calendar API
-        $response = wp_remote_get(self::TIMETICS_CALENDAR_EVENT, $args);
-
+        $response = wp_remote_get( $api_url, $args );
         if ( is_wp_error( $response ) ) {
-            return ['error' => $response->get_error_message()];
+            return [];
         }
 
         $body   = wp_remote_retrieve_body( $response );
         $events = json_decode($body, true);
 
         if ( empty( $events['items'] ) ) {
-            return ['message' => 'No events found for the last 3 months.'];
+            return [];
         }
 
         // Filter required fields
@@ -72,13 +77,21 @@ class Calendar {
             $start = ! empty($event['start']['dateTime']) ? $event['start']['dateTime'] : $event['start']['date'];
             $end = ! empty($event['end']['dateTime']) ? $event['end']['dateTime'] : $event['end']['date'];
 
+            $timezone = $event['start']['timeZone'] ?? wp_timezone_string();
+            $timezone = new \DateTimeZone( $timezone );
+
+            $start_dt = new \DateTime( $start );
+            $start_dt->setTimezone( $timezone );
+
+            $end_dt = new \DateTime( $end );
+            $end_dt->setTimezone( $timezone );
 
             $filtered_events[] = [
-                'id' => $event['id'] ?? '',
-                'start_date' => date('Y-m-d', strtotime($start)),
-                'start_time' => date('H:i:s', strtotime($start)),
-                'end_date'   => date('Y-m-d', strtotime($end)),
-                'end_time'   => date('H:i:s', strtotime($end)),
+                'id'         => $event['id'] ?? '',
+                'start_date' => $start_dt->format( 'Y-m-d' ),
+                'start_time' => $start_dt->format( 'H:i:s' ),
+                'end_date'   => $end_dt->format( 'Y-m-d' ),
+                'end_time'   => $end_dt->format( 'H:i:s' ),
                 'summary'    => $event['summary'] ?? '',
                 'description'=> $event['description'] ?? '',
             ];
@@ -107,7 +120,7 @@ class Calendar {
             ],
         ];
 
-        $response = wp_remote_get(self::TIMETICS_CALENDAR_EVENT . $event_id, $data);
+        $response = wp_remote_get(self::TIMETICS_CALENDAR_EVENT . '/' . $event_id, $data);
 
         if ( is_wp_error( $response ) ) {
             return ['error' => $response->get_error_message()];
@@ -194,7 +207,7 @@ class Calendar {
         $data           = $this->prepare_request_data( $args );
         $data['method'] = 'PUT';
 
-        $response = wp_remote_post( self::TIMETICS_CALENDAR_EVENT . $event_id . '?' . $query_params, $data );
+        $response = wp_remote_post( self::TIMETICS_CALENDAR_EVENT . '/' . $event_id . '?' . $query_params, $data );
 
         if ( is_wp_error( $response ) ) {
             return false;
@@ -246,7 +259,7 @@ class Calendar {
             'sendUpdates'           => 'all',
         ] );
 
-        $response = wp_remote_post( self::TIMETICS_CALENDAR_EVENT . $event_id . '?' . $query_params, [
+        $response = wp_remote_post( self::TIMETICS_CALENDAR_EVENT . '/' . $event_id . '?' . $query_params, [
             'headers' => [
                 'Authorization' => 'Bearer ' . $access_token,
                 'Content-Type'  => 'application/json; charset=utf-8',

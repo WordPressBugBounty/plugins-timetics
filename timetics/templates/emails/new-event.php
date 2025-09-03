@@ -23,8 +23,8 @@
     $email_title = ! empty( $email_title ) ? $email_title : $this->get_title(); 
     
     $meeting_id     = $this->meeting->get_id();
-    $booking_cancel_url = $this->meeting->get_appointment_permalink() . '?id=' . $this->booking->get_id() . '&meeting_id=' . $this->meeting->get_id() .'&booking_action=cancel';
-    $booking_reschedule_url = $this->meeting->get_appointment_permalink() . '?id=' . $this->booking->get_id() . '&meeting_id=' . $this->meeting->get_id() . '&booking_action=reschedule';
+    $booking_cancel_url = $this->meeting->get_appointment_permalink() . '?id=' . $this->booking->get_id() . '&meeting_id=' . $this->meeting->get_id() .'&booking_action=cancel'. '&appointment_token=' . $this->booking->get_security_token();
+    $booking_reschedule_url = $this->meeting->get_appointment_permalink() . '?id=' . $this->booking->get_id() . '&meeting_id=' . $this->meeting->get_id() . '&booking_action=reschedule'. '&appointment_token='. $this->booking->get_security_token();
 
 
     $placeholders = [

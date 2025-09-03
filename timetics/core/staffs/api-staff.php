@@ -516,6 +516,11 @@ class Api_Staff extends Api {
                 $revoked = true;
                 update_user_meta( $staff_id, 'timetics_zoom_token', '' );
                 break;
+
+            case 'outlook-auth':
+                $revoked = true;
+                update_user_meta( $staff_id, 'timetics_outlook_token', '');
+                break;
         }
 
         if ( ! $revoked ) {

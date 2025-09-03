@@ -115,11 +115,11 @@
   }
 }
 
-.wrap {
+#time_tics_dashboard {
   margin: 20px 40px 0 20px;
 }
 @media screen and (max-width: 768px) {
-  .wrap {
+  #time_tics_dashboard {
     margin: 0;
   }
 }

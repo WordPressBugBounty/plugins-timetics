@@ -5,8 +5,10 @@
  * @package Timetics
  */
 
-$user         = wp_get_current_user();
-$integrations = timetics_get_staff_integrations( $user->ID );
+defined( 'ABSPATH' ) || exit;
+
+$timetics_user         = wp_get_current_user();
+$timetics_integrations = timetics_get_staff_integrations( $timetics_user->ID );
 ?>
 
 <!DOCTYPE html>
@@ -18,10 +20,8 @@ $integrations = timetics_get_staff_integrations( $user->ID );
         <title><?php esc_html_e( 'Staff onboard', 'timetics' ); ?></title>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-            href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"
-            rel="stylesheet"
-        />
+        <?php // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet -- Standalone onboarding page outside normal WordPress context ?>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
     </head>
     <style>
         body {
@@ -124,12 +124,12 @@ $integrations = timetics_get_staff_integrations( $user->ID );
                 <header><h2><?php esc_html_e( 'Integrations', 'timetics' ); ?></h2></header>
                 <main class="main-wrapper">
                     <ul>
-                        <?php foreach( $integrations as $integration ): ?>
+                        <?php foreach( $timetics_integrations as $timetics_integration ): ?>
                             <li class="single-list">
                                 <div class="single-item">
                                     <div class="integration-logo">
                                         <?php 
-                                        if($integration['id'] == 'google-calendar-meet'){
+                                        if($timetics_integration['id'] == 'google-calendar-meet'){
                                             ?>
                                             <svg
                                                     width="20"
@@ -164,7 +164,7 @@ $integrations = timetics_get_staff_integrations( $user->ID );
                                                     />
                                                 </svg>
                                             <?php
-                                        } else if($integration['id'] == 'zoom-meeting'){
+                                        } else if($timetics_integration['id'] == 'zoom-meeting'){
                                             ?>
                                                 <svg
                                                         xmlns="http://www.w3.org/2000/svg"
@@ -179,7 +179,7 @@ $integrations = timetics_get_staff_integrations( $user->ID );
                                                         />
                                                     </svg>
                                             <?php
-                                        } else if($integration['id'] == 'google-calendar'){
+                                        } else if($timetics_integration['id'] == 'google-calendar'){
                                             ?>
                                             <svg
                                                     width="20"
@@ -230,12 +230,12 @@ $integrations = timetics_get_staff_integrations( $user->ID );
                                     
                                     </div>
                                     <div class="content">
-                                        <h3><?php echo esc_html( $integration['name'] ); ?></h3>
+                                        <h3><?php echo esc_html( $timetics_integration['name'] ); ?></h3>
                                         <p>
-                                            <?php echo esc_html( $integration['description'] ); ?>
+                                            <?php echo esc_html( $timetics_integration['description'] ); ?>
                                         </p>
                                     </div>
-                                    <a class="connect-btn" href="<?php echo esc_url( $integration['auth_url'] ); ?>"><?php esc_html_e( 'Connect', 'timetics' ); ?></a>
+                                    <a class="connect-btn" href="<?php echo esc_url( $timetics_integration['auth_url'] ); ?>"><?php esc_html_e( 'Connect', 'timetics' ); ?></a>
                                 </div>
                             </li>
                         <?php endforeach; ?>

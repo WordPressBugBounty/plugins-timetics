@@ -7,6 +7,8 @@
 
 namespace Timetics\Core\Emails;
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Class Email
  */

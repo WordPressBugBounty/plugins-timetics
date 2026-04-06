@@ -117,9 +117,7 @@ class Api_Booking extends Api {
                 [
                     'methods'             => \WP_REST_Server::EDITABLE,
                     'callback'            => [$this, 'make_payment'],
-                    'permission_callback' => function () {
-                        return true;
-                    },
+                    'permission_callback' => [$this, 'make_payment_permission_callback'],
                 ],
             ]
         );
@@ -706,9 +704,31 @@ class Api_Booking extends Api {
         $recurring_dates = ! empty( $data['recurring_dates'] ) ? $data['recurring_dates'] : [];
         $seats           = ! empty( $data['seats'] ) ? $data['seats'] : [];
         $cancel_reason   = ! empty( $data['cancel_reason'] ) ? $data['cancel_reason'] : [];
-        $booking_time   = ! empty( $data['booking_createAt'] ) ? $data['booking_createAt'] : '';
+        $booking_time    = ! empty( $data['booking_createAt'] ) ? $data['booking_createAt'] : '';
         $action          = $id ? 'updated' : 'created';
+
+        // For WooCommerce payments, create booking in failed status until payment is confirmed
+        if ( 'woocommerce' === $payment_method && 'created' === $action && $order_total != 0 ) {
+            $status = 'failed';
+        }
         $appointment_token = ! empty( $data['appointment_token'] ) ? sanitize_text_field( $data['appointment_token'] ) : '';
+
+        if ( $id ) {
+            $email_validation = $this->validate_email_change_permission( $id, $email );
+
+            if ( is_wp_error( $email_validation ) ) {
+                $error_code = $email_validation->get_error_code();
+                $error_response = [
+                    'success'     => 0,
+                    'status_code' => $error_code,
+                    'message'     => $email_validation->get_error_message(),
+                ];
+                return new WP_HTTP_Response( $error_response, $error_code );
+            }
+
+            // Use the validated email from the security check
+            $email = $email_validation;
+        }
 
         $validate = $this->validate(
             $data, [
@@ -752,6 +772,7 @@ class Api_Booking extends Api {
             'start_time' => $start_time,
             'timezone'   => $timezone,
         ] ) ) {
+            /* translators: %s: Time slot */
             return new WP_Error( 'time_slot_error', sprintf( __( '%s time slot is not available', 'timetics' ), $start_time ) );
         }
 
@@ -838,6 +859,12 @@ class Api_Booking extends Api {
             'cancel_reason'       => $cancel_reason,
         ];
 
+        if ( $id ) {
+            $old_start_date = $booking->get_start_date();
+            $old_start_time = $booking->get_start_time();
+            $old_end_time   = $booking->get_end_time();
+        }
+
         if( 'created' == $action ){
             $booking_props['security_token'] = $booking->generate_security_token();
         }
@@ -865,8 +892,8 @@ class Api_Booking extends Api {
                 }
 
                 if ( $is_email_to_customer ) {
-                $customer_cancel_event_email = new Cancel_Event_Customer_Email( $booking );
-                $customer_cancel_event_email->send();
+                    $customer_cancel_event_email = new Cancel_Event_Customer_Email( $booking );
+                    $customer_cancel_event_email->send();
                 }
 
                 /**
@@ -874,21 +901,29 @@ class Api_Booking extends Api {
                  */
                 do_action( 'timetics/admin/booking/after_delete_item', $booking );
             } else {
+                // Check if the booking date/time was actually changed
+                $date_time_changed = (
+                    $old_start_date !== $start_date ||
+                    $old_start_time !== $start_time ||
+                    $old_end_time   !== $end_time
+                );
+
                 $booking->update_event();
-                $is_email_to_reschedule_customer = timetics_get_option( 'booking_rescheduled_customer');
-                $is_email_to_reschedule_host     = timetics_get_option( 'booking_rescheduled_host');
 
-                if ( $is_email_to_reschedule_host ) {
-                $update_event_email = new Update_Event_Email( $booking );
-                $update_event_email->send();
+                if ( $date_time_changed ) {
+                    $is_email_to_reschedule_customer = timetics_get_option( 'booking_rescheduled_customer');
+                    $is_email_to_reschedule_host     = timetics_get_option( 'booking_rescheduled_host');
+
+                    if ( $is_email_to_reschedule_host ) {
+                        $update_event_email = new Update_Event_Email( $booking );
+                        $update_event_email->send();
+                    }
+
+                    if ( $is_email_to_reschedule_customer ) {
+                        $update_event_customer_email = new Update_Event_Customer_Email( $booking );
+                        $update_event_customer_email->send();
+                    }
                 }
-
-                if ( $is_email_to_reschedule_customer ) {
-                    $update_event_customer_email = new Update_Event_Customer_Email( $booking );
-                    $update_event_customer_email->send();
-                }
-
-
             }
         }
 
@@ -1183,7 +1218,7 @@ class Api_Booking extends Api {
         }
 
         if ( 'cancel' !== $status ) {
-            if ( ! $meeting_has_buffer_time && ! in_array( date('g:ia', strtotime( $start_time ) ), $timeslots ) ) {
+            if ( ! $meeting_has_buffer_time && ! in_array( gmdate( 'g:ia', strtotime( $start_time ) ), $timeslots ) ) {
                 return $this->create_error_response( __( 'Invalid timeslot.', 'timetics' ), 422 );
             }
 
@@ -1244,7 +1279,7 @@ class Api_Booking extends Api {
 
     /**
      * Update item permission callback
-     * @param WP_Rest_Request $request
+     * @param WP_REST_Request $request
      * @return bool
      */
     public function update_item_permission_callback($request){
@@ -1253,26 +1288,26 @@ class Api_Booking extends Api {
         $booking_id = (int) $request->get_param('booking_id');
         $appointment_token = $request->get_param('appointment_token');
 
-        // If no token provided, this might be an old link. Verify with nonce for that case temporarily
-        if ( !empty($booking_id) && empty($appointment_token) && wp_verify_nonce($nonce, 'wp_rest')) {
-            return wp_verify_nonce($nonce, 'wp_rest');
-        }
-        
-        if (empty($booking_id) || empty($appointment_token)) {
-            return false;
-        }
-
         $booking = new Booking($booking_id);
-        
+
         if (!$booking->is_booking()) {
             return false;
         }
 
-        // Get the stored security token from booking meta
-        $stored_token = $booking->get_security_token();
-        
-        // Check if the provided token matches the stored token and have nonce verified
-        if ($appointment_token === $stored_token && !empty($stored_token) && wp_verify_nonce($nonce, 'wp_rest') ) {
+        // Guests: must provide a valid token
+        if ( ! empty( $appointment_token ) ) {
+            $stored_token = $booking->get_security_token();
+            if ($appointment_token === $stored_token && !empty($stored_token)) {
+                return true;
+            }
+        }
+
+        if (empty($booking_id) || ! wp_verify_nonce($nonce, 'wp_rest')) {
+            return false;
+        }
+
+        // Allow booking owner or admins/managers.
+        if ( (int) $booking->get_customer_id() === get_current_user_id() || current_user_can( 'manage_timetics' )) {
             return true;
         }
     
@@ -1286,9 +1321,97 @@ class Api_Booking extends Api {
      */
     public function get_item_permission_callback($request){
         $nonce = $request->get_header('X-WP-Nonce');
+        $booking_id = (int) $request->get_param('booking_id');
+        $appointment_token = $request->get_param('appointment_token');
+
+        $booking = new Booking($booking_id);
+
+        if (!$booking->is_booking()) {
+            return false;
+        }
+
+        // Guests: must provide a valid token
+        if ( ! empty( $appointment_token ) ) {
+            $stored_token = $booking->get_security_token();
+            if ($appointment_token === $stored_token && !empty($stored_token)) {
+                return true;
+            }
+        } 
+
         if (wp_verify_nonce($nonce, 'wp_rest') && current_user_can( 'manage_timetics' ) ) {
             return true;
         }
         return false;
     }
+
+    /**
+     * Validate email change permission during booking update.
+     *
+     * Prevents non-admin users from reassigning bookings to other users
+     * by changing the email address. Follows the principle of least privilege.
+     *
+     * @param int    $booking_id The ID of the booking being updated.
+     * @param string $new_email  The new email address from the request.
+     *
+     * @return string|WP_Error Returns the validated email on success, WP_Error on failure.
+     */
+    private function validate_email_change_permission( $booking_id, $new_email ) {
+        // Admin users have full permission to change email addresses
+        if ( current_user_can( 'manage_timetics' ) ) {
+            return $new_email;
+        }
+
+        $existing_booking = new Booking( $booking_id );
+
+        if ( ! $existing_booking->is_booking() ) {
+            return new WP_Error( 404, __( 'Booking not found.', 'timetics' ) );
+        }
+
+        // Get original customer email
+        $existing_customer = new Customer( $existing_booking->get_customer_id() );
+        $original_email = $existing_customer->get_email();
+
+        if ( empty( $original_email ) ) {
+            return new WP_Error( 500, __( 'Unable to verify booking ownership.', 'timetics' ) );
+        }
+
+        // Check if email is being changed (case-insensitive comparison)
+        $is_email_changed = ! empty( $new_email ) && strtolower( trim( $new_email ) ) !== strtolower( trim( $original_email ) );
+
+        if ( $is_email_changed ) {
+            return new WP_Error( 403, __( 'You are not allowed to change the email address for this booking.', 'timetics' ) );
+        }
+
+        return $original_email;
+    }
+
+    public function make_payment_permission_callback( $request ) {
+
+        $booking_id        = (int) $request->get_param('booking_id');
+        $appointment_token = sanitize_text_field( $request->get_param('appointment_token') );
+    
+        if ( empty( $booking_id ) || empty( $appointment_token ) ) {
+            return false;
+        }
+    
+        $booking = new Booking( $booking_id );
+    
+        if ( ! $booking->is_booking() ) {
+            return false;
+        }
+    
+        $stored_token = $booking->get_security_token();
+    
+        if ( empty( $stored_token ) ) {
+            return false;
+        }
+    
+        // constant-time comparison
+        if ( hash_equals( $stored_token, $appointment_token ) ) {
+            return true;
+        }
+    
+        return false;
+    }
+
 }

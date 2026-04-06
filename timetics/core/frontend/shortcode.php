@@ -7,6 +7,8 @@
 
 namespace Timetics\Core\Frontend;
 
+defined( 'ABSPATH' ) || exit;
+
 use Timetics\Utils\Singleton;
 use Timetics;
 
@@ -55,7 +57,7 @@ class Shortcode {
         $data_controls = [
             'id' => $id,
         ];
-        $controls      = json_encode( $data_controls );
+        $controls      = wp_json_encode( $data_controls );
 
         $visibility = get_post_meta( $id, '_tt_apointment_visibility', true );
         $is_visible = 'enabled' === $visibility;
@@ -87,7 +89,7 @@ class Shortcode {
         $data_controls = [
             'id' => $id,
         ];
-        $controls      = json_encode( $data_controls );
+        $controls      = wp_json_encode( $data_controls );
 
         ob_start();
         if (is_user_logged_in()) {
@@ -131,10 +133,10 @@ class Shortcode {
         wp_enqueue_script( 'calendar-locale' );
         wp_enqueue_script( 'jquery' );
 
-        wp_enqueue_script( 'timetics-meeting-filtering', TIMETICS_ASSETS_URL . 'js/meeting-filter.js', ['jquery'], time() );
+        wp_enqueue_script( 'timetics-meeting-filtering', TIMETICS_ASSETS_URL . 'js/meeting-filter.js', ['jquery'], time(), true );
 
-        $limit = isset( $attribute['limit'] ) ? $attribute['limit'] : '';
-        $show_filter = isset( $attribute['show_filter'] ) && 'true' == $attribute['show_filter'] ? $attribute['show_filter'] : false;
+        $timetics_limit = isset( $attribute['limit'] ) ? $attribute['limit'] : '';
+        $timetics_show_filter = isset( $attribute['show_filter'] ) && 'true' == $attribute['show_filter'] ? $attribute['show_filter'] : false;
 
         ob_start();
         ?>
@@ -167,7 +169,7 @@ class Shortcode {
         $data_controls = [
             'id' => $id,
         ];
-        $controls      = json_encode( $data_controls );
+        $controls      = wp_json_encode( $data_controls );
 
         ob_start();
         ?>

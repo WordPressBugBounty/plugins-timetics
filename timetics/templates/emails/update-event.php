@@ -1,35 +1,37 @@
 <?php
-    $staff_name     = $this->staff->get_display_name();
-    $customer_name  = $this->customer->get_display_name();
-    $customer_email = $this->customer->get_email();
-    $title          = $this->get_title();
-    $description    = $this->meeting->get_description();
-    $location       = $this->booking->get_location();
-    $location_type  = $this->booking->get_location_type();
+defined( 'ABSPATH' ) || exit;
 
-    $event     = $this->booking->get_event();
-    $join_link = 'google-meet' === $location_type && ! empty( $event['hangoutLink'] ) ? $event['hangoutLink'] : '';
-    $timezone  = $event ? $event['start']['timeZone'] : '';
-    $timestr   = $event ? strtotime( $event['start']['dateTime'] ) : '';
+    $timetics_staff_name     = $this->staff->get_display_name();
+    $timetics_customer_name  = $this->customer->get_display_name();
+    $timetics_customer_email = $this->customer->get_email();
+    $timetics_title          = $this->get_title();
+    $timetics_description    = $this->meeting->get_description();
+    $timetics_location       = $this->booking->get_location();
+    $timetics_location_type  = $this->booking->get_location_type();
 
-    $day  = gmdate( 'l', strtotime( $this->booking->get_start_date() ) );
-    $time = gmdate( 'h:i a', strtotime( $this->booking->get_start_time() ) );
-    $date = gmdate( 'd F Y', strtotime( $this->booking->get_start_date() ) );
+    $timetics_event     = $this->booking->get_event();
+    $timetics_join_link = 'google-meet' === $timetics_location_type && ! empty( $timetics_event['hangoutLink'] ) ? $timetics_event['hangoutLink'] : '';
+    $timetics_timezone  = $timetics_event ? $timetics_event['start']['timeZone'] : '';
+    $timetics_timestr   = $timetics_event ? strtotime( $timetics_event['start']['dateTime'] ) : '';
 
-    $email_body  = timetics_get_option( 'booking_rescheduled_host_email_body' );
-    $email_title = timetics_get_option( 'booking_rescheduled_host_email_title' );
-    $email_title = ! empty( $email_title ) ? $email_title : $this->get_title();
+    $timetics_day  = gmdate( 'l', strtotime( $this->booking->get_start_date() ) );
+    $timetics_time = gmdate( 'h:i a', strtotime( $this->booking->get_start_time() ) );
+    $timetics_date = gmdate( 'd F Y', strtotime( $this->booking->get_start_date() ) );
 
-    $placeholders = [
+    $timetics_email_body  = timetics_get_option( 'booking_rescheduled_host_email_body' );
+    $timetics_email_title = timetics_get_option( 'booking_rescheduled_host_email_title' );
+    $timetics_email_title = ! empty( $timetics_email_title ) ? $timetics_email_title : $this->get_title();
+
+    $timetics_placeholders = [
         '{%meeting_title%}'    => $this->meeting->get_name(),
-        '{%meeting_date%}'     => $date,
-        '{%meeting_time%}'     => $time,
-        '{%meeting_location%}' => $location,
+        '{%meeting_date%}'     => $timetics_date,
+        '{%meeting_time%}'     => $timetics_time,
+        '{%meeting_location%}' => $timetics_location,
         '{%meeting_duration%}' => $this->meeting->get_duration(),
-        '{%host_name%}'        => $staff_name,
+        '{%host_name%}'        => $timetics_staff_name,
         '{%host_email%}'       => $this->staff->get_email(),
-        '{%customer_name%}'    => $customer_name,
-        '{%customer_email%}'   => $customer_email,
+        '{%customer_name%}'    => $timetics_customer_name,
+        '{%customer_email%}'   => $timetics_customer_email,
     ];
 ?>
 
@@ -39,20 +41,20 @@
             <?php do_action('timetics_email_header') ;?>
             <div class="email-title">
                 <h3 style="color: #3161F1; font-size: 24px; font-weight: 600; margin: 30px 0;">
-                    <?php echo esc_html( timetics_replace_placeholder( $email_title, $placeholders ) ); ?>
+                    <?php echo esc_html( timetics_replace_placeholder( $timetics_email_title, $timetics_placeholders ) ); ?>
                 </h3>
             </div>
-            <?php if ( $email_body ): ?>
+            <?php if ( $timetics_email_body ): ?>
 
-                <?php echo wp_kses( timetics_replace_placeholder( $email_body, $placeholders ), 'post' ); ?>
-                <?php if ( 'virtual' === $location_type && $join_link ): ?>
+                <?php echo wp_kses( timetics_replace_placeholder( $timetics_email_body, $timetics_placeholders ), 'post' ); ?>
+                <?php if ( 'virtual' === $timetics_location_type && $timetics_join_link ): ?>
                     <div class="single-data-entry" style="margin: 10px 0 20px;">
                         <p style="font-weight: 600; font-size: 14px; line-height: 1; color: #0C274A; margin: 0 0 5px;">
                             <?php esc_html_e( 'Location:', 'timetics' );?>
                         </p>
                         <p style="font-weight: 400; font-size: 14px; color: #556880; margin: 0;">
                             <?php echo esc_html__('Joining link:', 'timetics') ;?>
-                            <a style="color: #3161F1" href="<?php echo esc_url( $join_link ); ?>"><?php echo esc_url( $join_link ); ?></a>
+                            <a style="color: #3161F1" href="<?php echo esc_url( $timetics_join_link ); ?>"><?php echo esc_url( $timetics_join_link ); ?></a>
                         </p>
                     </div>
                 <?php endif;?>
@@ -60,7 +62,9 @@
             <?php else: ?>
 
                 <p class="greeting" style="color: #556880; margin-bottom: 5px">
-                    <?php printf( esc_html__( 'Hi %s,', 'timetics' ), esc_html( $staff_name ) );?>
+                    <?php
+                    /* translators: %s: Staff name */
+                    printf( esc_html__( 'Hi %s,', 'timetics' ), esc_html( $timetics_staff_name ) );?>
                 </p>
 
                 <p style="color: #556880; margin-bottom: 5px"><?php esc_attr_e( 'Meeting has been rescheduled', 'timetics' );?></p>
@@ -69,45 +73,47 @@
                     <div class="single-data-entry" style="margin: 0 0 20px;">
                         <p style="font-weight: 600; font-size: 14px; line-height: 1; color: #0C274A; margin: 0 0 5px;"><?php echo esc_html__( 'Meeting Name:', 'timetics' ); ?></p>
                         <p style="font-weight: 400; font-size: 14px; color: #556880; margin: 0;">
-                            <?php echo esc_html( timetics_replace_placeholder( $email_title, $placeholders ) ); ?>
+                            <?php echo esc_html( timetics_replace_placeholder( $timetics_email_title, $timetics_placeholders ) ); ?>
                         </p>
 
                     </div>
                     <div class="single-data-entry" style="margin: 0 0 20px;">
                         <p style="font-weight: 600; font-size: 14px; line-height: 1; color: #0C274A; margin: 0 0 5px;"><?php echo esc_html__( 'Invitee:', 'timetics' ); ?></p>
                         <p style="font-weight: 400; font-size: 14px; color: #556880; margin: 0;">
-                            <?php echo esc_html( $customer_name );?> -
-                            <a style="color: #3161F1" href="mailto:<?php echo esc_attr( $customer_email )?>"><?php echo esc_html( $customer_email ); ?></a>
+                            <?php echo esc_html( $timetics_customer_name );?> -
+                            <a style="color: #3161F1" href="mailto:<?php echo esc_attr( $timetics_customer_email )?>"><?php echo esc_html( $timetics_customer_email ); ?></a>
                         </p>
                     </div>
 
                     <div class="single-data-entry" style="margin: 10px 0 20px;">
                         <p style="font-weight: 600; font-size: 14px; line-height: 1; color: #0C274A; margin: 0 0 5px;"><?php echo esc_html__( 'Date and time:', 'timetics' ); ?></p>
-                        <p style="font-weight: 400; font-size: 14px; color: #556880; margin: 0;"><?php printf( esc_html__( '%s, %s %s', 'timetics' ), esc_html( $time ), esc_html( $day ), esc_html( $date ), esc_html( $timezone ) );?></p>
+                        <p style="font-weight: 400; font-size: 14px; color: #556880; margin: 0;"><?php
+                        /* translators: 1: Time, 2: Day, 3: Date */
+                        printf( esc_html__( '%1$s, %2$s %3$s', 'timetics' ), esc_html( $timetics_time ), esc_html( $timetics_day ), esc_html( $timetics_date ), esc_html( $timetics_timezone ) );?></p>
                     </div>
 
-                    <?php if ( 'virtual' === $location_type && $join_link ): ?>
+                    <?php if ( 'virtual' === $timetics_location_type && $timetics_join_link ): ?>
                         <div class="single-data-entry" style="margin: 10px 0 20px;">
                             <p style="font-weight: 600; font-size: 14px; line-height: 1; color: #0C274A; margin: 0 0 5px;">
                                 <?php esc_html_e( 'Location:', 'timetics' );?>
                             </p>
-                            <img width="110" style="margin: 5px 0;" src="https://arraytics.dev/social-icons/google-meet.png" alt="Google Meet">
+                            <img width="110" style="margin: 5px 0;" src="<?php echo esc_url( TIMETICS_PLUGIN_URL . 'assets/images/social-icons/google-meet.svg' ); ?>" alt="Google Meet">
                             <p style="font-weight: 400; font-size: 14px; color: #556880; margin: 0;">
                                 <?php echo esc_html__('Joining link:', 'timetics') ;?>
-                                <a style="color: #3161F1" href="<?php echo esc_url( $join_link ); ?>"><?php echo esc_url( $join_link ); ?></a>
+                                <a style="color: #3161F1" href="<?php echo esc_url( $timetics_join_link ); ?>"><?php echo esc_url( $timetics_join_link ); ?></a>
                             </p>
                         </div>
                     <?php endif;?>
-                    <?php if($timezone) :?>
+                    <?php if($timetics_timezone) :?>
                         <div class="single-data-entry" style="margin: 10px 0 20px;">
                             <p style="font-weight: 600; font-size: 14px; line-height: 1; color: #0C274A; margin: 0 0 5px;"><?php echo esc_html__( 'Invitee Time Zone:', 'timetics' ); ?></p>
-                            <p style="font-weight: 400; font-size: 14px; color: #556880; margin: 0;"><?php echo esc_html( $timezone ); ?></p>
+                            <p style="font-weight: 400; font-size: 14px; color: #556880; margin: 0;"><?php echo esc_html( $timetics_timezone ); ?></p>
                         </div>
                     <?php endif;?>
                 </div>
             <?php endif;?>
             <p style="font-weight: 400; font-size: 14px; color: #556880; margin: 0;"><?php echo esc_html__('Thank you!', 'timetics'); ?></p>
         </div>
-        <?php do_action('timetics_email_footer', $customer_email) ;?>
+        <?php do_action('timetics_email_footer', $timetics_customer_email) ;?>
     </div>
 </div>

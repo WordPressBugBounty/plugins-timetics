@@ -175,12 +175,13 @@ final class Bootstrap {
      * Define constant if not already set.
      *
      * @since 1.0.0
-     * @param string      $name  Constant name.
+     * @param string      $timetics_constant_name  Constant name.
      * @param string|bool $value Constant value.
      */
-    private function define( $name, $value ) {
-        if ( ! defined( $name ) ) {
-            define( $name, $value );
+    private function define( $timetics_constant_name, $value ) {
+        if ( ! defined( $timetics_constant_name ) ) {
+            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.VariableConstantNameFound -- Constant name is dynamic but prefixed by caller
+            define( $timetics_constant_name, $value );
         }
     }
 
@@ -228,6 +229,7 @@ final class Bootstrap {
         // Register scripts and styles first
         if ( $this->is_request( 'admin' ) ) {
             add_action( 'admin_enqueue_scripts', [ $this, 'admin_scripts' ] );
+            add_action( 'admin_footer', [ $this, 'admin_helpscout_beacon' ] );
         }
 
         if ( $this->is_request( 'frontend' ) ) {
@@ -274,7 +276,8 @@ final class Bootstrap {
             wp_enqueue_style( 'timetics-feedback-modal', TIMETICS_ASSETS_URL . 'css/feedback-modal.css', [], TIMETICS_VERSION, 'all' );
 
             $feedback_obj = array(
-                'site_url'            => site_url()
+                'site_url'            => site_url(),
+                'admin_email'           => get_option( 'admin_email' )
             );
 
             wp_localize_script( 'timetics-feedback-modal', 'timetics_feedback', $feedback_obj );
@@ -419,7 +422,8 @@ final class Bootstrap {
 	 * @return void
 	 */
 	public function handle_buy_pro_module() {
-        $page = isset( $_GET['page'] ) ? sanitize_text_field( $_GET['page'] ) : '';
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only page parameter check, no form processing
+        $page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
 
 
         if ( 'timetics' !== $page ) {
@@ -443,12 +447,51 @@ final class Bootstrap {
 		\Wpmet\Libs\Banner::instance('timetics')
 			->is_test(true)
 			->set_filter(ltrim($filter_string, ','))
-			->set_api_url('https://product.themewinter.com/auth/public/jhanda')
+			->set_api_url('https://banner.themefunction.com/public/jhanda')
 			->set_plugin_screens('timetics')
 			->set_plugin_screens('toplevel_page_timetics')
  			->call();
 		// show get-help and upgrade-to-premium menu.
 		// $this->handle_get_help_and_upgrade_menu();
+	}
+
+	/**
+	 * Add HelpScout script to admin footer
+	 *
+	 * @return  void
+	 */
+	public function admin_helpscout_beacon() {
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		$is_timetics_screen = false;
+
+		if ( $screen ) {
+			$screen_id = isset( $screen->id ) ? $screen->id : '';
+
+			// Check: only load on Timetics top-level admin page
+			if ( 'toplevel_page_timetics' === $screen_id ) {
+				$is_timetics_screen = true;
+			}
+		}
+
+		// Allow overriding detection via filter.
+		$is_timetics_screen = apply_filters( 'timetics_is_admin_screen', $is_timetics_screen, $screen );
+
+		if ( ! $is_timetics_screen ) {
+			return;
+		}
+		?>
+		<script type="text/javascript">!function(e,t,n){function a(){var e=t.getElementsByTagName("script")[0],n=t.createElement("script");n.type="text/javascript",n.async=!0,n.src="https://beacon-v2.helpscout.net",e.parentNode.insertBefore(n,e)}if(e.Beacon=n=function(t,n,a){e.Beacon.readyQueue.push({method:t,options:n,data:a})},n.readyQueue=[],"complete"===t.readyState)a();else if(e.attachEvent)e.attachEvent("onload",a);else e.addEventListener("load",a,!1)}(window,document,window.Beacon||function(){});</script>
+		<script type="text/javascript">
+		window.Beacon('config', {
+			color: "#0060e5",
+		});
+		window.Beacon('init', '4be24aa2-ee50-483c-a90c-db4216664d65');
+		window.Beacon('on', 'ready', function(){
+			window.Beacon('show');
+		});
+
+		</script>
+		<?php
 	}
 
 }

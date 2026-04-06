@@ -7,6 +7,8 @@
 
 namespace Timetics\Core\Bookings;
 
+defined( 'ABSPATH' ) || exit;
+
 use Timetics\Core\Appointments\Appointment;
 use Timetics\Core\Emails\Customer_Booking_Reminder_Email;
 use Timetics\Core\Emails\Staff_Booking_Reminder_Email;
@@ -205,16 +207,43 @@ class Hooks {
      * @return  void
      */
     public function register_booking_status() {
-        $statuses = timetics_get_post_status();
+        // Define label_count translations for each status
+        $label_counts = array(
+            /* translators: %s: Number of approved bookings */
+            'approved' => _n_noop(
+                'Approved <span class="count">(%s)</span>',
+                'Approved <span class="count">(%s)</span>',
+                'timetics'
+            ),
+            
+            /* translators: %s: Number of pending bookings */
+            'pending' => _n_noop(
+                'Pending <span class="count">(%s)</span>',
+                'Pending <span class="count">(%s)</span>',
+                'timetics'
+            ),
+            /* translators: %s: Number of cancelled bookings */
+            'cancel' => _n_noop(
+                'Cancelled <span class="count">(%s)</span>',
+                'Cancelled <span class="count">(%s)</span>',
+                'timetics'
+            ),
+            /* translators: %s: Number of completed bookings */
+            'completed' => _n_noop(
+                'Completed <span class="count">(%s)</span>',
+                'Completed <span class="count">(%s)</span>',
+                'timetics'
+            ),
+        );
 
-        foreach ( $statuses as $status ) {
-
+        // Register each status
+        foreach ( $label_counts as $status => $label_count ) {
             register_post_status( $status, array(
                 'public'                    => true,
                 'exclude_from_search'       => false,
                 'show_in_admin_all_list'    => false,
                 'show_in_admin_status_list' => false,
-                'label_count'               => _n_noop( "$status (%s)", "$status (%s)", 'timetics' ),
+                'label_count'               => $label_count,
             ) );
         }
     }
@@ -228,6 +257,7 @@ class Hooks {
         $args = [
             'post_type'   => 'timetics-booking',
             'numberposts' => -1,
+            // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Meta query is necessary for filtering bookings by payment method
             'meta_query'  => array(
                 'relation' => 'OR',
                 array(

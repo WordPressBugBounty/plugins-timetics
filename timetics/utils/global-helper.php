@@ -1,4 +1,6 @@
 <?php
+defined( 'ABSPATH' ) || exit;
+
 use function Timetics\timetics;
 use Timetics\Core\Bookings\Booking;
 use Timetics\Core\Integrations\Google\Client;
@@ -167,9 +169,9 @@ if ( ! function_exists( 'timetics_get_google_auth_url' ) ) {
      * @return  string
      */
     function timetics_get_google_auth_url() {
-        $client = timetics_get_google_client();
+        $local_url = site_url( 'timetics-integration/google-auth' );
 
-        return $client->get_auth_url();
+        return wp_nonce_url( $local_url, 'timetics_auth_action', 'timetics_auth_nonce' );
     }
 }
 
@@ -749,5 +751,122 @@ if ( ! function_exists( 'timetics_connected_platforms' ) ) {
         }
 
         return $integration_names;
+    }
+}
+
+if ( ! function_exists( 'timetics_modules_list' ) ) {
+    /**
+     * Get the master list of Arraytics plugins for the About Us page.
+     *
+     * Each entry describes an external Arraytics plugin that can be
+     * installed/activated/deactivated from within the Timetics admin.
+     *
+     * @return array
+     */
+    function timetics_modules_list(): array {
+        return [
+            'eventin' => [
+                'name'          => 'eventin',
+                'slug'          => 'wp-event-solution',
+                'type'          => 'plugin',
+                'upgrade'       => false,
+                'upgrade_link'  => 'https://themewinter.com/eventin',
+                'status'        => 'on',
+                'is_pro'        => false,
+                'title'         => __( 'Eventin', 'timetics' ),
+                'description'   => __( 'Best Free WordPress Event Calendar Plugin to manage booking, registration, RSVPs, schedule recurring events and sell event tickets with WooCommerce.', 'timetics' ),
+                'icon'          => \Timetics\Core\Addon\Extension_Icon::get( 'eventin' ),
+                'notice'        => '',
+                'demo_link'     => 'https://product.themewinter.com/eventin',
+                'settings_link' => '',
+                'doc_link'      => 'https://support.themewinter.com/docs/plugins/docs/eventin/',
+            ],
+            'booktics' => [
+                'name'          => 'booktics',
+                'slug'          => 'booktics',
+                'type'          => 'plugin',
+                'upgrade'       => false,
+                'upgrade_link'  => 'https://arraytics.com/booktics',
+                'status'        => 'on',
+                'is_pro'        => false,
+                'title'         => __( 'Booktics', 'timetics' ),
+                'description'   => __( 'The ultimate online booking plugin for WordPress — services, staff, schedules, and payments in one place.', 'timetics' ),
+                'icon'          => \Timetics\Core\Addon\Extension_Icon::get( 'booktics' ),
+                'notice'        => '',
+                'demo_link'     => 'https://arraytics.com/booktics',
+                'settings_link' => '',
+                'doc_link'      => 'https://docs.arraytics.com/docs/booktics/',
+            ],
+            'poptics'  => [
+                'name'          => 'poptics',
+                'slug'          => 'poptics',
+                'type'          => 'plugin',
+                'upgrade'       => false,
+                'upgrade_link'  => 'https://arraytics.com/poptics',
+                'status'        => 'on',
+                'is_pro'        => false,
+                'title'         => __( 'Poptics', 'timetics' ),
+                'description'   => __( 'Discover the ultimate popup mix with Poptics Popup Builder to boost your lead generation and sales conversions.', 'timetics' ),
+                'icon'          => \Timetics\Core\Addon\Extension_Icon::get( 'poptics' ),
+                'notice'        => '',
+                'demo_link'     => 'https://arraytics.com/poptics',
+                'settings_link' => '',
+                'doc_link'      => 'https://docs.aethonic.com/docs/getting-started/intro/',
+            ],
+            'wpcafe'   => [
+                'name'          => 'wpcafe',
+                'slug'          => 'wp-cafe',
+                'type'          => 'plugin',
+                'upgrade'       => false,
+                'upgrade_link'  => 'https://themewinter.com/wpcafe',
+                'status'        => 'on',
+                'is_pro'        => false,
+                'title'         => __( 'WPCafe', 'timetics' ),
+                'description'   => __( 'WPCafe — Restaurant plugin with Online Ordering, Delivery, Pickup, Food Menu, Reservations, and Table Management.', 'timetics' ),
+                'icon'          => \Timetics\Core\Addon\Extension_Icon::get( 'wpcafe' ),
+                'notice'        => '',
+                'demo_link'     => 'https://product.themewinter.com/wpcafe',
+                'settings_link' => '',
+                'doc_link'      => 'https://support.themewinter.com/docs/plugins/docs/wp-cafe/',
+            ],
+        ];
+    }
+}
+
+if ( ! function_exists( 'timetics_extension' ) ) {
+    /**
+     * Get the Timetics Extension manager instance (tools-sdk).
+     *
+     * @return \Arraytics\ToolsSdk\Extension
+     */
+    function timetics_extension(): \Arraytics\ToolsSdk\Extension {
+        return new \Arraytics\ToolsSdk\Extension( 'timetics_available_modules', timetics_modules_list() );
+    }
+}
+
+if ( ! function_exists( 'timetics_get_enabled_modules' ) ) {
+    /**
+     * Get list of enabled module slugs.
+     *
+     * @return array
+     */
+    function timetics_get_enabled_modules(): array {
+        $modules = get_option( 'timetics_available_modules', [] );
+
+        if ( empty( $modules ) || ! is_array( $modules ) ) {
+            return [];
+        }
+
+        $enabled = [];
+
+        foreach ( $modules as $slug => $data ) {
+            if ( is_array( $data ) && isset( $data['status'] ) && 'on' === $data['status'] ) {
+                $enabled[] = $slug;
+            } elseif ( is_string( $data ) && 'on' === $data ) {
+                $enabled[] = $slug;
+            }
+        }
+
+        return $enabled;
     }
 }

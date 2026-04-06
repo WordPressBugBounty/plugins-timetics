@@ -316,7 +316,8 @@ class ApiAppointmentTaxonomy extends Api {
         $response = [
             'success'     => 1,
             'status_code' => 200,
-            'message'     => sprintf( __( 'Successfully deleted %d out of %d categories', 'timetics' ), $counter, count( $ids ) ),
+            /* translators: 1: Number of deleted categories, 2: Total number of categories */
+            'message'     => sprintf( __( 'Successfully deleted %1$d out of %2$d categories', 'timetics' ), $counter, count( $ids ) ),
         ];
 
         return rest_ensure_response( $response );
@@ -360,6 +361,7 @@ class ApiAppointmentTaxonomy extends Api {
         $args = [
             'post_type' => 'timetics-appointment',
             'fields'    => 'ids',
+            // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Tax query is necessary for filtering appointments by category
             'tax_query' => [
                 [
                     'taxonomy' => 'timetics-meeting-category',

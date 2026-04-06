@@ -7,6 +7,8 @@
 
 namespace Timetics\Core\Appointments;
 
+defined( 'ABSPATH' ) || exit;
+
 use Timetics\Utils\Singleton;
 
 class Hooks {

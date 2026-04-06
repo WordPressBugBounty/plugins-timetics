@@ -8,6 +8,8 @@
 
 namespace Timetics\Core\EnqueueInline;
 
+defined( 'ABSPATH' ) || exit;
+
 use Timetics\Utils\Singleton;
 use Timetics;
 
@@ -129,7 +131,7 @@ class Enqueue_Inline
         ";
 
         // add inline css.
-        wp_register_style('timetics-custom-css', false);
+        wp_register_style( 'timetics-custom-css', false, array(), TIMETICS_VERSION );
         wp_enqueue_style('timetics-custom-css');
         wp_add_inline_style('timetics-frontend', $custom_css);
     }

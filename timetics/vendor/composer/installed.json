@@ -1,0 +1,81 @@
+{
+    "packages": [
+        {
+            "name": "arraytics/tools-sdk",
+            "version": "dev-main",
+            "version_normalized": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/themewinter/tools-sdk.git",
+                "reference": "0348b54d386cd0a3a590762f4ac0f0d7419ae7e9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/themewinter/tools-sdk/zipball/0348b54d386cd0a3a590762f4ac0f0d7419ae7e9",
+                "reference": "0348b54d386cd0a3a590762f4ac0f0d7419ae7e9",
+                "shasum": ""
+            },
+            "time": "2025-10-21T04:07:05+00:00",
+            "default-branch": true,
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "Arraytics\\ToolsSdk\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Arraytics\\ToolsSdk\\Tests\\": "tests/"
+                }
+            },
+            "description": "A PHP package for tools.",
+            "support": {
+                "source": "https://github.com/themewinter/tools-sdk/tree/main",
+                "issues": "https://github.com/themewinter/tools-sdk/issues"
+            },
+            "install-path": "../arraytics/tools-sdk"
+        },
+        {
+            "name": "themewinter/uninstaller_form",
+            "version": "dev-main",
+            "version_normalized": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/themewinter/uninstaller_form.git",
+                "reference": "84c2190a03d30c0661a88a4090905eb785570c4c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/themewinter/uninstaller_form/zipball/84c2190a03d30c0661a88a4090905eb785570c4c",
+                "reference": "84c2190a03d30c0661a88a4090905eb785570c4c",
+                "shasum": ""
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^10"
+            },
+            "time": "2025-10-15T04:18:33+00:00",
+            "default-branch": true,
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "UninstallerForm\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "UninstallerForm\\Tests\\": "tests/"
+                }
+            },
+            "description": "Reusable WordPress plugin uninstaller feedback form with REST API",
+            "support": {
+                "source": "https://github.com/themewinter/uninstaller_form/tree/main",
+                "issues": "https://github.com/themewinter/uninstaller_form/issues"
+            },
+            "install-path": "../themewinter/uninstaller_form"
+        }
+    ],
+    "dev": true,
+    "dev-package-names": []
+}

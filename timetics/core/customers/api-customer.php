@@ -74,16 +74,18 @@ class Api_Customer extends Api {
                 [
                     'methods'             => \WP_REST_Server::READABLE,
                     'callback'            => [$this, 'get_item'],
-                    'permission_callback' => function () {
-                        return current_user_can( 'timetics-customer' );
+                    'permission_callback' => function ( $request ) {
+                        $customer_id = (int) $request['customer_id'];
+                        if ( current_user_can( 'manage_timetics' ) || current_user_can( 'manage_options' ) ) {
+                            return true;
+                        }
+                        return current_user_can( 'timetics-customer' ) && get_current_user_id() === $customer_id;
                     },
                 ],
                 [
                     'methods'             => \WP_REST_Server::EDITABLE,
-                    'callback'            => [$this, 'update_item'],
-                    'permission_callback' => function () {
-                        return current_user_can( 'timetics-customer' );
-                    },
+                    'callback'            => [$this, 'update_item'], 
+                    'permission_callback' => [$this, 'update_item_permission_callback'],
                 ],
                 [
                     'methods'             => \WP_REST_Server::DELETABLE,
@@ -101,7 +103,7 @@ class Api_Customer extends Api {
                     'methods'             => \WP_REST_Server::READABLE,
                     'callback'            => [$this, 'search_items'],
                     'permission_callback' => function () {
-                        return current_user_can( 'edit_posts' );
+                        return current_user_can( 'manage_timetics' );
                     },
                 ],
             ]
@@ -117,8 +119,12 @@ class Api_Customer extends Api {
                 [
                     'methods'             => \WP_REST_Server::READABLE,
                     'callback'            => [$this, 'get_bookings'],
-                    'permission_callback' => function () {
-                        return current_user_can( 'timetics-customer' );
+                    'permission_callback' => function ( $request ) {
+                        $customer_id = (int) $request['customer_id'];
+                        if ( current_user_can( 'manage_timetics' ) || current_user_can( 'manage_options' ) ) {
+                            return true;
+                        }
+                        return current_user_can( 'timetics-customer' ) && get_current_user_id() === $customer_id;
                     },
                 ],
             ]
@@ -272,6 +278,33 @@ class Api_Customer extends Api {
      */
     public function create_item( $request ) {
         return $this->save_customer( $request );
+    }
+
+    /**
+     * Update customer Permission check
+     *
+     * @param   WP_Rest_Request  $request
+     *
+     * @return  JSON | WP_Error
+     */
+    public function update_item_permission_callback( $request ) {
+        $customer_id = (int) $request['customer_id'];
+
+        // Admins can always update any customer
+        if ( current_user_can( 'manage_timetics' ) || current_user_can( 'manage_options' ) ) {
+            return true;
+        }
+
+        // Customers can update themselves with a valid nonce
+        $nonce = $request->get_header( 'X-WP-Nonce' );
+        if ( ! empty( $nonce ) && wp_verify_nonce( $nonce, 'wp_rest' ) ) {
+            $current_user_id = get_current_user_id();
+            if ( $customer_id === $current_user_id && $current_user_id > 0 ) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -541,6 +574,7 @@ class Api_Customer extends Api {
             'posts_per_page' => $per_page,
             'paged'          => $paged,
             'post_status'    => 'any',
+            // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Meta query is necessary for filtering bookings by customer
             'meta_query'     => array(
                 'relation' => 'OR',
                 array(

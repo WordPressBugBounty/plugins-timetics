@@ -87,19 +87,20 @@ class Client {
      *
      * @return  string
      */
-    public function get_auth_url() {
-        $auth_url = add_query_arg(
-            array(
-				'client_id'     => $this->client_id,
-				'scope'         => urlencode_deep( $this->auth_scope ),
-				'redirect_uri'  => $this->redirect_uri,
-				'response_type' => 'code',
-				'access_type'   => 'offline',
-
-			), self::TIMETICS_AUTH_URL
+    public function get_auth_url( $state = '' ) {
+        $params = array(
+            'client_id'     => $this->client_id,
+            'scope'         => urlencode_deep( $this->auth_scope ),
+            'redirect_uri'  => $this->redirect_uri,
+            'response_type' => 'code',
+            'access_type'   => 'offline',
         );
 
-        return $auth_url;
+        if ( ! empty( $state ) ) {
+            $params['state'] = $state;
+        }
+
+        return add_query_arg( $params, self::TIMETICS_AUTH_URL );
     }
 
     /**

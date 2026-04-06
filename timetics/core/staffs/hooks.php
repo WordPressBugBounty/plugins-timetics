@@ -6,6 +6,8 @@
  */
 namespace Timetics\Core\Staffs;
 
+defined( 'ABSPATH' ) || exit;
+
 use Timetics\Core\Staffs\Onboard;
 use Timetics\Utils\Singleton;
 
@@ -49,9 +51,9 @@ class Hooks {
         $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
 
         $local     = get_locale();
-        $reset_url = site_url( "wp-login.php?action=rp&key={$key}&login={$user_login}&wp_lang={$local}" );
+        $timetics_reset_url = site_url( "wp-login.php?action=rp&key={$key}&login={$user_login}&wp_lang={$local}" );
 
-        $reset_url = apply_filters( 'timetics_staff_password_reset_url', $reset_url, $key, $user_login, $local );
+        $timetics_reset_url = apply_filters( 'timetics_staff_password_reset_url', $timetics_reset_url, $key, $user_login, $local );
 
         ob_start();
         include TIMETICS_PLUGIN_DIR . '/templates/emails/email-header.php';
@@ -153,7 +155,8 @@ class Hooks {
      * @return  void
      */
     public function setup_staff_onboard() {
-        $page = isset( $_GET['page'] ) ? sanitize_text_field( $_GET['page'] ) : '';
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only page parameter check, no form processing
+        $page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
 
         if ( 'staff-onboard' === $page ) {
             Onboard::instance()->init();
@@ -205,6 +208,7 @@ class Hooks {
      * @return  string
      */
     public function reset_email_title( $title ) {
+        /* translators: %s: Site name */
         $title = sprintf( esc_html__( 'Welcome to %s onboarding!', 'timetics' ), get_bloginfo( 'name' ) );
 
         return $title;

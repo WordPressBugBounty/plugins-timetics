@@ -9,37 +9,37 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ "./assets/src/dashboard.js":
+/***/ "./assets/src/dashboard.js"
 /*!*********************************!*\
   !*** ./assets/src/dashboard.js ***!
   \*********************************/
-/***/ ((__unused_webpack_module, __unused_webpack_exports, __webpack_require__) => {
+(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
 
-eval("Promise.all(/*! import() */[__webpack_require__.e(\"vendors-node_modules_reduxjs_toolkit_dist_redux-toolkit_esm_js-node_modules_dayjs_dayjs_min_j-086c36\"), __webpack_require__.e(\"assets_src_admin_index_js\")]).then(__webpack_require__.bind(__webpack_require__, /*! ./admin */ \"./assets/src/admin/index.js\"));\n\n//# sourceURL=webpack://timetics/./assets/src/dashboard.js?");
+eval("{Promise.all(/*! import() */[__webpack_require__.e(\"vendors-node_modules_reduxjs_toolkit_dist_redux-toolkit_esm_js-node_modules_dayjs_dayjs_min_j-086c36\"), __webpack_require__.e(\"assets_src_admin_index_js\")]).then(__webpack_require__.bind(__webpack_require__, /*! ./admin */ \"./assets/src/admin/index.js\"));\n\n//# sourceURL=webpack://timetics/./assets/src/dashboard.js?\n}");
 
-/***/ }),
+/***/ },
 
-/***/ "react":
+/***/ "react"
 /*!************************!*\
   !*** external "React" ***!
   \************************/
-/***/ ((module) => {
+(module) {
 
 "use strict";
 module.exports = React;
 
-/***/ }),
+/***/ },
 
-/***/ "react-dom":
+/***/ "react-dom"
 /*!***************************!*\
   !*** external "ReactDOM" ***!
   \***************************/
-/***/ ((module) => {
+(module) {
 
 "use strict";
 module.exports = ReactDOM;
 
-/***/ })
+/***/ }
 
 /******/ 	});
 /************************************************************************/
@@ -61,6 +61,12 @@ module.exports = ReactDOM;
 /******/ 		};
 /******/ 	
 /******/ 		// Execute the module function
+/******/ 		if (!(moduleId in __webpack_modules__)) {
+/******/ 			delete __webpack_module_cache__[moduleId];
+/******/ 			var e = new Error("Cannot find module '" + moduleId + "'");
+/******/ 			e.code = 'MODULE_NOT_FOUND';
+/******/ 			throw e;
+/******/ 		}
 /******/ 		__webpack_modules__[moduleId].call(module.exports, module, module.exports, __webpack_require__);
 /******/ 	
 /******/ 		// Flag the module as loaded
@@ -116,7 +122,7 @@ module.exports = ReactDOM;
 /******/ 		// This function allow to reference async chunks
 /******/ 		__webpack_require__.u = (chunkId) => {
 /******/ 			// return url for filenames based on template
-/******/ 			return "chunk/" + {"vendors-node_modules_reduxjs_toolkit_dist_redux-toolkit_esm_js-node_modules_dayjs_dayjs_min_j-086c36":"3c1e812dd1af35e4e34a","assets_src_admin_index_js":"369d4c3197b69e501b69","vendors-node_modules_chart_js_auto_auto_js-node_modules_react-chartjs-2_dist_index_js":"283c7958d2ca191df6a7","assets_src_admin_pages_overview_index_js":"ff039f552a08151a64b9","assets_src_admin_pages_staff_index_js":"03b0e4d7106eb153aaf2","assets_src_admin_libs_staffLib_js":"713ac06b1cdf8c7bbf2b","assets_src_admin_hooks_useBulkDelete_js-assets_src_admin_services_exportImportApi_js":"15f93efd932f67da3782","assets_src_admin_hooks_useDebounceSearch_js":"f8193b183a4508eebca5","assets_src_admin_pages_staff_staffList_js":"74c3b5976a6091be7f89","assets_src_admin_pages_staff_Create_js":"6019e19ae37aaf0f54f3","assets_src_admin_pages_staff_Update_js":"d76cf73946e1a6a8bdbd","assets_src_admin_pages_meeting_index_js":"6986a4e1094f04a08935","vendors-node_modules_ant-design_icons_es_icons_QuestionCircleOutlined_js-node_modules_antd_es-747d6e":"95b7380402e6fc05c1d5","assets_src_admin_pages_settings_index_js":"d37a6e569e3c525f1182","assets_src_admin_pages_customers_index_js":"0a6d960d487e8cab55a5","assets_src_admin_pages_customers_CustomerList_js":"5645198b6a8025f353bf","assets_src_admin_pages_bookings_index_js":"7cac369bd95cb5cec561","assets_src_admin_pages_bookings_Create_js":"277562178b33a6c1970a","assets_src_admin_pages_bookings_Edit_js":"0858b12b12f4fb9660a8","vendors-node_modules_dayjs_plugin_isSameOrAfter_js-node_modules_dayjs_plugin_isToday_js-node_-97987c":"914e0865b9e4663e9d7d","assets_src_admin_pages_bookings_bookingLists_js":"52b195371eab38be8076","assets_src_admin_pages_meeting_CreateMeeting_js":"0ec9ef0fe18d86ea0301","assets_src_admin_pages_meeting_MeetingList_js":"df8add9bffc3c7daab25","assets_src_admin_module_onboard_index_js":"1b4f901407d6ed913571"}[chunkId] + ".chunk.js";
+/******/ 			return "chunk/" + {"vendors-node_modules_reduxjs_toolkit_dist_redux-toolkit_esm_js-node_modules_dayjs_dayjs_min_j-086c36":"6269574e7467e939ef19","assets_src_admin_index_js":"a896a0b63a67709c27b1","vendors-node_modules_chart_js_auto_auto_js-node_modules_react-chartjs-2_dist_index_js":"6f79550ca03ca5733d73","assets_src_admin_pages_overview_index_js":"e4f70e0ecb4afc4a3ec9","assets_src_admin_pages_staff_index_js":"c833fca65f9a17d14255","assets_src_admin_libs_staffLib_js":"e1d9e7ac7b00e5cb2c2e","assets_src_admin_hooks_useBulkDelete_js-assets_src_admin_hooks_useDebounceSearch_js-assets_sr-527efb":"2871c772b1fe3cb023cc","assets_src_admin_pages_staff_staffList_js":"1dee219b787b26cba095","assets_src_admin_pages_staff_Create_js":"fd35482adf22e8139043","assets_src_admin_pages_staff_Update_js":"74c36c466af48ab02e67","assets_src_admin_pages_meeting_index_js":"78ac041edde7895c6245","vendors-node_modules_ant-design_icons_es_utils_js-node_modules_classnames_index_js-node_modul-3ca66a":"a0306742806e48010b09","vendors-node_modules_ant-design_icons_es_icons_QuestionCircleOutlined_js-node_modules_antd_es-747d6e":"44691e1c6a0b67fd7674","assets_src_admin_pages_settings_index_js":"5aa9e5e87a45c996dfff","assets_src_admin_pages_customers_index_js":"2b31eb24b34614a2114a","assets_src_admin_pages_customers_CustomerList_js":"e2c1e8a137244c04caec","assets_src_admin_pages_bookings_index_js":"5d30251da7805e48609c","assets_src_admin_pages_bookings_Create_js":"a940e43d730fd78b8565","assets_src_admin_pages_bookings_Edit_js":"45560335a07eb479c476","vendors-node_modules_dayjs_plugin_isSameOrAfter_js-node_modules_dayjs_plugin_isToday_js-node_-97987c":"112e0a171c879caafc15","assets_src_admin_pages_bookings_bookingLists_js":"4b838a9efc665d807083","assets_src_admin_pages_meeting_CreateMeeting_js":"ae5044361041af76b252","assets_src_admin_pages_meeting_MeetingList_js":"282b97c002db900764ad","assets_src_admin_module_onboard_index_js":"12c674149c3258fb873d","assets_src_admin_pages_about-us_index_js":"17e02d8c2e3d6ee9948e"}[chunkId] + ".chunk.js";
 /******/ 		};
 /******/ 	})();
 /******/ 	
@@ -172,7 +178,6 @@ module.exports = ReactDOM;
 /******/ 				script = document.createElement('script');
 /******/ 		
 /******/ 				script.charset = 'utf-8';
-/******/ 				script.timeout = 120;
 /******/ 				if (__webpack_require__.nc) {
 /******/ 					script.setAttribute("nonce", __webpack_require__.nc);
 /******/ 				}
@@ -224,7 +229,7 @@ module.exports = ReactDOM;
 /******/ 		if (__webpack_require__.g.importScripts) scriptUrl = __webpack_require__.g.location + "";
 /******/ 		var document = __webpack_require__.g.document;
 /******/ 		if (!scriptUrl && document) {
-/******/ 			if (document.currentScript)
+/******/ 			if (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT')
 /******/ 				scriptUrl = document.currentScript.src;
 /******/ 			if (!scriptUrl) {
 /******/ 				var scripts = document.getElementsByTagName("script");
@@ -237,7 +242,7 @@ module.exports = ReactDOM;
 /******/ 		// When supporting browsers where an automatic publicPath is not supported you must specify an output.publicPath manually via configuration
 /******/ 		// or pass an empty string ("") and set the __webpack_public_path__ variable from your code to use your own logic.
 /******/ 		if (!scriptUrl) throw new Error("Automatic publicPath is not supported in this browser");
-/******/ 		scriptUrl = scriptUrl.replace(/#.*$/, "").replace(/\?.*$/, "").replace(/\/[^\/]+$/, "/");
+/******/ 		scriptUrl = scriptUrl.replace(/^blob:/, "").replace(/#.*$/, "").replace(/\?.*$/, "").replace(/\/[^\/]+$/, "/");
 /******/ 		__webpack_require__.p = scriptUrl;
 /******/ 	})();
 /******/ 	

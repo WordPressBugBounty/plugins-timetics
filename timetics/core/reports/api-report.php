@@ -154,7 +154,7 @@ class Api_Report extends Api {
         $reports = [];
 
         while ( $current_date <= $end_timestamp ) {
-            $current_report_date = date( 'Y-m-d', $current_date );
+            $current_report_date = gmdate( 'Y-m-d', $current_date );
 
             $date_range = [
                 'start' => $current_report_date,

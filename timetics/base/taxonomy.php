@@ -8,6 +8,8 @@
  */
 namespace Timetics\Base;
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Taxonomy Class.
  *

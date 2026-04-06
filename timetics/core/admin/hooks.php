@@ -5,6 +5,9 @@
  * @package Timetics
  */
 namespace Timetics\Core\Admin;
+
+defined( 'ABSPATH' ) || exit;
+
 use Timetics\Utils\Singleton;
 
 
@@ -137,7 +140,8 @@ class Hooks {
         update_option( 'timetics_onboard_setup', true );
         update_option( 'timetics_onboard_settings', false );
 
-        exit( esc_url( wp_redirect( admin_url('admin.php?page=timetics#/onboard') ) ) );
+        wp_safe_redirect( admin_url('admin.php?page=timetics#/onboard') );
+        exit;
     }
 
     /**
@@ -236,35 +240,43 @@ class Hooks {
 
             'booking_created_customer_email_from'       => $admin_email,
             'booking_created_customer_email_title'      => sprintf('%s', __( 'New meeting scheduled!', 'timetics' )),
+            /* translators: 1: Greeting with customer name, 2: Meeting scheduled message */
             'booking_created_customer_email_body'       => sprintf('<p>%s</p><p>%s</p>', __( 'Hi {%customer_name%}', 'timetics' ), __( 'A new meeting has been scheduled.', 'timetics' )),
 
             'booking_created_host_email_from'           => $admin_email,
             'booking_created_host_email_title'          => sprintf('%s', __( 'New meeting scheduled!', 'timetics' )),
+            /* translators: 1: Greeting with host name, 2: Meeting scheduled message */
             'booking_created_host_email_body'           => sprintf('<p>%s</p><p>%s</p>', __( 'Hi {%host_name%}', 'timetics' ), __( 'A new meeting has been scheduled.', 'timetics' )),
 
 
             'booking_canceled_customer_email_from'      => $admin_email,
             'booking_canceled_customer_email_title'     => sprintf('%s', __( 'Meeting cancelled', 'timetics' )),
+            /* translators: 1: Greeting with customer name, 2: Meeting cancellation message */
             'booking_canceled_customer_email_body'      => sprintf('<p>%s</p><p>%s</p>', __( 'Hi {%customer_name%}', 'timetics' ), __( '{%meeting_title%} has been canceled.', 'timetics' )),
 
             'booking_canceled_host_email_from'      => $admin_email,
             'booking_canceled_host_email_title'     => sprintf('%s', __( 'Meeting cancelled', 'timetics' )),
+            /* translators: 1: Greeting with host name, 2: Meeting cancellation message */
             'booking_canceled_host_email_body'      => sprintf('<p>%s</p><p>%s</p>', __( 'Hi {%host_name%}', 'timetics' ), __( '{%meeting_title%} has been canceled.', 'timetics' )),
 
             'booking_rescheduled_customer_email_from'   => $admin_email,
             'booking_rescheduled_customer_email_title'  => sprintf('%s', __( 'Meeting rescheduled!', 'timetics' )),
+            /* translators: 1: Greeting with host name, 2: Meeting rescheduled message */
             'booking_rescheduled_customer_email_body'   => sprintf('<p>%s</p><p>%s</p>', __( 'Hi {%host_name%}', 'timetics' ), __( '{%meeting_title%} has been rescheduled', 'timetics' )),
 
             'booking_rescheduled_host_email_from'   => $admin_email,
             'booking_rescheduled_host_email_title'  => sprintf('%s', __('Meeting rescheduled!', 'timetics' )),
+            /* translators: 1: Greeting with host name, 2: Meeting rescheduled message */
             'booking_rescheduled_host_email_body'   => sprintf('<p>%s</p><p>%s</p>', __( 'Hi {%host_name%}', 'timetics' ), __( '{%meeting_title%} has been rescheduled', 'timetics' )),
 
             'booking_reminder_customer_email_from'      => $admin_email,
             'booking_reminder_customer_email_title'     => sprintf('%s', __( 'Meeting time reminder', 'timetics' )),
+            /* translators: 1: Greeting with customer name, 2: Meeting reminder details */
             'booking_reminder_customer_email_body'      => sprintf('<p>%s</p><p>%s</p>', __( 'Hi {%customer_name%}', 'timetics' ), __( '{%meeting_title%} at {%meeting_date%} {%meeting_time%}', 'timetics' )),
 
             'booking_reminder_host_email_from'          => $admin_email,
             'booking_reminder_host_email_title'         => sprintf('%s', __( 'Meeting time reminder', 'timetics' )),
+            /* translators: 1: Greeting with host name, 2: Meeting reminder details */
             'booking_reminder_host_email_body'          => sprintf('<p>%s</p><p>%s</p>', __( 'Hi {%host_name%}', 'timetics' ), __( '{%meeting_title%} at {%meeting_date%} {%meeting_time%}', 'timetics' )),
         ];
 

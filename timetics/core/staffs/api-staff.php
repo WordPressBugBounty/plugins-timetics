@@ -46,9 +46,7 @@ class Api_Staff extends Api {
                 [
                     'methods'             => \WP_REST_Server::READABLE,
                     'callback'            => [$this, 'get_items'],
-                    'permission_callback' => function () {
-                        return true;
-                    },
+                    'permission_callback' => [$this, 'get_staffs_permission_callback'],
                 ],
                 [
                     'methods'             => \WP_REST_Server::CREATABLE,
@@ -111,7 +109,7 @@ class Api_Staff extends Api {
                     'methods'             => \WP_REST_Server::READABLE,
                     'callback'            => [$this, 're_invite_staff'],
                     'permission_callback' => function () {
-                        return true;
+                        return current_user_can( 'manage_timetics' );
                     },
                 ],
             ]
@@ -123,7 +121,7 @@ class Api_Staff extends Api {
                     'methods'             => \WP_REST_Server::READABLE,
                     'callback'            => [$this, 'search_items'],
                     'permission_callback' => function () {
-                        return current_user_can( 'edit_posts' );
+                        return current_user_can( 'manage_timetics' );
                     },
                 ],
             ]
@@ -135,7 +133,7 @@ class Api_Staff extends Api {
                     'methods'             => \WP_REST_Server::READABLE,
                     'callback'            => [$this, 'get_integrations'],
                     'permission_callback' => function () {
-                        return current_user_can( 'edit_posts' );
+                        return current_user_can( 'manage_timetics' );
                     },
                 ],
             ]
@@ -147,7 +145,7 @@ class Api_Staff extends Api {
                     'methods'             => \WP_REST_Server::READABLE,
                     'callback'            => [$this, 'auth_revoke'],
                     'permission_callback' => function () {
-                        return current_user_can( 'edit_posts' );
+                        return current_user_can( 'manage_timetics' );
                     },
                 ],
             ]
@@ -664,8 +662,27 @@ class Api_Staff extends Api {
      */
     public function prepare_item( $staff ) {
         $staff = new Staff( $staff );
+        $data  = $staff->get_data();
 
-        return $staff->get_data();
+        if ( ! current_user_can( 'manage_timetics' ) ) {
+            unset( $data['email'], $data['phone'], $data['user_name'] );
+        }
+
+        return $data;
     }
-
+    
+    /**
+     * Get items permission callback
+     *
+     * @param   WP_Rest_Request  $request
+     *
+     * @return  boolean true if user has permission, false otherwise
+     */
+    public function get_staffs_permission_callback($request){
+        $nonce = $request->get_header('X-WP-Nonce');
+        if (wp_verify_nonce($nonce, 'wp_rest') && ( current_user_can( 'manage_timetics' ) || current_user_can( 'manage_options' ) ) ) {
+            return true;
+        }
+        return false;
+    }
 }

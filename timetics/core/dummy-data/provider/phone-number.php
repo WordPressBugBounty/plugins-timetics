@@ -17,9 +17,9 @@ class PhoneNumber {
      * @return  string
      */
     public static function phone_number() {
-        $areaCode   = mt_rand( 100, 999 );
-        $prefix     = mt_rand( 100, 999 );
-        $lineNumber = mt_rand( 1000, 9999 );
+        $areaCode   = wp_rand( 100, 999 );
+        $prefix     = wp_rand( 100, 999 );
+        $lineNumber = wp_rand( 1000, 9999 );
 
         return "($areaCode) $prefix-$lineNumber";
     }

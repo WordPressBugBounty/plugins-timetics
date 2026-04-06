@@ -7,6 +7,8 @@
 
 namespace Timetics\Core\Integrations;
 
+defined( 'ABSPATH' ) || exit;
+
 use Timetics\Core\Integrations\Google\Service\Calendar;
 use Timetics\Utils\Singleton;
 
@@ -36,7 +38,19 @@ class Auth {
         $query_var = get_query_var( 'timetics-integration', false );
         $user_id   = get_current_user_id();
 
-        $code = isset( $_GET['code'] ) ? sanitize_text_field( $_GET['code'] ) : '';
+        $code = isset( $_GET['code'] ) ? sanitize_text_field( wp_unslash( $_GET['code'] ) ) : '';
+
+        // Verify nonce for security.
+        if ( empty( $code ) ) {
+            if ( ! isset( $_GET['timetics_auth_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['timetics_auth_nonce'] ) ), 'timetics_auth_action' ) ) {
+                return;
+            }
+        } else {
+            $state = isset( $_GET['state'] ) ? sanitize_text_field( wp_unslash( $_GET['state'] ) ) : '';
+            if ( ! wp_verify_nonce( $state, 'timetics_auth_callback' ) ) {
+                return;
+            }
+        }
 
         if ( ! $query_var ) {
             return;
@@ -56,7 +70,7 @@ class Auth {
             $redirect_url = admin_url('admin.php?page=timetics#/settings');
         }
 
-        wp_redirect( $redirect_url );
+        wp_safe_redirect( $redirect_url );
         exit;
     }
 
@@ -70,11 +84,13 @@ class Auth {
     public function google_auth( $code = '' ) {
         $client = timetics_get_google_client();
 
-        // If no code is provided, redirect to Google's authorization page
-        if ( empty($code) ) {
+        // If no code is provided, redirect to Google's authorization page.
+        if ( empty( $code ) ) {
+            $state = wp_create_nonce( 'timetics_auth_callback' );
             $client->add_scope( Calendar::scope() );
-            $auth_url = $client->get_auth_url();
-            wp_redirect($auth_url);
+            $auth_url = $client->get_auth_url( $state );
+            // phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Redirecting to external Google OAuth URL.
+            wp_redirect( $auth_url );
             exit;
         }
 
@@ -85,7 +101,7 @@ class Auth {
 
             timetics_update_google_auth( get_current_user_id(), $data );
 
-            wp_redirect(admin_url('admin.php?page=timetics#/settings'));
+            wp_safe_redirect(admin_url('admin.php?page=timetics#/settings'));
             exit;
         } catch (\Exception $e) {
             $error_message = sprintf(
@@ -94,7 +110,7 @@ class Auth {
                 esc_url( admin_url('admin.php?page=timetics#/settings') )
             );
 
-            wp_die($error_message, esc_html__('Google Auth Error', 'timetics'), array('back_link' => true));
+            wp_die( wp_kses_post( $error_message ), esc_html__('Google Auth Error', 'timetics'), array('back_link' => true));
         }
     }
 

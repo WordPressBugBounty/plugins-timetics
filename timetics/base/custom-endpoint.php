@@ -5,6 +5,9 @@
  * @package Timetics
  */
 namespace Timetics\Base;
+
+defined( 'ABSPATH' ) || exit;
+
 use Timetics\Utils\Singleton;
 
 class Custom_Endpoint {

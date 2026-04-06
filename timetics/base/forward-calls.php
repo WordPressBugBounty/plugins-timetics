@@ -43,7 +43,8 @@ trait ForwardCalls {
      */
     protected static function throwBadMethodCallException( $method ) {
         throw new BadMethodCallException( sprintf(
-            esc_html__( 'Call to undefined method %s::%s()', 'timetics' ), static::class, esc_html( $method )
-        ) ); 
+            /* translators: %1$s: Class name, %2$s: Method name */
+            esc_html__( 'Call to undefined method %1$s::%2$s()', 'timetics' ), static::class, esc_html( $method )
+        ) );
     }
 }

@@ -4,6 +4,8 @@
  *
  * @package Timetics
  */
+
+defined( 'ABSPATH' ) || exit;
 ?>
 
 <?php do_action( 'timetics-email-header' ); ?>

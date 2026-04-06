@@ -8,6 +8,8 @@
 
 namespace Timetics\Core\Admin;
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Class Menu
  */
@@ -41,73 +43,77 @@ class Menu
         $capability = 'manage_timetics';
         $slug       = 'timetics';
         $url        = 'admin.php?page=' . $slug . '#';
-        $timetics_menu_position = 'timetics_menu_position_';
-        $timetics_menu_permission = 'timetics_menu_permission_';
-
         $menu_items = array(
             [
                 'id'         => 'overview',
                 'title'      => esc_html__('Overview', 'timetics'),
                 'link'       => '/',
-                'capability' => apply_filters($timetics_menu_permission . 'overview', $capability),
-                'position'   => apply_filters($timetics_menu_position . 'overview', 1),
+                'capability' => apply_filters('timetics_menu_permission_overview', $capability),
+                'position'   => apply_filters('timetics_menu_position_overview', 1),
             ],
             [
                 'id'         => 'meeting',
                 'title'      => esc_html__('Meetings', 'timetics'),
                 'link'       => '/meetings',
-                'capability' => apply_filters($timetics_menu_permission . 'meeting', 'read_booking'),
-                'position'   => apply_filters($timetics_menu_position . 'meeting', 2),
+                'capability' => apply_filters('timetics_menu_permission_meeting', 'read_booking'),
+                'position'   => apply_filters('timetics_menu_position_meeting', 2),
             ],
             [
                 'id'         => 'staff',
                 'title'      => esc_html__('Team Members', 'timetics'),
                 'link'       => '/staff',
-                'capability' => apply_filters($timetics_menu_permission . 'staff', 'edit_staff'),
-                'position'   => apply_filters($timetics_menu_position . 'staff', 3),
+                'capability' => apply_filters('timetics_menu_permission_staff', 'edit_staff'),
+                'position'   => apply_filters('timetics_menu_position_staff', 3),
             ],
 
             [
                 'id'         => 'booking',
                 'title'      => esc_html__('Calendar', 'timetics'),
                 'link'       => '/bookings',
-                'capability' => apply_filters($timetics_menu_permission . 'booking', 'read_booking'),
-                'position'   => apply_filters($timetics_menu_position . 'booking', 1.5),
+                'capability' => apply_filters('timetics_menu_permission_booking', 'read_booking'),
+                'position'   => apply_filters('timetics_menu_position_booking', 1.5),
             ],
             [
                 'id'         => 'customer',
                 'title'      => esc_html__('Customers', 'timetics'),
                 'link'       => '/customers',
-                'capability' => apply_filters($timetics_menu_permission . 'customer', 'manage_options'),
-                'position'   => apply_filters($timetics_menu_position . 'customer', 5),
+                'capability' => apply_filters('timetics_menu_permission_customer', 'manage_options'),
+                'position'   => apply_filters('timetics_menu_position_customer', 5),
             ],
             [
                 'id'         => 'settings',
                 'title'      => esc_html__('Settings', 'timetics'),
                 'link'       => '/settings',
-                'capability' => apply_filters($timetics_menu_permission . 'settings', 'manage_options'),
-                'position'   => apply_filters($timetics_menu_position . 'settings', 6),
+                'capability' => apply_filters('timetics_menu_permission_settings', 'manage_options'),
+                'position'   => apply_filters('timetics_menu_position_settings', 6),
             ],
             [
                 'id'         => 'my-profile',
                 'title'      => esc_html__('My Profile', 'timetics'),
                 'link'       => '/my-profile',
-                'capability' => apply_filters($timetics_menu_permission . 'my-profile', 'edit_profile'),
-                'position'   => apply_filters($timetics_menu_position . 'my-profile', 7),
+                'capability' => apply_filters('timetics_menu_permission_my_profile', 'edit_profile'),
+                'position'   => apply_filters('timetics_menu_position_my_profile', 7),
             ],
             [
                 'id'         => 'shortcode',
                 'title'      => esc_html__('Shortcodes', 'timetics'),
                 'link'       => '/shortcodes',
-                'capability' => apply_filters($timetics_menu_permission . 'shortcode', 'manage_options'),
-                'position'   => apply_filters($timetics_menu_position . 'shortcode', 8),
+                'capability' => apply_filters('timetics_menu_permission_shortcode', 'manage_options'),
+                'position'   => apply_filters('timetics_menu_position_shortcode', 8),
             ],
             [
                 'id'         => 'onboard',
                 'title'      => esc_html__('Setup Wizard', 'timetics'),
                 'link'       => '/onboard',
-                'capability' => apply_filters($timetics_menu_permission . 'onboard', 'manage_options'),
-                'position'   => apply_filters($timetics_menu_position . 'onboard', 9),
+                'capability' => apply_filters('timetics_menu_permission_onboard', 'manage_options'),
+                'position'   => apply_filters('timetics_menu_position_onboard', 9),
+            ],
+            [
+                'id'         => 'about-us',
+                'title'      => esc_html__('About Us', 'timetics'),
+                'link'       => '/about-us',
+                'capability' => apply_filters('timetics_menu_permission_about_us', 'manage_options'),
+                'position'   => apply_filters('timetics_menu_position_about_us', 10),
             ],
         );
 

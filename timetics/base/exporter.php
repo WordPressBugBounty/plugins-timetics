@@ -112,12 +112,12 @@ abstract class Exporter {
     protected function export_columns() {
         $colunms = $this->get_columns();
         ob_clean();
-        $output = fopen( 'php://output', 'w' );
+        $output = fopen( 'php://output', 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- php://output is a stream wrapper, not a filesystem operation
         ob_start();
 
         fputcsv( $output, $colunms );
 
-        fclose( $output );
+        fclose( $output ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closing php://output stream
 
         return ob_get_clean();
     }
@@ -130,10 +130,12 @@ abstract class Exporter {
     protected function export_rows() {
         $data   = $this->get_data();
         ob_clean();
-        $buffer = fopen( 'php://output', 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fopen
+        $buffer = fopen( 'php://output', 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- php://output is a stream wrapper, not a filesystem operation
         ob_start();
 
         array_walk( $data, array( $this, 'export_row' ), $buffer );
+
+        fclose( $buffer ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closing php://output stream
 
         return ob_get_clean();
     }
@@ -199,7 +201,7 @@ abstract class Exporter {
         $this->send_headers();
         $data = $this->get_data();
 
-        echo json_encode( $data, JSON_PRETTY_PRINT );
+        echo wp_json_encode( $data, JSON_PRETTY_PRINT );
         die();
     }
 

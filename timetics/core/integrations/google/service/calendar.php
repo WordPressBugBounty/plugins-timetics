@@ -30,8 +30,9 @@ class Calendar {
         }
 
         // Define the time range for the last 3 months
-        $three_months_ago = date('c', strtotime('-3 months'));
-        $three_months_ahead = date('c', strtotime('+3 months')); // 3 months ahead date-time in RFC3339 format
+        // Use gmdate() for API queries to ensure UTC timestamps.
+        $three_months_ago   = gmdate( 'c', strtotime( '-3 months' ) );
+        $three_months_ahead = gmdate( 'c', strtotime( '+3 months' ) ); // 3 months ahead date-time in RFC3339 format
 
         $filters = array(
             'timeMin' => rawurlencode($three_months_ago),
@@ -310,24 +311,22 @@ class Calendar {
         $start_time = isset( $data['start']['time'] ) ? $data['start']['time'] : gmdate( 'H:i:s' );
         $end_date   = isset( $data['end']['date'] ) ? $data['end']['date'] : gmdate( 'Y-m-d' );
         $end_time   = isset( $data['end']['time'] ) ? $data['end']['time'] : gmdate( 'H:i:s' );
-        $timezone        = isset( $data['timezone'] ) ? $data['timezone'] : 'Asia/Dhaka';
-        $timezone_offset = $this->get_timezone_offset( $timezone );
+        $timezone   = isset( $data['timezone'] ) ? $data['timezone'] : wp_timezone_string();
 
-        $start_date_time = $start_date . 'T' . $this->convertTo24HourFormat( $start_time ) . $timezone_offset;
-        $end_date_time   = $end_date . 'T' . $this->convertTo24HourFormat( $end_time ) . $timezone_offset;
+        // Create DateTime objects with proper timezone to avoid double conversion.
+        $start_datetime = new \DateTime( $start_date . ' ' . $start_time, new \DateTimeZone( $timezone ) );
+        $end_datetime   = new \DateTime( $end_date . ' ' . $end_time, new \DateTimeZone( $timezone ) );
 
-        $date_time = [
+        return [
             'start' => [
-                'dateTime' => $start_date_time,
+                'dateTime' => $start_datetime->format( \DateTime::RFC3339 ),
                 'timeZone' => $timezone,
             ],
             'end'   => [
-                'dateTime' => $end_date_time,
+                'dateTime' => $end_datetime->format( \DateTime::RFC3339 ),
                 'timeZone' => $timezone,
             ],
         ];
-
-        return $date_time;
     }
 
     /**
@@ -338,7 +337,9 @@ class Calendar {
      * @return string
      */
     public function convertTo24HourFormat( $time ) {
-        return date('H:i:s', strtotime( $time ) );
+        // Use gmdate() instead of wp_date() to avoid timezone conversion
+        // since we're building an RFC3339 datetime string with explicit timezone offset.
+        return gmdate( 'H:i:s', strtotime( $time ) );
     }
 
     /**
@@ -377,7 +378,7 @@ class Calendar {
                 'Authorization' => 'Bearer ' . $access_token,
                 'Content-Type'  => 'application/json; charset=utf-8',
             ],
-            'body'    => json_encode( $args ),
+            'body'    => wp_json_encode( $args ),
         ];
 
         return $data;

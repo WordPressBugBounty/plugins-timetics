@@ -831,6 +831,7 @@ class Api_Appointment extends Api {
         $response = [
             'status_code' => 201,
             'success'     => 1,
+            /* translators: %s: Action performed (created, updated, etc.) */
             'message'     => sprintf( esc_html__( 'Successfully %s meeting', 'timetics' ), $action ),
             'data'        => $item,
         ];

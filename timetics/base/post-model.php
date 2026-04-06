@@ -47,6 +47,7 @@ abstract class PostModel {
             return $this->data[$name];
         }
 
+        /* translators: %s: Property name */
         throw new \Exception( sprintf( esc_html__( 'Undefined property %s', 'timetics' ), esc_attr( $name ) ) );
     }
 
@@ -60,6 +61,7 @@ abstract class PostModel {
      */
     public function __set( $key, $value ) {
         if ( ! isset( $this->data[$key] ) ) {
+            /* translators: %s: Property name */
             throw new \Exception( sprintf( esc_html__( 'Undefined property %s', 'timetics' ), esc_attr( $key ) ) );
         }
 
@@ -159,6 +161,7 @@ abstract class PostModel {
 
         if ( $meta ) {
             $meta['relation'] = 'AND';
+            // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Meta query is necessary for filtering posts by meta fields
             $args['meta_query'] = $meta;
         }
 

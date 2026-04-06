@@ -220,7 +220,9 @@ if(!class_exists('\Wpmet\Libs\Pro_Awareness')) :
 			<!-- Welcome section end -->
 			<!-- Box grid section start -->
             <div class="pro_aware grid_container tw-help-section">
-	            <?php do_action($this->text_domain.'/pro_awareness/before_grid_contents'); ?>
+	            <?php
+					// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- kept re-usable for other plugins
+				    do_action($this->text_domain.'/pro_awareness/before_grid_contents'); ?>
                 <div class="tw-grid-row">
 					<?php
 					foreach($this->grids as $grid) {
@@ -248,13 +250,15 @@ if(!class_exists('\Wpmet\Libs\Pro_Awareness')) :
 					} ?>
                 </div>
 
-	            <?php do_action($this->text_domain.'/pro_awareness/after_grid_contents'); ?>
+	            <?php 
+					// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- kept re-usable for other plugins
+				    do_action($this->text_domain.'/pro_awareness/after_grid_contents'); ?>
             </div>
 			<!-- Box grid section end -->
 			<!-- Commmon FAQ wrapper start -->
 			<div class="tw-help-section">
 				<div class="tw-faq-wrapper">
-					<h3 class="tw-section-title"><?php echo esc_html('Common FAQs', 'eventin');?></h3>
+					<h3 class="tw-section-title"><?php echo esc_html__('Common FAQs', 'timetics');?></h3>
 					<div class="etn-row">
 						<div class="etn-col-md-6">
 							<div class="tw-accordion-wrapper">

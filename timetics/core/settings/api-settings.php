@@ -84,9 +84,9 @@ class Api_Settings extends Api {
      */
     public function get_settings() {
         $settings = apply_filters( 'timetics_settings', timetics_get_settings() );
-        $role = !current_user_can( 'manage_timetics' );
+        $is_admin = current_user_can( 'manage_timetics' );
         //only run for non user capabilities
-        if ( $role ) {
+        if ( ! $is_admin ) {
             $exclude_settings = $this->exclude_settings_for_customer(); 
             foreach($settings as $key => $setting){
                 if( in_array( $key, $exclude_settings )){
@@ -131,7 +131,7 @@ class Api_Settings extends Api {
                 'custom_domain_url' => $options['custom_domain_url'],
                 'network_slug' => $options['network_slug'],
             ];
-            do_action('custom_domain_data', $custom_domain_data);
+            do_action('timetics_custom_domain_data', $custom_domain_data);
         }
 
 
@@ -278,6 +278,7 @@ class Api_Settings extends Api {
             "zoom_auth_redirect_uri",
             "fluentcrm_webhook",
             "zapier_webhook",
+            "pabbly_webhook",
             "twillo_account_id",
             "twillo_token",
             "twillo_phone_number",

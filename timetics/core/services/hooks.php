@@ -7,6 +7,8 @@
 
 namespace Timetics\Core\Services;
 
+defined( 'ABSPATH' ) || exit;
+
 use Timetics\Utils\Singleton;
 use Timetics\Core\Services\Service_Taxonomy;
 

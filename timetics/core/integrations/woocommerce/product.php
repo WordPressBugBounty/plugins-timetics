@@ -34,6 +34,11 @@ class Product {
         $product->set_category_ids( [$product_category_id] );
 
         $product->update_meta_data( 'timetics_meeting_id', $meeting->get_id() );
+
+        // Store meeting details as product meta for checkout/email display
+        $product->update_meta_data( 'timetics_duration', $meeting->get_duration() );
+        $product->update_meta_data( 'timetics_timezone', $meeting->get_timezone() );
+
         $product_id = $product->save();
 
         $meeting->update( [

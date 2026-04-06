@@ -63,9 +63,9 @@ class Re_Invite_Staff extends Email {
 		$user_login = $this->staff->user_login;
 		$locale     = get_user_locale($this->staff);
 		$reset_key  = get_password_reset_key($this->staff);
-		$reset_url = site_url( "wp-login.php?action=rp&key={$reset_key}&login={$user_login}&wp_lang={$locale}" );
+		$timetics_reset_url = site_url( "wp-login.php?action=rp&key={$reset_key}&login={$user_login}&wp_lang={$locale}" );
 
-        $reset_url = apply_filters( 'timetics_staff_password_reset_url', $reset_url, $reset_key, $user_login, $locale );
+        $timetics_reset_url = apply_filters( 'timetics_staff_password_reset_url', $timetics_reset_url, $reset_key, $user_login, $locale );
 		include_once  TIMETICS_PLUGIN_DIR . '/templates/emails/new-staff.php';
     }
 }

@@ -1,4 +1,5 @@
 <?php
+// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedNamespaceFound -- Third-party vendor library, namespace cannot be changed
 namespace Oxaim\Libs;
 
 defined( 'ABSPATH' ) || exit;
@@ -286,9 +287,11 @@ class Notice{
             $expired = '';
         }
 
+        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Vendor library global variable
         global $oxaim_lib_notice_list;
 
         if(!isset($oxaim_lib_notice_list[$this->notice_id])){
+            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Vendor library global variable usage
             $oxaim_lib_notice_list[$this->notice_id] = __FILE__;
 
             // is transient expired?

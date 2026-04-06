@@ -6,6 +6,8 @@
  */
 namespace Timetics\Core\Staffs;
 
+defined( 'ABSPATH' ) || exit;
+
 use Timetics\Utils\Singleton;
 
 /**
@@ -39,13 +41,24 @@ class Onboard {
      * @return  void
      */
     public function setup_onboard_page() {
-        $page = isset( $_GET['page'] ) ? sanitize_text_field( $_GET['page'] ) : '';
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only page parameter check, no form processing
+        $page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
 
         if ( 'staff-onboard' !== $page ) {
             return;
         }
-        ob_start();
-        include_once TIMETICS_PLUGIN_DIR . '/templates/staff/onboard.php';
-        exit();
+
+        $template = TIMETICS_PLUGIN_DIR . '/templates/staff/onboard.php';
+        
+        if ( file_exists( $template ) ) {
+            include $template;
+        }
+        
+        $output = ob_get_clean();
+        
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+        echo $output;
+        
+        exit;
     }
 }

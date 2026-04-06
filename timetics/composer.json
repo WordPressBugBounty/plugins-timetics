@@ -1,0 +1,20 @@
+{
+    "name": "arraytics/timetics",
+    "description": "Timetics booking wordpress plugin",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "themewinter/uninstaller_form": "dev-main",
+        "arraytics/tools-sdk": "dev-main"
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/themewinter/uninstaller_form"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/themewinter/tools-sdk"
+        }
+    ]
+}

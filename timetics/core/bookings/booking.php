@@ -528,7 +528,7 @@ class Booking {
      * @return  string
      */
     private function generate_randon_id() {
-        return chr( rand( ord( 'A' ), ord( 'Z' ) ) ) . rand( 575639, 575639 + 400 );
+        return chr( wp_rand( ord( 'A' ), ord( 'Z' ) ) ) . wp_rand( 575639, 575639 + 400 );
     }
 
     // Setter.
@@ -705,6 +705,7 @@ class Booking {
 
         if ( ! empty( $args['start_date'] ) ) {
             //_tt_booking_start_date
+            // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Meta query is necessary for filtering bookings by start date
             $args['meta_query'] = [
                 [
                     'key'     => '_tt_booking_start_date',
@@ -981,6 +982,7 @@ class Booking {
             'post_type'      => 'timetics-booking',
             'post_status'    => 'any',
             'posts_per_page' => $per_page,
+            // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Meta query is necessary for filtering bookings by appointment
             'meta_query'     => [
                 [
                     'key'     => '_tt_booking_appointment',
@@ -1034,6 +1036,7 @@ class Booking {
             array(
                 'post_type'      => 'any',
                 'posts_per_page' => -1,
+                // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Meta query is necessary for filtering posts by meta key
                 'meta_query'     => array(
                     array(
                         'key'     => $meta_key,

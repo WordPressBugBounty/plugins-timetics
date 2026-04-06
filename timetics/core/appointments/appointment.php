@@ -860,8 +860,8 @@ class Appointment extends PostModel {
      * @return  array
      */
     private function get_schedule_by_date( $date, $staff_id, $time_zone = '' ) {
-        $day_name         = ucfirst( date( 'D', strtotime( $date ) ) );
-        $schedule         = $this->get_schedule();
+        $day_name = ucfirst( gmdate( 'D', strtotime( $date ) ) );
+        $schedule = $this->get_schedule();
         $interval         = $this->get_interval();
         $target_schedule = [];
 
@@ -933,20 +933,39 @@ class Appointment extends PostModel {
         $time            = gmdate( 'h:i a', $time );
         $booking_entries = new Booking_Entry();
         $entries         = $booking_entries->find( [
-            'meeting_id' => $this->id,
             'staff_id'   => $staff_id,
             'date'       => $this->convert_timezone( $date, $this->get_timezone())->format('Y-m-d'),
         ] );
 
         foreach ( $entries as $entry ) {
             $booking      = new Booking( $entry->get_booking_id() );
+            $start_time   = $entry->get_start();
+            $end_time     = $entry->get_end();
 
-            if ( $entry->get_start() == $time ) {
+            // Check if current time slot falls within the booking duration
+            if ( $this->is_time_in_range( $time, $start_time, $end_time ) ) {
                 return $entry;
             }
         }
 
         return false;
+    }
+
+    /**
+     * Check if a time falls within a given time range
+     *
+     * @param   string  $current_time  Current time in h:i a format
+     * @param   string  $start_time    Start time in h:i a format  
+     * @param   string  $end_time      End time in h:i a format
+     *
+     * @return  bool
+     */
+    private function is_time_in_range( $current_time, $start_time, $end_time ) {
+        $current = strtotime( $current_time );
+        $start   = strtotime( $start_time );
+        $end     = strtotime( $end_time );
+
+        return $current >= $start && $current < $end;
     }
 
     /**
@@ -999,8 +1018,8 @@ class Appointment extends PostModel {
      * @return  array   Available timeslots
      */
     public function get_avilable_timeslots( $date, $staff_id, $time_zone = '' ) {
-        $day_name         = ucfirst( date( 'D', strtotime( $date ) ) );
-        $schedule         = $this->get_schedule();
+        $day_name = ucfirst( gmdate( 'D', strtotime( $date ) ) );
+        $schedule = $this->get_schedule();
         $interval         = $this->get_interval();
         $tartget_schedule = [];
 

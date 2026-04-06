@@ -33,7 +33,7 @@ class Internet {
         $strLength = strlen( self::$str );
 
         // Generate a random start position within the valid range
-        $start_pos = mt_rand( 0, max( 0, $strLength - 5 ) );
+        $start_pos = wp_rand( 0, max( 0, $strLength - 5 ) );
 
         // Extract the random substring using substr()
         $random_substring = substr( self::$str, $start_pos, 5 );

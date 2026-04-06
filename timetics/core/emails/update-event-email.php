@@ -59,7 +59,7 @@ class Update_Event_Email extends Email {
         $this->staff    = new Staff( $booking->get_staff_id() );
         $this->customer = new Customer( $booking->get_customer_id() );
 
-        apply_filters( 'timeics/booking/update', $booking, $this );
+        apply_filters( 'timetics/booking/update', $booking, $this );
 
         parent::__construct();
     }

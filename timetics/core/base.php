@@ -12,6 +12,7 @@ namespace Timetics\Core;
 use Hooks;
 use Timetics;
 use Timetics\Core\Appointments\ApiAppointmentTaxonomy;
+use Timetics\Core\Addon\Api_Addon;
 use Timetics\Core\Appointments\Appointment;
 use Timetics\Core\Bookings\Booking;
 use Timetics\Core\DummyData\Api_Faker;
@@ -59,6 +60,7 @@ class Base {
         ApiAppointmentTaxonomy::instance();
         Google_Calendar_Sync::instance();
         Api_Booking_Calendar::instance();
+        Api_Addon::instance();
     }
 }
 

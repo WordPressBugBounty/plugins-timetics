@@ -4,16 +4,47 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitd02707597fbf5927c7666b74bdb40ea9
+class ComposerStaticInitb20117cddd741a51e3bb6f90a34768e1
 {
+    public static $prefixLengthsPsr4 = array (
+        'U' => 
+        array (
+            'UninstallerForm\\' => 16,
+        ),
+        'A' => 
+        array (
+            'Arraytics\\ToolsSdk\\' => 19,
+        ),
+    );
+
+    public static $prefixDirsPsr4 = array (
+        'UninstallerForm\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/themewinter/uninstaller_form/src',
+        ),
+        'Arraytics\\ToolsSdk\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/arraytics/tools-sdk/src',
+        ),
+    );
+
     public static $classMap = array (
+        'Arraytics\\ToolsSdk\\Extension' => __DIR__ . '/..' . '/arraytics/tools-sdk/src/Extension.php',
+        'Arraytics\\ToolsSdk\\PluginManager' => __DIR__ . '/..' . '/arraytics/tools-sdk/src/PluginManager.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'UninstallerForm\\Api\\FeedbackController' => __DIR__ . '/..' . '/themewinter/uninstaller_form/src/Api/FeedbackController.php',
+        'UninstallerForm\\HookRegistrar' => __DIR__ . '/..' . '/themewinter/uninstaller_form/src/HookRegistrar.php',
+        'UninstallerForm\\Support\\GoogleSheetClient' => __DIR__ . '/..' . '/themewinter/uninstaller_form/src/Support/GoogleSheetClient.php',
+        'UninstallerForm\\Support\\Localizer' => __DIR__ . '/..' . '/themewinter/uninstaller_form/src/Support/Localizer.php',
+        'UninstallerForm\\UninstallerForm' => __DIR__ . '/..' . '/themewinter/uninstaller_form/src/UninstallerForm.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->classMap = ComposerStaticInitd02707597fbf5927c7666b74bdb40ea9::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitb20117cddd741a51e3bb6f90a34768e1::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitb20117cddd741a51e3bb6f90a34768e1::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInitb20117cddd741a51e3bb6f90a34768e1::$classMap;
 
         }, null, ClassLoader::class);
     }

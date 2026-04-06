@@ -1,10 +1,10 @@
 <?php
 
 /**
- * Plugin Name:       Timetics
+ * Plugin Name:       Timetics - Appointment Booking Calendar & Scheduling System
  * Plugin URI:        https://arraytics.com/timetics/
  * Description:       Schedule, Appointment and Seat Booking plugin.
- * Version:           1.0.41
+ * Version:           1.0.54
  * Requires at least: 5.2
  * Requires PHP:      7.3
  * Author:            Arraytics
@@ -56,7 +56,7 @@ final class Timetics {
      * @return string
      */
     public static function get_version() {
-        return '1.0.41';
+        return '1.0.54';
     }
 
     /**
@@ -117,11 +117,10 @@ final class Timetics {
      * @return void
      */
     public function load_text_domain() {
-        $locale = apply_filters( 'plugin_locale', get_user_locale(), 'timetics' );
+        $locale = apply_filters( 'timetics_plugin_locale', get_user_locale(), 'timetics' );
 
         unload_textdomain( 'timetics' );
         load_textdomain( 'timetics', WP_LANG_DIR . '/timetics/timetics-' . $locale . '.mo' );
-        load_plugin_textdomain( 'timetics', false, self::get_plugin_dir() . 'languages/' );
     }
 
     /**

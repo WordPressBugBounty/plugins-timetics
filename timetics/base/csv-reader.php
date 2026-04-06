@@ -39,28 +39,51 @@ class CsvReader implements FileReaderInterface {
         $file     = self::$file;
         $csv_data = [];
 
-        $handle  = fopen( $file, 'r' );
-        $headers = fgetcsv( $handle );
+        // Initialize WP_Filesystem
+        global $wp_filesystem;
+        if ( empty( $wp_filesystem ) ) {
+            require_once ABSPATH . 'wp-admin/includes/file.php';
+            WP_Filesystem();
+        }
 
+        // Read file contents using WP_Filesystem
+        $contents = $wp_filesystem->get_contents( $file );
+        if ( false === $contents ) {
+            return $csv_data;
+        }
+
+        // Split content into lines
+        $lines = explode( "\n", $contents );
+        if ( empty( $lines ) ) {
+            return $csv_data;
+        }
+
+        // Parse header row
+        $headers = str_getcsv( array_shift( $lines ) );
         if ( ! $headers ) {
             return $csv_data;
         }
 
-        if ( $handle !== false ) {
-            $header_count = count( $headers );
+        $header_count = count( $headers );
 
-            while (  ( $data = fgetcsv( $handle ) ) !== false ) {
-                $row = [];
-
-                for ( $i = 0; $i < $header_count; $i++ ) {
-                    $row[$headers[$i]] = $data[$i];
-                }
-
-                $csv_data[] = $row;
+        foreach ( $lines as $line ) {
+            // Skip empty lines
+            if ( empty( trim( $line ) ) ) {
+                continue;
             }
-        }
 
-        fclose( $handle );
+            $data = str_getcsv( $line );
+            if ( false === $data ) {
+                continue;
+            }
+
+            $row = [];
+            for ( $i = 0; $i < $header_count; $i++ ) {
+                $row[$headers[$i]] = isset( $data[$i] ) ? $data[$i] : '';
+            }
+
+            $csv_data[] = $row;
+        }
 
         return $csv_data;
     }

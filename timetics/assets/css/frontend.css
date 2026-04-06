@@ -387,14 +387,16 @@
 }
 .tt-container-wrapper .tt-form-container {
   padding: 30px;
-  background-color: #ffffff;
-  border: 1px solid var(--tt-secondary-color-12);
-  border-radius: 8px;
 }
 @media screen and (max-width: 768px) {
   .tt-container-wrapper .tt-form-container {
     padding: 20px;
   }
+}
+.tt-container-wrapper .tt-form-container {
+  background-color: #ffffff;
+  border: 1px solid var(--tt-secondary-color-12);
+  border-radius: 8px;
 }
 .tt-container-wrapper .tt-form-container .ant-collapse {
   border-radius: 8px;
@@ -467,25 +469,25 @@
   box-shadow: inset 0px 4px 4px rgba(0, 0, 0, 0.12);
   border-radius: 28px;
 }
+.toplevel_page_timetics .ant-switch .ant-switch-handle::before {
+  box-shadow: -1px 4px 4px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(210.38deg, #ffffff 11.21%, rgba(255, 255, 255, 0.8) 87.98%);
+}
 .toplevel_page_timetics .ant-switch .ant-switch-handle {
   top: 4px;
   left: 4px;
   width: 16px;
   height: 16px;
 }
-.toplevel_page_timetics .ant-switch .ant-switch-handle::before {
-  box-shadow: -1px 4px 4px rgba(0, 0, 0, 0.15);
-  background: linear-gradient(210.38deg, #ffffff 11.21%, rgba(255, 255, 255, 0.8) 87.98%);
-}
 .toplevel_page_timetics .ant-switch.ant-switch-checked {
   background: var(--tt-primary-color);
-}
-.toplevel_page_timetics .ant-switch.ant-switch-checked .ant-switch-handle {
-  left: calc(100% - 20px);
 }
 .toplevel_page_timetics .ant-switch.ant-switch-checked .ant-switch-handle::before {
   background: linear-gradient(210.38deg, #ffffff 11.21%, rgba(255, 255, 255, 0.7) 87.98%);
   box-shadow: -1px 4px 4px rgba(0, 0, 0, 0.25);
+}
+.toplevel_page_timetics .ant-switch.ant-switch-checked .ant-switch-handle {
+  left: calc(100% - 20px);
 }
 .toplevel_page_timetics .ant-checkbox .ant-checkbox-inner {
   width: 20px;
@@ -1215,9 +1217,6 @@
   padding: 0;
 }
 
-.timetics-stripe {
-  /* spinner/processing state, errors */
-}
 .timetics-stripe #payment-message {
   color: rgb(105, 115, 134);
   font-size: 16px;
@@ -1227,6 +1226,9 @@
 }
 .timetics-stripe #payment-element {
   margin-bottom: 24px;
+}
+.timetics-stripe {
+  /* spinner/processing state, errors */
 }
 .timetics-stripe .spinner,
 .timetics-stripe .spinner:before,
@@ -1850,31 +1852,37 @@
   width: 0; /* Width of the scrollbar */
 }
 
+.tt-scroll-bar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
 .tt-scroll-bar {
   /* Thumb (the draggable part) */
+}
+.tt-scroll-bar::-webkit-scrollbar-thumb {
+  background: var(--tt-secondary-color-50);
+  border-radius: 8px;
+}
+.tt-scroll-bar {
   /* Corner (between the vertical and horizontal scrollbar) */
+}
+.tt-scroll-bar::-webkit-scrollbar-corner {
+  background: var(--tt-secondary-color-50);
+}
+.tt-scroll-bar {
   /* For Firefox */
   /* Unlike WebKit browsers, Firefox doesn't allow separate styling of track and thumb */
   /* Both track and thumb */
   scrollbar-width: thin;
   scrollbar-color: var(--tt-secondary-color-50);
   /* Track */
-  /* Thumb */
-}
-.tt-scroll-bar::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-.tt-scroll-bar::-webkit-scrollbar-thumb {
-  background: var(--tt-secondary-color-50);
-  border-radius: 8px;
-}
-.tt-scroll-bar::-webkit-scrollbar-corner {
-  background: var(--tt-secondary-color-50);
 }
 .tt-scroll-bar::-ms-scrollbar {
   width: 8px;
   height: 8px;
+}
+.tt-scroll-bar {
+  /* Thumb */
 }
 .tt-scroll-bar::-ms-scrollbar-thumb {
   background: var(--tt-secondary-color-20);

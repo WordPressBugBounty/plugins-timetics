@@ -16,7 +16,7 @@ class DateTime {
      * @return  string
      */
     public static function date( $format = 'Y-m-d' ) {
-        return date( $format, self::timestamp() );
+        return gmdate( $format, self::timestamp() );
     }
 
     /**
@@ -25,7 +25,7 @@ class DateTime {
      * @return  string
      */
     public static function time( $format = 'h:i a' ) {
-        return date( $format, self::timestamp() );
+        return gmdate( $format, self::timestamp() );
     }
 
     /**
@@ -38,7 +38,7 @@ class DateTime {
         $end_timestamp   = strtotime( '2030-12-31' );
 
         // Generate a random timestamp within the valid range
-        $random_timestamp = mt_rand( $start_timestamp, $end_timestamp );
+        $random_timestamp = wp_rand( $start_timestamp, $end_timestamp );
 
         // Format the timestamp into a valid date format
         return $random_timestamp;

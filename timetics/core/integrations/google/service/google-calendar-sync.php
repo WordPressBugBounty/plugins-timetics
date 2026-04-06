@@ -9,6 +9,8 @@
 
 namespace Timetics\Core\Integrations\Google\Service;
 
+defined( 'ABSPATH' ) || exit;
+
 use Timetics\Core\Appointments\Api_Appointment;
 use Timetics\Core\Bookings\Booking;
 use Timetics\Core\Customers\Customer;
@@ -66,7 +68,10 @@ class Google_Calendar_Sync {
             add_filter( 'timetics/admin/booking/get_items', array( $this, 'get_events_from_google' ) );
             add_filter( 'timetics_schedule_data_for_selected_date', array( $this, 'block_timeslots_by_google_events' ), 10, 5 );
         } catch ( \Throwable $e ) {
-            error_log( $e->getMessage() );
+            if ( defined( 'WP_DEBUG' ) && WP_DEBUG && defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG ) {
+                // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Debug logging is properly guarded by WP_DEBUG checks
+                error_log( 'Timetics Google Calendar Sync: ' . $e->getMessage() );
+            }
         }
     }
 
@@ -157,7 +162,10 @@ class Google_Calendar_Sync {
             $booking->set_sync_status( 'synced' );
         } catch ( \Throwable $e ) {
             // If sync fails silenty exits to ensure no other process gets hampered
-            error_log( $e->getMessage() );
+            if ( defined( 'WP_DEBUG' ) && WP_DEBUG && defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG ) {
+                // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Debug logging is properly guarded by WP_DEBUG checks
+                error_log( 'Timetics Google Calendar Sync: ' . $e->getMessage() );
+            }
         }
     }
 
@@ -242,7 +250,6 @@ class Google_Calendar_Sync {
             $date_obj_start = new DateTime( $date_of_event . ' 00:00:00', new DateTimeZone( $timezone ) );
             $date_obj_end   = new DateTime( $date_of_event . ' 23:59:59', new DateTimeZone( $timezone ) );
 
-            $staff_id = get_current_user_id();
             $google_events = $this->calendar->get_events( $staff_id, [
                 'timeMin'      => rawurlencode($date_obj_start->format( DateTime::RFC3339 )),
                 'timeMax'      => rawurlencode($date_obj_end->format( DateTime::RFC3339 )),

@@ -119,12 +119,12 @@ class Google_Calendar_Sync {
                 'summary' => sanitize_text_field( $meeting->get_name() ),
                 'description' => sanitize_text_field( $meeting->get_description() ),
                 'start' => array(
-                    'dateTime' => $booking->get_start_date(),
-                    'timeZone' => wp_timezone_string(),
+                    'date' => $booking->get_start_date(),
+                    'time' => $booking->get_start_time(),
                 ),
                 'end' => array(
-                    'dateTime' => $booking->get_end_date(),
-                    'timeZone' => wp_timezone_string(),
+                    'date' => $booking->get_end_date(),
+                    'time' => $booking->get_end_time(),
                 ),
                 'attendees' => array(
                     array( 'email' => $customer->get_email() ),
@@ -135,7 +135,7 @@ class Google_Calendar_Sync {
                 'guestsCanInviteOthers' => false,
                 'guestsCanModify' => false,
                 'guestsCanSeeOtherGuests' => false,
-                'timezone' => wp_timezone_string(),
+                'timezone' => $booking->get_timezone(),
             );
 
             // Check if this booking already has a Google Event ID
@@ -238,21 +238,24 @@ class Google_Calendar_Sync {
      */
     public function block_timeslots_by_google_events( $data, $staff_id, $meeting_id, $timezone ) {
         try {
-            // Fixing minor array format issue
-            $time_slot_data = $data[0];
-            
             if ( ! timetics_get_option( 'google_calendar_overlap', false ) ) {
                 return $data;
             }
 
-            $date_of_event = $time_slot_data['date'];
+            if ( empty( $data ) ) {
+                return $data;
+            }
 
-            $date_obj_start = new DateTime( $date_of_event . ' 00:00:00', new DateTimeZone( $timezone ) );
-            $date_obj_end   = new DateTime( $date_of_event . ' 23:59:59', new DateTimeZone( $timezone ) );
+            // Fetch Google events for the full date range in one request
+            $first_day = reset( $data );
+            $last_day  = end( $data );
+
+            $date_obj_start = new DateTime( $first_day['date'] . ' 00:00:00', new DateTimeZone( $timezone ) );
+            $date_obj_end   = new DateTime( $last_day['date'] . ' 23:59:59', new DateTimeZone( $timezone ) );
 
             $google_events = $this->calendar->get_events( $staff_id, [
-                'timeMin'      => rawurlencode($date_obj_start->format( DateTime::RFC3339 )),
-                'timeMax'      => rawurlencode($date_obj_end->format( DateTime::RFC3339 )),
+                'timeMin'      => rawurlencode( $date_obj_start->format( DateTime::RFC3339 ) ),
+                'timeMax'      => rawurlencode( $date_obj_end->format( DateTime::RFC3339 ) ),
                 'orderBy'      => 'startTime',
                 'singleEvents' => 'true',
                 'timeZone'     => $timezone,
@@ -263,35 +266,50 @@ class Google_Calendar_Sync {
                 return $data;
             }
 
-            // Process each timeslot for the day
-            $updated_slots = [];
-
-            foreach ( $time_slot_data['slots'] as $slot ) {
-                $slot_start_time = strtotime( $slot['start_time'] );
-
-                // Check against each Google Calendar event
-                foreach ( $google_events as $event ) {
-                    $event_start = strtotime( $event['start_time'] );
-                    $event_end   = strtotime( $event['end_time'] );
-
-                    // If the slot overlaps with the event, mark it as unavailable
-                    if ( $slot_start_time >= $event_start && $slot_start_time < $event_end ) {
-                        $slot['status'] = 'unavailable';
-                        break; // No need to check more events if already unavailable
-                    }
+            // Index events by date for efficient per-day lookup
+            $events_by_date = [];
+            foreach ( $google_events as $event ) {
+                $event_date = $event['start_date'] ?? '';
+                if ( $event_date ) {
+                    $events_by_date[ $event_date ][] = $event;
                 }
+            }
 
-                if ( $slot['status'] === 'unavailable' ) {
+            // Process each day in the range
+            foreach ( $data as $index => $time_slot_data ) {
+                $date = $time_slot_data['date'];
+
+                if ( empty( $events_by_date[ $date ] ) ) {
                     continue;
                 }
 
-                $updated_slots[] = $slot;
+                $day_events    = $events_by_date[ $date ];
+                $updated_slots = [];
+
+                foreach ( $time_slot_data['slots'] as $slot ) {
+                    $slot_start_time = strtotime( $slot['start_time'] );
+
+                    // Check against each Google Calendar event for this day
+                    foreach ( $day_events as $event ) {
+                        $event_start = strtotime( $event['start_time'] );
+                        $event_end   = strtotime( $event['end_time'] );
+
+                        // If the slot overlaps with the event, mark it as unavailable
+                        if ( $slot_start_time >= $event_start && $slot_start_time < $event_end ) {
+                            $slot['status'] = 'unavailable';
+                            break;
+                        }
+                    }
+
+                    if ( $slot['status'] === 'unavailable' ) {
+                        continue;
+                    }
+
+                    $updated_slots[] = $slot;
+                }
+
+                $data[ $index ]['slots'] = $updated_slots;
             }
-
-            $time_slot_data['slots'] = $updated_slots;
-
-            // return the data with updated timeslots in its original format
-            $data[0] = $time_slot_data;
 
             return $data;
         } catch (\Throwable $e) {

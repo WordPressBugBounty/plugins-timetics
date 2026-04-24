@@ -171,13 +171,11 @@ class Api_Booking extends Api {
         $paged      = ! empty( $request['paged'] ) ? intval( $request['paged'] ) : 1;
         $meeting_id = ! empty( $request['meeting_id'] ) ? intval( $request['meeting_id'] ) : 0;
         $start_date = ! empty( $request['start_date'] ) ? $request['start_date'] : '';
-        $staff_id   = ! current_user_can( 'edit_booking' ) ? get_current_user_id() : 0;
 
         $args = [
             'posts_per_page' => $per_page,
             'paged'          => $paged,
             'meeting'        => $meeting_id,
-            'staff'          => $staff_id,
         ];
 
         $args = apply_filters( 'timetics/add/item/data', $args, $request );
@@ -186,14 +184,13 @@ class Api_Booking extends Api {
             $args['start_date'] = $start_date;
         }
 
-        $bookings = Booking::all( $args );
-        $items = [];
-
         if ( ! current_user_can( 'manage_options' ) ) {
-            $user_id         = get_current_user_id();
-            $appointment_ids = Appointment::get_appointment_ids_by_author( $user_id );
-            $bookings        = Booking::get_booking_ids_by_appointment( $appointment_ids, $per_page );
+            $allowed_ids      = Booking::get_visible_ids_for_user( get_current_user_id() );
+            $args['post__in'] = ! empty( $allowed_ids ) ? $allowed_ids : [ 0 ];
         }
+
+        $bookings = Booking::all( $args );
+        $items    = [];
 
         foreach ( $bookings['items'] as $item ) {
             $items[] = $this->prepare_item( $item->ID );
@@ -577,7 +574,7 @@ class Api_Booking extends Api {
         $data                   = json_decode( $request->get_body(), true );
         $status                 = ! empty( $data['status'] ) ? sanitize_text_field( $data['status'] ) : '';
         $default_booking_status = timetics_get_option( 'default_booking_status', 'approved' );
-        $post_status            = 'succeeded' === $status ? $default_booking_status : 'pending';
+        $post_status            = 'succeeded' === $status ? $default_booking_status : ( 'failed' === $status ? 'failed' : 'pending' );
         $payment_method         = ! empty( $data['payment_method'] ) ? sanitize_text_field( $data['payment_method'] ) : '';
         $payment_details        = ! empty( $data['payment_details'] ) ? $data['payment_details'] : '';
         $type                   = $booking->get_type();
@@ -710,6 +707,11 @@ class Api_Booking extends Api {
         // For WooCommerce payments, create booking in failed status until payment is confirmed
         if ( 'woocommerce' === $payment_method && 'created' === $action && $order_total != 0 ) {
             $status = 'failed';
+        }
+
+        // For Stripe payments, create booking in pending status until payment is confirmed
+        if ( 'stripe' === strtolower( $payment_method ) && 'created' === $action && $order_total != 0 ) {
+            $status = 'pending';
         }
         $appointment_token = ! empty( $data['appointment_token'] ) ? sanitize_text_field( $data['appointment_token'] ) : '';
 

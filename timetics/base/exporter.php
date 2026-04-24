@@ -51,6 +51,13 @@ abstract class Exporter {
     protected $file_type = '';
 
     /**
+     * Store selected IDs for selective export
+     *
+     * @var array
+     */
+    protected $selected_ids = [];
+
+    /**
      * Prepare data that will be exported
      *
      * @return  void

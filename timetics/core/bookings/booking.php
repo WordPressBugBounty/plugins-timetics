@@ -701,43 +701,41 @@ class Booking {
 
         $args = wp_parse_args( $args, $defaults );
 
-        $args = apply_filters( 'timetics/admin/bookings/all', $defaults, $args);
+        $args = apply_filters( 'timetics/admin/bookings/all', $args, $defaults );
+
+        $meta_query = ! empty( $args['meta_query'] ) && is_array( $args['meta_query'] ) ? $args['meta_query'] : [];
 
         if ( ! empty( $args['start_date'] ) ) {
-            //_tt_booking_start_date
-            // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Meta query is necessary for filtering bookings by start date
-            $args['meta_query'] = [
-                [
-                    'key'     => '_tt_booking_start_date',
-                    'value'   => $args['start_date'],
-                    'compare' => '>=',
-                    'type'    => 'DATE',
-                ],
+            $meta_query[] = [
+                'key'     => '_tt_booking_start_date',
+                'value'   => $args['start_date'],
+                'compare' => '>=',
+                'type'    => 'DATE',
             ];
         }
 
         if ( ! empty( $args['meeting'] ) ) {
-            // @codingStandardsIgnoreStart
-            $args['meta_query'] = [
-                [
-                    'key'     => '_tt_booking_appointment',
-                    'value'   => $args['meeting'],
-                    'compare' => '=',
-                ],
+            $meta_query[] = [
+                'key'     => '_tt_booking_appointment',
+                'value'   => $args['meeting'],
+                'compare' => '=',
             ];
-            // @codingStandardsIgnoreEnd
         }
 
         if ( ! empty( $args['staff'] ) ) {
-            // @codingStandardsIgnoreStart
-            $args['meta_query'] = [
-                [
-                    'key'     => '_tt_booking_staff',
-                    'value'   => $args['staff'],
-                    'compare' => '=',
-                ],
+            $meta_query[] = [
+                'key'     => '_tt_booking_staff',
+                'value'   => $args['staff'],
+                'compare' => '=',
             ];
-            // @codingStandardsIgnoreEnd
+        }
+
+        if ( ! empty( $meta_query ) ) {
+            if ( count( $meta_query ) > 1 && empty( $meta_query['relation'] ) ) {
+                $meta_query['relation'] = 'AND';
+            }
+            // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Meta query is necessary for filtering bookings
+            $args['meta_query'] = $meta_query;
         }
 
         $post = new WP_Query( $args );
@@ -996,6 +994,61 @@ class Booking {
             'total' => $query->found_posts,
             'items' => $query->posts,
         ];
+    }
+
+    /**
+     * Get booking ids visible to a given user.
+     *
+     * Union of:
+     *  - bookings where the user is the assigned staff (`_tt_booking_staff`)
+     *  - bookings whose appointment is authored by the user
+     *
+     * @param   integer  $user_id  WP user id.
+     *
+     * @return  int[]    Deduped list of booking post ids.
+     */
+    public static function get_visible_ids_for_user( $user_id ) {
+        $user_id = (int) $user_id;
+
+        if ( ! $user_id ) {
+            return [];
+        }
+
+        $staff_ids = get_posts( [
+            'post_type'      => 'timetics-booking',
+            'post_status'    => 'any',
+            'posts_per_page' => -1,
+            'fields'         => 'ids',
+            // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- needed to scope bookings to current staff user
+            'meta_query'     => [
+                [
+                    'key'   => '_tt_booking_staff',
+                    'value' => $user_id,
+                ],
+            ],
+        ] );
+
+        $appointment_ids = Appointment::get_appointment_ids_by_author( $user_id );
+
+        $appointment_booking_ids = [];
+        if ( ! empty( $appointment_ids ) ) {
+            $appointment_booking_ids = get_posts( [
+                'post_type'      => 'timetics-booking',
+                'post_status'    => 'any',
+                'posts_per_page' => -1,
+                'fields'         => 'ids',
+                // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- needed to scope bookings to appointments owned by current user
+                'meta_query'     => [
+                    [
+                        'key'     => '_tt_booking_appointment',
+                        'value'   => $appointment_ids,
+                        'compare' => 'IN',
+                    ],
+                ],
+            ] );
+        }
+
+        return array_values( array_unique( array_map( 'intval', array_merge( $staff_ids, $appointment_booking_ids ) ) ) );
     }
 
     /**

@@ -15,9 +15,11 @@ defined( 'ABSPATH' ) || exit;
     $timetics_timezone  = $timetics_event ? $timetics_event['start']['timeZone'] : '';
     $timetics_timestr   = $timetics_event ? strtotime( $timetics_event['start']['dateTime'] ) : '';
 
-    $timetics_day  = gmdate( 'l', strtotime( $this->booking->get_start_date() ) );
-    $timetics_time = gmdate( 'h:i a', strtotime( $this->booking->get_start_time() ) );
-    $timetics_date = gmdate( 'd F Y', strtotime( $this->booking->get_start_date() ) );
+    // Use WordPress date and time format settings
+    $timetics_formatted = timetics_format_email_datetime( $this->booking->get_start_date(), $this->booking->get_start_time() );
+    $timetics_day  = $timetics_formatted['day'];
+    $timetics_time = $timetics_formatted['time'];
+    $timetics_date = $timetics_formatted['date'];
 
     $timetics_email_body  = timetics_get_option( 'booking_rescheduled_customer_email_body' );
     $timetics_email_title = timetics_get_option( 'booking_rescheduled_customer_email_title' );

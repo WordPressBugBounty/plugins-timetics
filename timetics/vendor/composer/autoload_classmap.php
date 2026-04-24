@@ -6,12 +6,5 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Arraytics\\ToolsSdk\\Extension' => $vendorDir . '/arraytics/tools-sdk/src/Extension.php',
-    'Arraytics\\ToolsSdk\\PluginManager' => $vendorDir . '/arraytics/tools-sdk/src/PluginManager.php',
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
-    'UninstallerForm\\Api\\FeedbackController' => $vendorDir . '/themewinter/uninstaller_form/src/Api/FeedbackController.php',
-    'UninstallerForm\\HookRegistrar' => $vendorDir . '/themewinter/uninstaller_form/src/HookRegistrar.php',
-    'UninstallerForm\\Support\\GoogleSheetClient' => $vendorDir . '/themewinter/uninstaller_form/src/Support/GoogleSheetClient.php',
-    'UninstallerForm\\Support\\Localizer' => $vendorDir . '/themewinter/uninstaller_form/src/Support/Localizer.php',
-    'UninstallerForm\\UninstallerForm' => $vendorDir . '/themewinter/uninstaller_form/src/UninstallerForm.php',
 );

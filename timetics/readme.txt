@@ -1,9 +1,9 @@
-=== Timetics – Appointment Booking & Scheduling ===
+=== Timetics - Appointment Booking Calendar & Scheduling System ===
 Contributors: arraytics, ehsanriyadh
 Tags: appointment booking, booking system, booking calendar, scheduling, appointment scheduler, online booking
 Requires at least: 5.2
 Tested up to: 6.9
-Stable tag: 1.0.54
+Stable tag: 1.0.55
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -322,6 +322,18 @@ Handles secure online payment transactions for appointment bookings made through
 **Note:** Optional integration, only active if you configure Stripe payment settings.
 
 == Changelog ==
+
+= 1.0.55 (April 24, 2026) =
+Tweak: Grunt file configuration update. [internal]
+Fix: Duplicate booking creation on Stripe payment failure retry.
+Fix: Stripe error messages now display for all failure types.
+Fix: Payment settings toggle and accordion conflict fixed.
+Fix: Stripe bookings now show "failed" if payment is failed.
+Fix: Missing frontend CSS in booking form shortcode preview rendering.
+Fix: Google Calendar sync event time and multi-day availability filtering.
+Fix: Bulk export now exports only selected items instead of all.
+Fix: Email date and time format now respects WordPress admin settings.
+Fix: Integration icon mismatch resolved.
 
 = 1.0.54 (March 26, 2026) =
 Fix     : Fixed fatal error while using woocommerce payment method 

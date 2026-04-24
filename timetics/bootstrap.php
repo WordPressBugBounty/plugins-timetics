@@ -339,6 +339,23 @@ final class Bootstrap {
         wp_register_style( 'timetics-vendor', TIMETICS_ASSETS_URL . 'css/vendor.css', [], TIMETICS_VERSION, 'all' );
         wp_register_style( 'timetics-frontend', TIMETICS_ASSETS_URL . 'css/frontend.css', [], TIMETICS_VERSION, 'all' );
 
+        global $post;
+        if ( $post ) {
+            $is_timetics_cpt = ( 'timetics-appointment' === get_post_type( $post ) );
+            $timetics_shortcodes = [ 'timetics-booking-form', 'timetics-meeting-list', 'timetics-user-dashboard', 'timetics-category' ];
+            $has_timetics_shortcode = false;
+            foreach ( $timetics_shortcodes as $shortcode ) {
+                if ( has_shortcode( $post->post_content, $shortcode ) ) {
+                    $has_timetics_shortcode = true;
+                    break;
+                }
+            }
+            if ( $is_timetics_cpt || $has_timetics_shortcode ) {
+                wp_enqueue_style( 'timetics-vendor' );
+                wp_enqueue_style( 'timetics-frontend' );
+            }
+        }
+
         wp_register_script( 'timetics-flatpickr-scripts', TIMETICS_ASSETS_URL . 'js/vendors/flatpickr.js', [ 'wp-plugins', 'wp-i18n', 'wp-element', 'wp-dom', 'wp-data' ], TIMETICS_VERSION, true );
         wp_enqueue_script( 'timetics-packages', TIMETICS_ASSETS_URL . 'js/packages.js', [ 'timetics-flatpickr-scripts' ], TIMETICS_VERSION, true );
 

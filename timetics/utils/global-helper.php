@@ -870,3 +870,31 @@ if ( ! function_exists( 'timetics_get_enabled_modules' ) ) {
         return $enabled;
     }
 }
+
+if ( ! function_exists( 'timetics_format_email_datetime' ) ) {
+    /**
+     * Format date, time and day according to WordPress admin settings
+     * Used in email templates to display consistent date/time formats
+     *
+     * @param   string  $start_date  Start date (Y-m-d format)
+     * @param   string  $start_time  Start time (h:i a format)
+     *
+     * @return  array  Array with 'day', 'time', 'date' keys
+     */
+    function timetics_format_email_datetime( $start_date, $start_time = '' ) {
+        $wp_date_format = get_option( 'date_format' );
+        $wp_time_format = get_option( 'time_format' );
+
+        $datetime = $start_time 
+            ? $start_date . ' ' . $start_time 
+            : $start_date;
+
+        $timestamp = strtotime( $datetime );
+
+        return [
+            'day'  => date_i18n( 'l', $timestamp ),
+            'time' => date_i18n( $wp_time_format, $timestamp ),
+            'date' => date_i18n( $wp_date_format, $timestamp ),
+        ];
+    }
+}

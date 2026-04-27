@@ -151,6 +151,27 @@
 .toplevel_page_timetics .tt-page-header-wrapper .tt-header-info-dropdown.ant-btn {
   padding: 4px 0px;
 }
+.toplevel_page_timetics .tt-page-header-wrapper .tt-header-referral-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  background: transparent;
+  color: rgba(0, 0, 0, 0.88);
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+.toplevel_page_timetics .tt-page-header-wrapper .tt-header-referral-link .anticon {
+  font-size: 19px;
+  line-height: 1;
+}
+.toplevel_page_timetics .tt-page-header-wrapper .tt-header-referral-link:hover, .toplevel_page_timetics .tt-page-header-wrapper .tt-header-referral-link:focus {
+  color: var(--tt-primary-color);
+  border-color: var(--tt-primary-color);
+  background: transparent;
+}
 .toplevel_page_timetics .tt-shortcode-list .ant-input-group-addon .anticon:hover path {
   stroke: var(--tt-primary-color);
 }

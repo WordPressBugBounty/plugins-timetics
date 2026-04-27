@@ -4,7 +4,7 @@
  * Plugin Name:       Timetics - Appointment Booking Calendar & Scheduling System
  * Plugin URI:        https://arraytics.com/timetics/
  * Description:       Schedule, Appointment and Seat Booking plugin.
- * Version:           1.0.55
+ * Version:           1.0.56
  * Requires at least: 5.2
  * Requires PHP:      7.3
  * Author:            Arraytics
@@ -56,7 +56,7 @@ final class Timetics {
      * @return string
      */
     public static function get_version() {
-        return '1.0.55';
+        return '1.0.56';
     }
 
     /**
@@ -356,5 +356,33 @@ final class Timetics {
         return trailingslashit( plugin_dir_path( self::get_plugin_file() ) );
     }
 }
+
+/**
+ * Add a "Go Pro" action link on the Plugins page.
+ * Hidden when the pro plugin already exists.
+ */
+if ( ! function_exists( 'timetics_add_go_pro_action_link' ) ) {
+    function timetics_add_go_pro_action_link( $links ) {
+        if ( ! function_exists( 'get_plugins' ) ) {
+            require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+
+        foreach ( get_plugins() as $plugin ) {
+            if ( isset( $plugin['TextDomain'] ) && 'timetics-pro' === $plugin['TextDomain'] ) {
+                return $links;
+            }
+        }
+
+        $go_pro = sprintf(
+            '<a href="%1$s" target="_blank" rel="noopener noreferrer" style="color:#e8364c;font-weight:600;">%2$s</a>',
+            esc_url( 'https://arraytics.com/timetics/pricing/' ),
+            esc_html__( 'Go Pro', 'timetics' )
+        );
+
+        $links[] = $go_pro;
+        return $links;
+    }
+}
+add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'timetics_add_go_pro_action_link' );
 
 Timetics::get_instance();

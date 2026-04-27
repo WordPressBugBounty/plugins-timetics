@@ -1,14 +1,14 @@
 === Timetics - Appointment Booking Calendar & Scheduling System ===
 Contributors: arraytics, ehsanriyadh
-Tags: appointment booking, booking system, booking calendar, scheduling, appointment scheduler, online booking
+Tags: appointment booking, booking, booking calendar, scheduling, appointment scheduler, online booking, elearning
 Requires at least: 5.2
 Tested up to: 6.9
-Stable tag: 1.0.55
+Stable tag: 1.0.56
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Appointment booking and scheduling system with online booking calendar, payments, automated reminders, and calendar sync.
+Online appointment booking and scheduling system with calendar, payments, reminders, and easy class booking for tutors, coaches, and educators.
 
 == Description ==
 
@@ -16,7 +16,7 @@ Appointment booking and scheduling system with online booking calendar, payments
 
 With its smart booking calendar and real-time availability, customers can choose their preferred time slot booking and confirm meetings instantly. You can easily handle daily schedules using the built-in appointment calendar and automated calendar booking features.
 
-Whether you run coaching sessions, consultations, services, or team meetings, Timetics works as a complete appointment scheduler and meeting scheduler that saves time and removes manual follow-ups.
+Whether you run coaching sessions, consultations, eLearning and LMS sessions, services, or team meetings, Timetics works as a complete appointment scheduler and meeting scheduler that saves time and removes manual follow-ups.
 
 [youtube https://youtu.be/qBqTz2wF3kk]
 
@@ -44,7 +44,7 @@ Need help getting started? 👉 [Contact our support team](https://arraytics.com
 
 Timetics is a flexible **WordPress booking system** built for **professional and service-based business** that needs to schedule, manage, and automate client appointments online. Here are the most common use cases:
 
-- [Education & Training](https://arraytics.com/timetics/education/)- Schedule **mentorship sessions, course consultations, tutoring, workshops**, and career counseling. Suitable for **schools, universities, private tutors, and online educators** who need to manage multiple classes and avoid scheduling conflicts.
+- [Education & Training - eLearning Use Cases](https://arraytics.com/timetics/education/)- Schedule mentorship sessions, course consultations, tutoring, workshops, and career counseling with ease. WPTimetics allowing educators to manage **student bookings, class scheduling, and live learning sessions** without the complexity of a traditional Learning Management System. Perfect for anyone who needs **class scheduling and student booking instead of a full LMS setup**.
 
 - [Recruiting & HR](https://arraytics.com/timetics/recruiting/)- Recruiters and HR teams can **automate interview scheduling**, let candidates choose available time slots, and receive instant booking confirmations – eliminating endless back-and-forth emails.
 
@@ -52,9 +52,9 @@ Timetics is a flexible **WordPress booking system** built for **professional and
 
 - [Sales & Marketing Teams](https://arraytics.com/timetics/sales-marketing/)- Let prospects **book consultations, product demos, discovery calls**, or strategy sessions directly from your website. Integrates seamlessly with CRM tools for tracking leads.
 
-- [Consultants & Coaches](https://arraytics.com/timetics/counseling/)- From **business consultants to life coaches**, offer clients an easy way to book one-on-one or group sessions. Customize availability, set buffer times, and send automated reminders.
+- [Consultants & Coaches - Online Learning & eLearning Sessions](https://arraytics.com/timetics/counseling/)- From business consultants to life coaches, offer clients an easy way to book one-on-one or group sessions. Timetics is ideal for **coaching-based eLearning businesses** that rely on scheduled sessions instead of structured courses. A practical solution for professionals who deliver **learning through live interaction rather than LMS-based courses**.
 
-- [Teachers & Mentors](https://arraytics.com/timetics/education/)- Manage **class schedules, private lessons, and tutoring sessions** so students can book convenient time slots without email chains.
+- [Teachers & Mentors - Student Booking & Class Scheduling ](https://arraytics.com/timetics/education/)- Manage class schedules, private lessons, and tutoring sessions so students can book convenient time slots without email chains. Timetics acts as a **student booking system for WordPress eLearning websites**, helping teachers organize their availability and avoid scheduling conflicts. Ideal for educators who want a **simple alternative to LMS platforms focused on scheduling and live classes**.
 
 - **Musicians & Creative Professionals**- Allow clients and collaborators to **book studio sessions, music lessons, or creative consultations**. Manage availability, payments, and rescheduling with ease.
 
@@ -259,6 +259,10 @@ Unlimited. The free version of Timetics has no caps on appointments, bookings, m
 
 Timetics is built for any service-based professional or business that relies on scheduled appointments — including consultants, coaches, educators, fitness trainers, hair salons, medical clinics, therapists, recruiters, legal professionals, and customer support teams. If your business runs on bookable time slots, Timetics keeps everything structured, automated, and easy to manage.
 
+= Does Timetics work with eLearning platforms? =
+
+Yes. Timetics works alongside popular LMS plugins like LearnDash, LifterLMS, TutorLMS. While your LMS manages course content and student progress, Timetics handles the live booking layer - letting students book 1-on-1 tutoring sessions, virtual office hours, course consultations, webinars, and mentorship calls directly on your WordPress site. It's the ideal scheduling companion for any eLearning platform or online education business.
+
 = Does Timetics support recurring appointments? =
 
 Yes. Clients can schedule weekly, biweekly, monthly, or custom recurring bookings in a single step — ideal for ongoing coaching sessions, therapy appointments, fitness classes, and subscription-based services. This is a PRO feature.
@@ -288,40 +292,30 @@ Yes. Timetics PRO includes Twilio integration for direct SMS reminders, as well 
 Share your feedback or feature request on the [Timetics Roadmap](https://arraytics.com/timetics-roadmaps/). We actively review community suggestions when planning new releases.
 
 == External Services ==
-
 This plugin connects to the following external services:
 
 === Arraytics FluentCRM Service ===
-
 Connects to Arraytics.com's FluentCRM service to manage contact information for marketing and communication purposes (product updates, feature announcements, support information).
-
 **Data sent:** Your email address (only when you voluntarily provide it during business setup/onboarding).
-
 **Service provider:** Arraytics - [Terms of Service](https://arraytics.com/terms-of-service/) | [Privacy Policy](https://arraytics.com/privacy-policy/)
-
 **Note:** This is optional and not required for core plugin functionality.
 
 === Google Calendar API ===
-
 Synchronizes appointment bookings between your WordPress site and Google Calendar (two-way sync). Enables automatic blocking of booked time slots and real-time calendar updates.
-
 **Data sent:** Calendar event data (appointment details, dates, times, attendee information) when bookings are created, updated, or synchronized.
-
 **Service provider:** Google LLC - [Terms of Service](https://policies.google.com/terms) | [Privacy Policy](https://policies.google.com/privacy)
-
 **Note:** Optional integration, only active if you connect your Google Calendar account.
 
 === Stripe Payment Processing ===
-
 Handles secure online payment transactions for appointment bookings made through the booking calendar.
-
 **Data sent:** Payment information (transaction amounts, booking details) when customers make payments.
-
 **Service provider:** Stripe, Inc. - [Terms of Service](https://stripe.com/legal/ssa) | [Privacy Policy](https://stripe.com/privacy)
-
 **Note:** Optional integration, only active if you configure Stripe payment settings.
 
 == Changelog ==
+
+= 1.0.56 (April 27, 2026) =
+Tweak: Minor user experience improvement.
 
 = 1.0.55 (April 24, 2026) =
 Tweak: Grunt file configuration update. [internal]

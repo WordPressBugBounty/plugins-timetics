@@ -151,6 +151,27 @@
 .toplevel_page_timetics .tt-page-header-wrapper .tt-header-info-dropdown.ant-btn {
   padding: 4px 0px;
 }
+.toplevel_page_timetics .tt-page-header-wrapper .tt-header-referral-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  background: transparent;
+  color: rgba(0, 0, 0, 0.88);
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+.toplevel_page_timetics .tt-page-header-wrapper .tt-header-referral-link .anticon {
+  font-size: 19px;
+  line-height: 1;
+}
+.toplevel_page_timetics .tt-page-header-wrapper .tt-header-referral-link:hover, .toplevel_page_timetics .tt-page-header-wrapper .tt-header-referral-link:focus {
+  color: var(--tt-primary-color);
+  border-color: var(--tt-primary-color);
+  background: transparent;
+}
 .toplevel_page_timetics .tt-shortcode-list .ant-input-group-addon .anticon:hover path {
   stroke: var(--tt-primary-color);
 }
@@ -3344,6 +3365,129 @@
   display: block;
   position: relative;
   z-index: 1;
+}
+.ss-about-us .ss-referral-section {
+  position: relative;
+  background: #fff;
+  border: 1px solid #f1f5f9;
+  border-radius: 16px;
+  overflow: hidden;
+  padding: 40px 32px;
+  margin-bottom: 40px;
+}
+@media screen and (min-width: 769px) {
+  .ss-about-us .ss-referral-section {
+    padding: 24px 48px;
+  }
+}
+@media screen and (max-width: 768px) {
+  .ss-about-us .ss-referral-section {
+    margin-bottom: 20px;
+  }
+}
+.ss-about-us .ss-referral-section__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+}
+@media screen and (min-width: 769px) {
+  .ss-about-us .ss-referral-section__inner {
+    flex-direction: row;
+  }
+}
+.ss-about-us .ss-referral-section__content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+@media screen and (min-width: 769px) {
+  .ss-about-us .ss-referral-section__content {
+    flex-basis: 55%;
+  }
+}
+.ss-about-us .ss-referral-section__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #2f5bff;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 999px;
+  width: fit-content;
+}
+.ss-about-us .ss-referral-section__badge svg {
+  width: 16px;
+  height: 16px;
+}
+.ss-about-us .ss-referral-section__badge span {
+  font-size: 14px;
+  font-weight: 600;
+}
+.ss-about-us .ss-referral-section__title {
+  font-size: 36px;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.9);
+  line-height: 1.15;
+  margin: 0;
+}
+@media screen and (min-width: 769px) {
+  .ss-about-us .ss-referral-section__title {
+    font-size: 44px;
+  }
+}
+.ss-about-us .ss-referral-section__desc {
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.6);
+  line-height: 1.7;
+  max-width: 28rem;
+  margin: 0;
+}
+.ss-about-us .ss-referral-section__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffb800;
+  color: #000 !important;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 14px 24px;
+  border-radius: 10px;
+  width: fit-content;
+  margin-top: 8px;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+  -webkit-transition: background-color 0.2s ease;
+  -moz-transition: background-color 0.2s ease;
+  -ms-transition: background-color 0.2s ease;
+}
+.ss-about-us .ss-referral-section__cta svg {
+  width: 16px;
+  height: 16px;
+}
+.ss-about-us .ss-referral-section__cta:hover, .ss-about-us .ss-referral-section__cta:focus {
+  background: #f0ae00;
+  color: #000 !important;
+}
+.ss-about-us .ss-referral-section__illustration {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+@media screen and (min-width: 769px) {
+  .ss-about-us .ss-referral-section__illustration {
+    flex-basis: 45%;
+    justify-content: flex-end;
+  }
+}
+.ss-about-us .ss-referral-section__illustration img {
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+  object-fit: contain;
 }
 .ss-about-us .ss-section-title {
   margin: 40px 0 16px !important;

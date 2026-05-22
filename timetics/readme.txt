@@ -8,7 +8,7 @@ Requires PHP: 7.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Online appointment booking and scheduling system with calendar, payments, reminders, and easy class booking for tutors, coaches, and educators.
+Online booking and scheduling system for appointments, meetings, consultations, classes, payments, reminders, and calendar sync.
 
 == Description ==
 
@@ -290,6 +290,10 @@ Yes. Timetics PRO includes Twilio integration for direct SMS reminders, as well 
 = How do I suggest a feature for future versions of Timetics? =
 
 Share your feedback or feature request on the [Timetics Roadmap](https://arraytics.com/timetics-roadmaps/). We actively review community suggestions when planning new releases.
+
+= Where do I report security bugs found in this plugin? =
+ 
+Please report security bugs found in the source code of the Timetics plugin through the [Patchstack Vulnerability Disclosure  Program](https://patchstack.com/database/vdp/b805dd61-8b06-4378-88be-cb596219ebf5). The Patchstack team will assist you with verification, CVE assignment, and notify the developers of this plugin.
 
 == External Services ==
 This plugin connects to the following external services:

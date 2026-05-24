@@ -7,6 +7,7 @@
 namespace Timetics\Core\Integrations\Stripe;
 
 use Timetics\Base\Api;
+use Timetics\Core\Bookings\Booking;
 use Timetics\Utils\Singleton;
 use WP_HTTP_Response;
 
@@ -64,19 +65,57 @@ class Api_Stripe extends Api {
     public function create_payment( $request ) {
         $data = json_decode( $request->get_body(), true );
 
-        $amount   = ! empty( $data['amount'] ) ? floatval( $data['amount'] ) : 0;
-        $currency = ! empty( $data['currency'] ) ? sanitize_text_field( $data['currency'] ) : '';
+        $amount     = ! empty( $data['amount'] ) ? floatval( $data['amount'] ) : 0;
+        $currency   = ! empty( $data['currency'] ) ? sanitize_text_field( $data['currency'] ) : '';
+        $booking_id = ! empty( $data['booking_id'] ) ? absint( $data['booking_id'] ) : 0;
+        $token      = ! empty( $data['security_token'] ) ? sanitize_text_field( $data['security_token'] ) : '';
+
+        $metadata = [];
+
+        // Bind PaymentIntent to a real booking by metadata so make_payment can
+        // verify ownership server-side. Reject mismatched / missing bindings.
+        if ( $booking_id > 0 && '' !== $token ) {
+            $booking = new Booking( $booking_id );
+
+            if ( ! $booking->is_booking() ) {
+                return new WP_HTTP_Response(
+                    [
+                        'success'     => 0,
+                        'status_code' => 404,
+                        'message'     => __( 'Invalid booking id.', 'timetics' ),
+                    ],
+                    404
+                );
+            }
+
+            $stored = (string) $booking->get_security_token();
+
+            if ( '' === $stored || ! hash_equals( $stored, $token ) ) {
+                return new WP_HTTP_Response(
+                    [
+                        'success'     => 0,
+                        'status_code' => 403,
+                        'message'     => __( 'Invalid booking token.', 'timetics' ),
+                    ],
+                    403
+                );
+            }
+
+            $metadata['booking_id']     = $booking_id;
+            $metadata['security_token'] = $stored;
+        }
 
         $payment = new StripePayment();
 
         $payment = $payment->create_payment(
             [
-				'amount'   => $amount * 100,
-				'currency' => $currency,
-			]
+                'amount'   => $amount * 100,
+                'currency' => $currency,
+                'metadata' => $metadata,
+            ]
         );
 
-        if ( is_wp_error( $data ) ) {
+        if ( is_wp_error( $payment ) ) {
             $response = [
                 'success'     => 0,
                 'status_code' => 403,

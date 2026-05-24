@@ -64,7 +64,7 @@ defined( 'ABSPATH' ) || exit;
 
                 <p class="greeting" style="color: #556880; margin-bottom: 5px">
                     <?php
-                    /* translators: %s: Customer name */
+                    /* translators: %s: Recipient name */
                     printf( esc_html__( 'Hi %s,', 'timetics' ), esc_html( $timetics_customer_name ) );?>
                 </p>
 

@@ -34,6 +34,9 @@ class Hooks {
 
         add_action( 'set_user_role', [ $this, 'set_roles' ], 10, 2 );
 
+        add_filter( 'show_admin_bar', [ $this, 'hide_admin_bar_for_customers' ] );
+        add_action( 'admin_init', [ $this, 'block_admin_for_customers' ] );
+
         add_filter( 'timetics_menu', [ $this, 'update_busyness_menu' ] );
 
         add_filter( 'timetics_settings', [ $this, 'set_google_auth_url' ] );
@@ -180,6 +183,59 @@ class Hooks {
     }
 
     /**
+     * Hide the WP admin toolbar for customer-only users.
+     *
+     * @param   bool  $show
+     *
+     * @return  bool
+     */
+    public function hide_admin_bar_for_customers( $show ) {
+        $user = wp_get_current_user();
+
+        if ( ! $user || ! $user->exists() ) {
+            return $show;
+        }
+
+        if ( $this->is_customer_only( $user ) ) {
+            return false;
+        }
+
+        return $show;
+    }
+
+    /**
+     * Redirect customer-only users away from /wp-admin/.
+     *
+     * @return  void
+     */
+    public function block_admin_for_customers() {
+        if ( wp_doing_ajax() ) {
+            return;
+        }
+
+        $user = wp_get_current_user();
+
+        if ( $user && $user->exists() && $this->is_customer_only( $user ) ) {
+            wp_safe_redirect( home_url() );
+            exit;
+        }
+    }
+
+    /**
+     * Whether the given user's only Timetics-relevant role is timetics-customer.
+     *
+     * @param   \WP_User  $user
+     *
+     * @return  bool
+     */
+    private function is_customer_only( $user ) {
+        $roles = (array) $user->roles;
+
+        return in_array( 'timetics-customer', $roles, true )
+            && ! array_intersect( $roles, [ 'administrator', 'editor', 'author', 'contributor', 'timetics-staff' ] );
+    }
+
+    /**
      * Update busyness menu item
      *
      * @param   array  $menu_items
@@ -236,48 +292,52 @@ class Hooks {
 
         $admin_email = get_option( 'admin_email' );
 
+        /* translators: {%customer_name%} is a token replaced at runtime with the recipient customer's name */
+        $customer_greeting = __( 'Hi {%customer_name%}', 'timetics' );
+        /* translators: {%host_name%} is a token replaced at runtime with the recipient host's name */
+        $host_greeting = __( 'Hi {%host_name%}', 'timetics' );
+        $new_meeting_msg = __( 'A new meeting has been scheduled.', 'timetics' );
+        /* translators: {%meeting_title%} is a token replaced at runtime with the meeting title */
+        $canceled_msg = __( '{%meeting_title%} has been canceled.', 'timetics' );
+        /* translators: {%meeting_title%} is a token replaced at runtime with the meeting title */
+        $rescheduled_msg = __( '{%meeting_title%} has been rescheduled', 'timetics' );
+        /* translators: {%meeting_title%}, {%meeting_date%}, {%meeting_time%} are tokens replaced at runtime with the meeting details */
+        $reminder_msg = __( '{%meeting_title%} at {%meeting_date%} {%meeting_time%}', 'timetics' );
+
         $defaults = [
 
             'booking_created_customer_email_from'       => $admin_email,
             'booking_created_customer_email_title'      => sprintf('%s', __( 'New meeting scheduled!', 'timetics' )),
-            /* translators: 1: Greeting with customer name, 2: Meeting scheduled message */
-            'booking_created_customer_email_body'       => sprintf('<p>%s</p><p>%s</p>', __( 'Hi {%customer_name%}', 'timetics' ), __( 'A new meeting has been scheduled.', 'timetics' )),
+            'booking_created_customer_email_body'       => sprintf('<p>%s</p><p>%s</p>', $customer_greeting, $new_meeting_msg),
 
             'booking_created_host_email_from'           => $admin_email,
             'booking_created_host_email_title'          => sprintf('%s', __( 'New meeting scheduled!', 'timetics' )),
-            /* translators: 1: Greeting with host name, 2: Meeting scheduled message */
-            'booking_created_host_email_body'           => sprintf('<p>%s</p><p>%s</p>', __( 'Hi {%host_name%}', 'timetics' ), __( 'A new meeting has been scheduled.', 'timetics' )),
+            'booking_created_host_email_body'           => sprintf('<p>%s</p><p>%s</p>', $host_greeting, $new_meeting_msg),
 
 
             'booking_canceled_customer_email_from'      => $admin_email,
             'booking_canceled_customer_email_title'     => sprintf('%s', __( 'Meeting cancelled', 'timetics' )),
-            /* translators: 1: Greeting with customer name, 2: Meeting cancellation message */
-            'booking_canceled_customer_email_body'      => sprintf('<p>%s</p><p>%s</p>', __( 'Hi {%customer_name%}', 'timetics' ), __( '{%meeting_title%} has been canceled.', 'timetics' )),
+            'booking_canceled_customer_email_body'      => sprintf('<p>%s</p><p>%s</p>', $customer_greeting, $canceled_msg),
 
             'booking_canceled_host_email_from'      => $admin_email,
             'booking_canceled_host_email_title'     => sprintf('%s', __( 'Meeting cancelled', 'timetics' )),
-            /* translators: 1: Greeting with host name, 2: Meeting cancellation message */
-            'booking_canceled_host_email_body'      => sprintf('<p>%s</p><p>%s</p>', __( 'Hi {%host_name%}', 'timetics' ), __( '{%meeting_title%} has been canceled.', 'timetics' )),
+            'booking_canceled_host_email_body'      => sprintf('<p>%s</p><p>%s</p>', $host_greeting, $canceled_msg),
 
             'booking_rescheduled_customer_email_from'   => $admin_email,
             'booking_rescheduled_customer_email_title'  => sprintf('%s', __( 'Meeting rescheduled!', 'timetics' )),
-            /* translators: 1: Greeting with host name, 2: Meeting rescheduled message */
-            'booking_rescheduled_customer_email_body'   => sprintf('<p>%s</p><p>%s</p>', __( 'Hi {%host_name%}', 'timetics' ), __( '{%meeting_title%} has been rescheduled', 'timetics' )),
+            'booking_rescheduled_customer_email_body'   => sprintf('<p>%s</p><p>%s</p>', $host_greeting, $rescheduled_msg),
 
             'booking_rescheduled_host_email_from'   => $admin_email,
             'booking_rescheduled_host_email_title'  => sprintf('%s', __('Meeting rescheduled!', 'timetics' )),
-            /* translators: 1: Greeting with host name, 2: Meeting rescheduled message */
-            'booking_rescheduled_host_email_body'   => sprintf('<p>%s</p><p>%s</p>', __( 'Hi {%host_name%}', 'timetics' ), __( '{%meeting_title%} has been rescheduled', 'timetics' )),
+            'booking_rescheduled_host_email_body'   => sprintf('<p>%s</p><p>%s</p>', $host_greeting, $rescheduled_msg),
 
             'booking_reminder_customer_email_from'      => $admin_email,
             'booking_reminder_customer_email_title'     => sprintf('%s', __( 'Meeting time reminder', 'timetics' )),
-            /* translators: 1: Greeting with customer name, 2: Meeting reminder details */
-            'booking_reminder_customer_email_body'      => sprintf('<p>%s</p><p>%s</p>', __( 'Hi {%customer_name%}', 'timetics' ), __( '{%meeting_title%} at {%meeting_date%} {%meeting_time%}', 'timetics' )),
+            'booking_reminder_customer_email_body'      => sprintf('<p>%s</p><p>%s</p>', $customer_greeting, $reminder_msg),
 
             'booking_reminder_host_email_from'          => $admin_email,
             'booking_reminder_host_email_title'         => sprintf('%s', __( 'Meeting time reminder', 'timetics' )),
-            /* translators: 1: Greeting with host name, 2: Meeting reminder details */
-            'booking_reminder_host_email_body'          => sprintf('<p>%s</p><p>%s</p>', __( 'Hi {%host_name%}', 'timetics' ), __( '{%meeting_title%} at {%meeting_date%} {%meeting_time%}', 'timetics' )),
+            'booking_reminder_host_email_body'          => sprintf('<p>%s</p><p>%s</p>', $host_greeting, $reminder_msg),
         ];
 
         $settings = wp_parse_args( $settings, $defaults );

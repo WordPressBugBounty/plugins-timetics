@@ -229,11 +229,13 @@ final class Bootstrap {
         // Register scripts and styles first
         if ( $this->is_request( 'admin' ) ) {
             add_action( 'admin_enqueue_scripts', [ $this, 'admin_scripts' ] );
+            add_action( 'admin_enqueue_scripts', [ $this, 'preload_js_translations' ], 5 );
             add_action( 'admin_footer', [ $this, 'admin_helpscout_beacon' ] );
         }
 
         if ( $this->is_request( 'frontend' ) ) {
             add_action( 'wp_enqueue_scripts', array( $this, 'frontend_scripts' ) );
+            add_action( 'wp_enqueue_scripts', [ $this, 'preload_js_translations' ], 5 );
         }
 
         // Register admin menu
@@ -259,6 +261,107 @@ final class Bootstrap {
      */
     public function demo_url(){
         return "https://arraytics.com/timetics/";
+    }
+
+    /**
+     * Preload PHP-loaded translations into wp.i18n before any bundle runs.
+     *
+     * Why: webpack bundles collapse many source files into one. wp_set_script_translations()
+     * looks up a JSON file hashed from the registered bundle URL, but Loco and wp i18n make-json
+     * shard JSON by source-file path. The hashes never match, so per-script JSON loading silently
+     * fails. Reading the textdomain that load_text_domain() already populated and injecting it via
+     * setLocaleData() bypasses the hash mismatch entirely — every __() call across every bundle
+     * resolves from in-memory data set before any React component renders.
+     */
+    public function preload_js_translations() {
+        $locale       = determine_locale();
+        $plural_forms = 'nplurals=2; plural=(n != 1);';
+
+        // Read .mo first — canonical, always-fresh source that Loco rewrites on every save.
+        // .l10n.php cache often lags behind .mo because Loco does not regenerate it.
+        $messages = $this->extract_mo_messages( $locale, $plural_forms );
+
+        // Merge .l10n.php on top (covers WP 6.5+ system-translated plugins where only .l10n.php exists).
+        foreach ( [
+            WP_LANG_DIR . '/loco/plugins/timetics-' . $locale . '.l10n.php',
+            TIMETICS_PLUGIN_DIR . 'languages/timetics-' . $locale . '.l10n.php',
+            WP_LANG_DIR . '/plugins/timetics-' . $locale . '.l10n.php',
+        ] as $file ) {
+            if ( ! is_readable( $file ) ) {
+                continue;
+            }
+            $data = include $file;
+            if ( ! is_array( $data ) || empty( $data['messages'] ) ) {
+                continue;
+            }
+            $messages = array_merge( $messages, $data['messages'] );
+            if ( ! empty( $data['plural-forms'] ) ) {
+                $plural_forms = $data['plural-forms'];
+            }
+        }
+
+        if ( empty( $messages ) ) {
+            return;
+        }
+
+        $locale_data = [
+            '' => [
+                'domain'       => 'timetics',
+                'lang'         => $locale,
+                'plural-forms' => $plural_forms,
+            ],
+        ];
+
+        foreach ( $messages as $msgid => $msgstr ) {
+            if ( is_string( $msgid ) && $msgid !== '' && is_string( $msgstr ) && $msgstr !== '' ) {
+                $locale_data[ $msgid ] = [ $msgstr ];
+            }
+        }
+
+        wp_add_inline_script(
+            'wp-i18n',
+            sprintf(
+                'wp.i18n.setLocaleData( %s, "timetics" );',
+                wp_json_encode( $locale_data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES )
+            ),
+            'after'
+        );
+    }
+
+    /**
+     * Fallback: parse .mo file to extract all translations.
+     */
+    private function extract_mo_messages( $locale, &$plural_forms ) {
+        $candidates = [
+            WP_LANG_DIR . '/loco/plugins/timetics-' . $locale . '.mo',
+            TIMETICS_PLUGIN_DIR . 'languages/timetics-' . $locale . '.mo',
+            WP_LANG_DIR . '/plugins/timetics-' . $locale . '.mo',
+        ];
+
+        $messages = [];
+
+        foreach ( $candidates as $mofile ) {
+            if ( ! is_readable( $mofile ) ) {
+                continue;
+            }
+            if ( ! class_exists( 'MO' ) ) {
+                require_once ABSPATH . WPINC . '/pomo/mo.php';
+            }
+            $mo = new \MO();
+            if ( ! $mo->import_from_file( $mofile ) ) {
+                continue;
+            }
+            if ( ! empty( $mo->headers['Plural-Forms'] ) ) {
+                $plural_forms = $mo->headers['Plural-Forms'];
+            }
+            foreach ( $mo->entries as $msgid => $entry ) {
+                if ( ! empty( $entry->translations[0] ) ) {
+                    $messages[ $msgid ] = $entry->translations[0];
+                }
+            }
+        }
+
+        return $messages;
     }
 
     /**
@@ -303,6 +406,7 @@ final class Bootstrap {
 
         wp_enqueue_script( 'timetics-dashboard-scripts', TIMETICS_ASSETS_URL . 'js/dashboard.js', [ 'wp-plugins', 'wp-i18n', 'wp-element', 'wp-dom', 'wp-data', 'wp-color-picker' ], TIMETICS_VERSION, true );
 
+        wp_set_script_translations( 'timetics-dashboard-scripts', 'timetics', TIMETICS_PLUGIN_DIR . 'languages/' );
 
         $localize_obj = array(
             'site_url'            => site_url(),
@@ -504,7 +608,7 @@ final class Bootstrap {
 		});
 		window.Beacon('init', '4be24aa2-ee50-483c-a90c-db4216664d65');
 		window.Beacon('on', 'ready', function(){
-			window.Beacon('show');
+			window.Beacon('close');
 		});
 
 		</script>

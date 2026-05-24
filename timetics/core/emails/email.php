@@ -51,11 +51,18 @@ abstract class Email {
      * @return  string
      */
     public function get_headers() {
+        $charset = get_bloginfo( 'charset' );
+        $charset = $charset ? $charset : 'UTF-8';
+
         $headers = 'MIME-Version: 1.0' . "\r\n";
-        $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+        $headers .= 'Content-type: text/html; charset=' . $charset . "\r\n";
         $from       = get_bloginfo( 'name' );
         $from_email = timetics_get_option('booking_created_customer_email_from');
-    
+
+        if ( function_exists( 'mb_encode_mimeheader' ) ) {
+            $from = mb_encode_mimeheader( $from, $charset );
+        }
+
         // Append the "From" header
         $headers .= 'From: ' .$from. ' <' . $from_email . '> '  . "\r\n";
 

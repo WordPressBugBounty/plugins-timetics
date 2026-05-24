@@ -17,6 +17,7 @@ use Timetics\Core\Emails\New_Event_Customer_Email;
 use Timetics\Core\Emails\New_Event_Email;
 use Timetics\Core\Emails\Update_Event_Customer_Email;
 use Timetics\Core\Emails\Update_Event_Email;
+use Timetics\Core\Integrations\Stripe\StripePayment;
 use Timetics\Core\Staffs\Staff;
 use Timetics\Utils\Singleton;
 use TimeticsPro\Core\SeatPlan\SeatPlan;
@@ -117,6 +118,16 @@ class Api_Booking extends Api {
                 [
                     'methods'             => \WP_REST_Server::EDITABLE,
                     'callback'            => [$this, 'make_payment'],
+                    'permission_callback' => [$this, 'make_payment_permission_callback'],
+                ],
+            ]
+        );
+
+        register_rest_route(
+            $this->namespace, '/' . $this->rest_base . '/(?P<booking_id>[\d]+)/payment-intent', [
+                [
+                    'methods'             => \WP_REST_Server::CREATABLE,
+                    'callback'            => [$this, 'bind_payment_intent'],
                     'permission_callback' => [$this, 'make_payment_permission_callback'],
                 ],
             ]
@@ -572,42 +583,192 @@ class Api_Booking extends Api {
         $booking_id             = intval( $request['booking_id'] );
         $booking                = new Booking( $booking_id );
         $data                   = json_decode( $request->get_body(), true );
-        $status                 = ! empty( $data['status'] ) ? sanitize_text_field( $data['status'] ) : '';
-        $default_booking_status = timetics_get_option( 'default_booking_status', 'approved' );
-        $post_status            = 'succeeded' === $status ? $default_booking_status : ( 'failed' === $status ? 'failed' : 'pending' );
+        $data                   = is_array( $data ) ? $data : [];
+        $client_status          = ! empty( $data['status'] ) ? sanitize_text_field( $data['status'] ) : '';
         $payment_method         = ! empty( $data['payment_method'] ) ? sanitize_text_field( $data['payment_method'] ) : '';
-        $payment_details        = ! empty( $data['payment_details'] ) ? $data['payment_details'] : '';
+        $default_booking_status = timetics_get_option( 'default_booking_status', 'approved' );
         $type                   = $booking->get_type();
 
         if ( ! $booking->is_booking() ) {
-            return [
-                'status_code' => 404,
-                'message'     => esc_html__( 'Invalid booking id.', 'timetics' ),
-                'data'        => [],
-            ];
+            return new WP_HTTP_Response(
+                [
+                    'success'     => 0,
+                    'status_code' => 404,
+                    'message'     => esc_html__( 'Invalid booking id.', 'timetics' ),
+                ],
+                404
+            );
+        }
+
+        // Idempotency: refuse re-approval of a booking that already finalized.
+        $current_status     = (string) $booking->get_status();
+        $finalized_statuses = [ 'approved', 'completed', 'failed', 'cancelled', 'cancel' ];
+        if ( in_array( $current_status, $finalized_statuses, true ) ) {
+            return new WP_HTTP_Response(
+                [
+                    'success'     => 0,
+                    'status_code' => 409,
+                    'message'     => esc_html__( 'Booking has already been finalized.', 'timetics' ),
+                ],
+                409
+            );
+        }
+
+        $verified_status   = 'pending';
+        $payment_details   = '';
+        $stored_intent_id  = '';
+
+        if ( 'stripe' === $payment_method ) {
+            $client_details = ! empty( $data['payment_details'] ) ? $data['payment_details'] : [];
+            $intent_id      = is_array( $client_details ) && ! empty( $client_details['id'] )
+                ? sanitize_text_field( (string) $client_details['id'] )
+                : '';
+
+            if ( '' === $intent_id || strpos( $intent_id, 'pi_' ) !== 0 ) {
+                if ( 'failed' === $client_status ) {
+                    $verified_status = 'failed';
+                } else {
+                    return new WP_HTTP_Response(
+                        [
+                            'success'     => 0,
+                            'status_code' => 400,
+                            'message'     => esc_html__( 'Missing payment intent.', 'timetics' ),
+                        ],
+                        400
+                    );
+                }
+            } else {
+                $intent = ( new StripePayment() )->retrieve_payment_intent( $intent_id );
+
+                if ( is_wp_error( $intent ) || ! is_array( $intent ) || empty( $intent['id'] ) ) {
+                    return new WP_HTTP_Response(
+                        [
+                            'success'     => 0,
+                            'status_code' => 502,
+                            'message'     => esc_html__( 'Cannot verify payment with Stripe.', 'timetics' ),
+                        ],
+                        502
+                    );
+                }
+
+                $expected_amount   = (int) round( (float) $booking->get_total() * 100 );
+                $expected_currency = strtolower( (string) apply_filters( 'timetics_currency', timetics_get_option( 'currency', 'USD' ) ) );
+                $intent_status     = isset( $intent['status'] ) ? (string) $intent['status'] : '';
+                $intent_amount     = isset( $intent['amount'] ) ? (int) $intent['amount'] : 0;
+                $intent_currency   = isset( $intent['currency'] ) ? strtolower( (string) $intent['currency'] ) : '';
+                $meta_booking_id   = isset( $intent['metadata']['booking_id'] ) ? (int) $intent['metadata']['booking_id'] : 0;
+                $meta_token        = isset( $intent['metadata']['security_token'] ) ? (string) $intent['metadata']['security_token'] : '';
+                $stored_token      = (string) $booking->get_security_token();
+
+                $mismatch = (
+                    'succeeded'        !== $intent_status                                        ||
+                    $expected_amount   !== $intent_amount                                        ||
+                    $expected_currency !== $intent_currency                                      ||
+                    $booking_id        !== $meta_booking_id                                      ||
+                    '' === $stored_token                                                          ||
+                    '' === $meta_token                                                            ||
+                    ! hash_equals( $stored_token, $meta_token )
+                );
+
+                if ( $mismatch ) {
+                    return new WP_HTTP_Response(
+                        [
+                            'success'     => 0,
+                            'status_code' => 402,
+                            'message'     => esc_html__( 'Payment verification failed.', 'timetics' ),
+                        ],
+                        402
+                    );
+                }
+
+                // Replay protection: this booking can be bound to exactly one
+                // PaymentIntent. A second call with a different intent fails.
+                $bound = $booking->get_stripe_payment_intent_id();
+                if ( '' !== $bound && $bound !== $intent['id'] ) {
+                    return new WP_HTTP_Response(
+                        [
+                            'success'     => 0,
+                            'status_code' => 409,
+                            'message'     => esc_html__( 'Payment intent does not match this booking.', 'timetics' ),
+                        ],
+                        409
+                    );
+                }
+
+                $stored_intent_id = $intent['id'];
+                $verified_status  = 'succeeded';
+                $payment_details  = $intent;
+            }
+        } elseif ( 'failed' === $client_status ) {
+            // Marking the user's own attempt as failed never grants access; safe to honor.
+            $verified_status = 'failed';
+        }
+        // Other payment methods (cash, on-site, etc.) stay pending here. They
+        // are approved through their own authenticated/admin paths.
+        $post_status = 'succeeded' === $verified_status
+            ? $default_booking_status
+            : ( 'failed' === $verified_status ? 'failed' : 'pending' );
+
+        $finalizing = 'succeeded' === $verified_status && '' !== $stored_intent_id;
+
+        if ( $finalizing ) {
+            $claimed = add_post_meta( $booking_id, '_tt_stripe_payment_intent_id', $stored_intent_id, true );
+            if ( false === $claimed ) {
+                $existing = (string) get_post_meta( $booking_id, '_tt_stripe_payment_intent_id', true );
+                if ( $existing !== $stored_intent_id ) {
+                    return new WP_HTTP_Response(
+                        [
+                            'success'     => 0,
+                            'status_code' => 409,
+                            'message'     => esc_html__( 'Payment intent does not match this booking.', 'timetics' ),
+                        ],
+                        409
+                    );
+                }
+
+                if ( 'pending' !== (string) $booking->get_status() ) {
+                    return new WP_HTTP_Response(
+                        [
+                            'success'     => 1,
+                            'status_code' => 200,
+                            'message'     => esc_html__( 'Payment already finalized.', 'timetics' ),
+                        ],
+                        200
+                    );
+                }
+            }
         }
 
         $update = $booking->update(
             [
                 'post_status'     => $post_status,
-                'payment_status'  => $status,
+                'payment_status'  => $verified_status,
                 'payment_details' => $payment_details,
                 'payment_method'  => $payment_method,
             ]
         );
 
         if ( is_wp_error( $update ) ) {
-            $data = [
-                'success'     => 0,
-                'status_code' => 409,
-                /* translators: Action */
-                'message'     => $update->get_error_message(),
-            ];
-
-            return new WP_HTTP_Response( $data, 409 );
+            // Roll back the claim so a retry can finalize cleanly.
+            if ( $finalizing ) {
+                delete_post_meta( $booking_id, '_tt_stripe_payment_intent_id', $stored_intent_id );
+            }
+            return new WP_HTTP_Response(
+                [
+                    'success'     => 0,
+                    'status_code' => 409,
+                    /* translators: Action */
+                    'message'     => $update->get_error_message(),
+                ],
+                409
+            );
         }
 
         if ( $default_booking_status === $post_status ) {
+            // Rotate the security token so the same one cannot drive a second
+            // approval after this booking has finalized.
+            $booking->rotate_security_token();
+
             $booking->create_event();
 
             if( 'timetics-event' == $type ){
@@ -678,6 +839,18 @@ class Api_Booking extends Api {
         $last_name       = ! empty( $data['last_name'] ) ? sanitize_text_field( $data['last_name'] ) : '';
         $email           = ! empty( $data['email'] ) ? sanitize_text_field( $data['email'] ) : '';
         $phone           = ! empty( $data['phone'] ) ? sanitize_text_field( $data['phone'] ) : '';
+
+        // Fallback: when built-in phone field absent (e.g., non attendee-call location),
+        // pick phone from custom form field so customer record still gets it.
+        if ( empty( $phone ) && ! empty( $data['custom_form_data'] ) ) {
+            $custom_form = is_array( $data['custom_form_data'] ) ? $data['custom_form_data'] : (array) json_decode( wp_json_encode( $data['custom_form_data'] ), true );
+            foreach ( [ 'phone', 'Phone', 'phone_number', 'mobile', 'contact_number' ] as $key ) {
+                if ( ! empty( $custom_form[ $key ] ) ) {
+                    $phone = sanitize_text_field( $custom_form[ $key ] );
+                    break;
+                }
+            }
+        }
         $city            = ! empty( $data['city'] ) ? sanitize_text_field( $data['city'] ) : '';
         $state           = ! empty( $data['state'] ) ? sanitize_text_field( $data['state'] ) : '';
         $post_code       = ! empty( $data['post_code'] ) ? sanitize_text_field( $data['post_code'] ) : '';
@@ -692,8 +865,7 @@ class Api_Booking extends Api {
         $end_date        = ! empty( $data['end_date'] ) ? sanitize_text_field( $data['end_date'] ) : $start_date;
         $start_time      = ! empty( $data['start_time'] ) ? sanitize_text_field( $data['start_time'] ) : '';
         $end_time        = ! empty( $data['end_time'] ) ? sanitize_text_field( $data['end_time'] ) : '';
-        $order_total     = ! empty( $data['order_total'] ) ? intval( $data['order_total'] ) : 0;
-        $status          = ! empty( $data['status'] ) ? sanitize_text_field( $data['status'] ) : timetics_get_option( 'default_booking_status', 'approved' );
+        $client_status   = ! empty( $data['status'] ) ? sanitize_text_field( $data['status'] ) : '';
         $location        = ! empty( $data['location'] ) ? sanitize_text_field( $data['location'] ) : '';
         $location_type   = ! empty( $data['location_type'] ) ? sanitize_text_field( $data['location_type'] ) : '';
         $description     = ! empty( $data['description'] ) ? sanitize_text_field( $data['description'] ) : '';
@@ -704,14 +876,28 @@ class Api_Booking extends Api {
         $booking_time    = ! empty( $data['booking_createAt'] ) ? $data['booking_createAt'] : '';
         $action          = $id ? 'updated' : 'created';
 
-        // For WooCommerce payments, create booking in failed status until payment is confirmed
-        if ( 'woocommerce' === $payment_method && 'created' === $action && $order_total != 0 ) {
-            $status = 'failed';
-        }
+        $is_privileged    = current_user_can( 'manage_timetics' ) || current_user_can( 'edit_booking' );
+        $server_total     = (int) $this->calculate_order_total( $data );
+        $default_status   = timetics_get_option( 'default_booking_status', 'approved' );
+        $payment_method_l = strtolower( $payment_method );
 
-        // For Stripe payments, create booking in pending status until payment is confirmed
-        if ( 'stripe' === strtolower( $payment_method ) && 'created' === $action && $order_total != 0 ) {
-            $status = 'pending';
+        if ( $is_privileged ) {
+            $status = '' !== $client_status ? $client_status : $default_status;
+        } elseif ( 'created' === $action ) {
+            if ( $server_total > 0 && 'stripe' === $payment_method_l ) {
+                $status = 'pending';
+            } elseif ( $server_total > 0 && 'woocommerce' === $payment_method_l ) {
+                $status = 'failed';
+            } else {
+                $status = $default_status;
+            }
+        } else {
+            $current_status = ( new Booking( $id ) )->get_status();
+            if ( 'cancel' === $client_status ) {
+                $status = 'cancel';
+            } else {
+                $status = $current_status;
+            }
         }
         $appointment_token = ! empty( $data['appointment_token'] ) ? sanitize_text_field( $data['appointment_token'] ) : '';
 
@@ -1014,22 +1200,28 @@ class Api_Booking extends Api {
 
         $booking_title = $appointment->is_appointment() ? $appointment->get_name() : $booking->get_appointment_name();
 
+        $payment_details_raw = $booking->get_payment_details();
+        $payment_details     = is_array( $payment_details_raw ) ? $payment_details_raw : [];
+
         $response = [
-            'id'            => $booking->get_id(),
-            'random_id'     => $booking->get_random_id(),
-            'status'        => $booking->get_status(),
-            'order_total'   => $booking->get_total(),
-            'start_date'    => $start_date_time->format( 'Y-m-d' ),
-            'end_date'      => $end_date_time->format( 'Y-m-d' ),
-            'date'          => $date,
-            'start_time'    => $start_date_time->format( 'h:i a' ),
-            'end_time'      => $end_date_time->format( 'h:i a' ),
-            'booking_time'  => $booking->get_booking_time(),
-            'location'      => $booking->get_location(),
-            'location_type' => $booking->get_location_type(),
-            'description'   => $booking->get_description(),
-            'cancel_reason' => $booking->get_cancel_reason(),
-            'security_token'=> $booking->get_security_token(),
+            'id'              => $booking->get_id(),
+            'random_id'       => $booking->get_random_id(),
+            'status'          => $booking->get_status(),
+            'order_total'     => $booking->get_total(),
+            'start_date'      => $start_date_time->format( 'Y-m-d' ),
+            'end_date'        => $end_date_time->format( 'Y-m-d' ),
+            'date'            => $date,
+            'start_time'      => $start_date_time->format( 'h:i a' ),
+            'end_time'        => $end_date_time->format( 'h:i a' ),
+            'booking_time'    => $booking->get_booking_time(),
+            'location'        => $booking->get_location(),
+            'location_type'   => $booking->get_location_type(),
+            'description'     => $booking->get_description(),
+            'cancel_reason'   => $booking->get_cancel_reason(),
+            'security_token'  => $booking->get_security_token(),
+            'payment_method'  => $booking->get_payment_method(),
+            'payment_status'  => $booking->get_payment_status(),
+            'payment_details' => $payment_details,
             'customer'      => [
                 'id'         => $customer->get_id(),
                 'full_name'  => $customer->get_display_name(),
@@ -1296,10 +1488,10 @@ class Api_Booking extends Api {
             return false;
         }
 
-        // Guests: must provide a valid token
+        // Guests: must provide a valid token (constant-time compare).
         if ( ! empty( $appointment_token ) ) {
-            $stored_token = $booking->get_security_token();
-            if ($appointment_token === $stored_token && !empty($stored_token)) {
+            $stored_token = (string) $booking->get_security_token();
+            if ( '' !== $stored_token && hash_equals( $stored_token, (string) $appointment_token ) ) {
                 return true;
             }
         }
@@ -1332,10 +1524,10 @@ class Api_Booking extends Api {
             return false;
         }
 
-        // Guests: must provide a valid token
+        // Guests: must provide a valid token (constant-time compare).
         if ( ! empty( $appointment_token ) ) {
-            $stored_token = $booking->get_security_token();
-            if ($appointment_token === $stored_token && !empty($stored_token)) {
+            $stored_token = (string) $booking->get_security_token();
+            if ( '' !== $stored_token && hash_equals( $stored_token, (string) $appointment_token ) ) {
                 return true;
             }
         } 
@@ -1387,33 +1579,156 @@ class Api_Booking extends Api {
         return $original_email;
     }
 
+    /**
+     * Bind a Stripe PaymentIntent to a booking by writing the booking_id and security_token into the PaymentIntent's metadata.
+     *
+     * @param \WP_REST_Request $request
+     * @return \WP_HTTP_Response
+     */
+    public function bind_payment_intent( $request ) {
+        $booking_id = (int) $request['booking_id'];
+        $booking    = new Booking( $booking_id );
+
+        if ( ! $booking->is_booking() ) {
+            return new WP_HTTP_Response(
+                [
+                    'success'     => 0,
+                    'status_code' => 404,
+                    'message'     => esc_html__( 'Invalid booking id.', 'timetics' ),
+                ],
+                404
+            );
+        }
+
+        $body      = json_decode( $request->get_body(), true );
+        $body      = is_array( $body ) ? $body : [];
+        $intent_id = ! empty( $body['payment_intent_id'] ) ? sanitize_text_field( (string) $body['payment_intent_id'] ) : '';
+
+        if ( '' === $intent_id || strpos( $intent_id, 'pi_' ) !== 0 ) {
+            return new WP_HTTP_Response(
+                [
+                    'success'     => 0,
+                    'status_code' => 400,
+                    'message'     => esc_html__( 'Invalid payment intent id.', 'timetics' ),
+                ],
+                400
+            );
+        }
+
+        $stripe = new StripePayment();
+
+        $bound = $booking->get_stripe_payment_intent_id();
+        if ( '' !== $bound && $bound !== $intent_id ) {
+            return new WP_HTTP_Response(
+                [
+                    'success'     => 0,
+                    'status_code' => 409,
+                    'message'     => esc_html__( 'Booking already bound to another payment intent.', 'timetics' ),
+                ],
+                409
+            );
+        }
+
+        $intent = $stripe->retrieve_payment_intent( $intent_id );
+
+        if ( is_wp_error( $intent ) || ! is_array( $intent ) || empty( $intent['id'] ) ) {
+            return new WP_HTTP_Response(
+                [
+                    'success'     => 0,
+                    'status_code' => 502,
+                    'message'     => esc_html__( 'Cannot verify payment intent with Stripe.', 'timetics' ),
+                ],
+                502
+            );
+        }
+
+        $expected_amount   = (int) round( (float) $booking->get_total() * 100 );
+        $expected_currency = strtolower( (string) apply_filters( 'timetics_currency', timetics_get_option( 'currency', 'USD' ) ) );
+        $intent_amount     = isset( $intent['amount'] ) ? (int) $intent['amount'] : 0;
+        $intent_currency   = isset( $intent['currency'] ) ? strtolower( (string) $intent['currency'] ) : '';
+        $intent_meta_book  = isset( $intent['metadata']['booking_id'] ) ? (int) $intent['metadata']['booking_id'] : 0;
+
+        if ( $expected_amount <= 0 || $intent_amount !== $expected_amount || $intent_currency !== $expected_currency ) {
+            return new WP_HTTP_Response(
+                [
+                    'success'     => 0,
+                    'status_code' => 409,
+                    'message'     => esc_html__( 'Payment intent does not match this booking.', 'timetics' ),
+                ],
+                409
+            );
+        }
+
+        if ( 0 !== $intent_meta_book && $booking_id !== $intent_meta_book ) {
+            return new WP_HTTP_Response(
+                [
+                    'success'     => 0,
+                    'status_code' => 409,
+                    'message'     => esc_html__( 'Payment intent is bound to another booking.', 'timetics' ),
+                ],
+                409
+            );
+        }
+
+        $result = $stripe->update_payment_intent(
+            $intent_id,
+            [
+                'booking_id'     => $booking_id,
+                'security_token' => (string) $booking->get_security_token(),
+            ]
+        );
+
+        if ( is_wp_error( $result ) ) {
+            return new WP_HTTP_Response(
+                [
+                    'success'     => 0,
+                    'status_code' => 502,
+                    'message'     => $result->get_error_message(),
+                ],
+                502
+            );
+        }
+
+        return new WP_HTTP_Response(
+            [
+                'success'     => 1,
+                'status_code' => 200,
+                'message'     => esc_html__( 'Payment intent bound.', 'timetics' ),
+            ],
+            200
+        );
+    }
+
     public function make_payment_permission_callback( $request ) {
 
         $booking_id        = (int) $request->get_param('booking_id');
         $appointment_token = sanitize_text_field( $request->get_param('appointment_token') );
-    
+
         if ( empty( $booking_id ) || empty( $appointment_token ) ) {
             return false;
         }
-    
+
         $booking = new Booking( $booking_id );
-    
+
         if ( ! $booking->is_booking() ) {
             return false;
         }
-    
+
         $stored_token = $booking->get_security_token();
-    
+
         if ( empty( $stored_token ) ) {
             return false;
         }
-    
+
         // constant-time comparison
-        if ( hash_equals( $stored_token, $appointment_token ) ) {
-            return true;
+        if ( ! hash_equals( $stored_token, $appointment_token ) ) {
+            return false;
         }
-    
-        return false;
+        if ( 'pending' !== (string) $booking->get_status() ) {
+            return false;
+        }
+
+        return true;
     }
 
 }

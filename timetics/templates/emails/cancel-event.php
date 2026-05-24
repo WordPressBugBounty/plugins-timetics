@@ -52,7 +52,7 @@ defined( 'ABSPATH' ) || exit;
             <?php else: ?>
                 <p class="greeting" style="color: #556880; margin-bottom: 5px">
                     <?php
-                    /* translators: %s: Staff name */
+                    /* translators: %s: Recipient name */
                     printf( esc_html__( 'Hi %s,', 'timetics' ), esc_html( $timetics_staff_name ) );?>
                 </p>
 

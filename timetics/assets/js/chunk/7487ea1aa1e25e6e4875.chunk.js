@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunktimetics=self.webpackChunktimetics||[]).push([[644],{3644(e,t,c){c.r(t),c.d(t,{default:()=>a});var s=c(7767);const a=function(){return React.createElement("div",{className:"tt-customer-list"},React.createElement(s.sv,null))}}}]);

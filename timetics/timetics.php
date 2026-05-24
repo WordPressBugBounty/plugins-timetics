@@ -4,7 +4,7 @@
  * Plugin Name:       Timetics - Appointment Booking Calendar & Scheduling System
  * Plugin URI:        https://arraytics.com/timetics/
  * Description:       Schedule, Appointment and Seat Booking plugin.
- * Version:           1.0.56
+ * Version:           1.0.57
  * Requires at least: 5.2
  * Requires PHP:      7.3
  * Author:            Arraytics
@@ -56,7 +56,7 @@ final class Timetics {
      * @return string
      */
     public static function get_version() {
-        return '1.0.56';
+        return '1.0.57';
     }
 
     /**
@@ -117,10 +117,24 @@ final class Timetics {
      * @return void
      */
     public function load_text_domain() {
-        $locale = apply_filters( 'timetics_plugin_locale', get_user_locale(), 'timetics' );
+        $locale = determine_locale();
+        $locale = apply_filters( 'plugin_locale', $locale, 'timetics' );
+        $locale = apply_filters( 'timetics_plugin_locale', $locale, 'timetics' );
 
-        unload_textdomain( 'timetics' );
-        load_textdomain( 'timetics', WP_LANG_DIR . '/timetics/timetics-' . $locale . '.mo' );
+        $mofile = 'timetics-' . $locale . '.mo';
+
+        // Loco "Custom" location.
+        if ( file_exists( WP_LANG_DIR . '/loco/plugins/' . $mofile ) ) {
+            load_textdomain( 'timetics', WP_LANG_DIR . '/loco/plugins/' . $mofile );
+        }
+
+        // Loco "System" location.
+        if ( file_exists( WP_LANG_DIR . '/plugins/' . $mofile ) ) {
+            load_textdomain( 'timetics', WP_LANG_DIR . '/plugins/' . $mofile );
+        }
+
+        // Loco "Author" location (plugin's own /languages/).
+        load_plugin_textdomain( 'timetics', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
     }
 
     /**
@@ -295,6 +309,9 @@ final class Timetics {
 
         // Create new woocommerce product category for timetics meeting
         timetics_add_woocommerce_product_cat();
+
+        // Force rewrite-rule flush on activation; the maybe_flush_rules guard handles subsequent upgrades.
+        delete_option( 'timetics_rewrite_version' );
 
         // Update option for onboard settings.
         $timetics_onboard_setup = get_option( 'timetics_onboard_setup' );

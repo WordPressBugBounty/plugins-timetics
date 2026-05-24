@@ -2,8 +2,8 @@
 Contributors: arraytics, ehsanriyadh
 Tags: appointment booking, booking, booking calendar, scheduling, appointment scheduler, online booking, elearning
 Requires at least: 5.2
-Tested up to: 6.9
-Stable tag: 1.0.56
+Tested up to: 7.0
+Stable tag: 1.0.57
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -317,6 +317,16 @@ Handles secure online payment transactions for appointment bookings made through
 **Note:** Optional integration, only active if you configure Stripe payment settings.
 
 == Changelog ==
+
+= 1.0.57 (May 24, 2026) =
+Fix: Guest users not being redirected to frontend dashboard after login.
+Fix: Resolved fatal error when WooCommerce session is unavailable during checkout.
+Fix: Added UTF-8 support for email subjects and content.
+Fix: Corrected dynamic shortcode color rendering on frontend.
+Fix: Selective export now works for all data in bookings, customers, and staff lists.
+Tweak: Improved booking modal phone field.
+Tweak: Improved overall performance for admin panel.
+
 
 = 1.0.56 (April 27, 2026) =
 Tweak: Minor user experience improvement.

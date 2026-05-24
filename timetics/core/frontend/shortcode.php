@@ -105,7 +105,7 @@ class Shortcode {
         }else{
             ?>
             <div class="timetics-userdashbaord-wrapper">
-                <h3> <?php esc_html_e( 'You are not logged in', 'timetics' ); ?> <a href="<?php echo esc_url(wp_login_url()) ?>"><?php esc_html_e( 'Login', 'timetics' ); ?></a></h3>
+                <h3> <?php esc_html_e( 'You are not logged in', 'timetics' ); ?> <a href="<?php echo esc_url( wp_login_url( get_permalink() ) ); ?>"><?php esc_html_e( 'Login', 'timetics' ); ?></a></h3>
             </div>
             <?php
         }

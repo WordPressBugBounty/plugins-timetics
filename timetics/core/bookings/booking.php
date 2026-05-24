@@ -356,6 +356,15 @@ class Booking {
     }
 
     /**
+     * Get payment status
+     *
+     * @return  string
+     */
+    public function get_payment_status() {
+        return $this->get_prop( 'payment_status' );
+    }
+
+    /**
      * Get appointment
      *
      * @return Appointment
@@ -1125,7 +1134,7 @@ class Booking {
      */
     public function get_security_token() {
         return $this->get_prop( 'security_token' );
-    }    
+    }
 
     /**
      * Generate and store a secure reschedule token for a booking
@@ -1136,5 +1145,38 @@ class Booking {
     public function generate_security_token() {
         $token = bin2hex(random_bytes(4)); // 8 hex chars
         return $token;
+    }
+
+    /**
+     * Rotate the booking's security token so the previously-issued one cannot
+     * be reused (e.g. after a payment is approved).
+     *
+     * @return void
+     */
+    public function rotate_security_token() {
+        $meta_key  = $this->meta_prefix . 'security_token';
+        $new_token = $this->generate_security_token();
+        update_post_meta( $this->id, $meta_key, $new_token );
+    }
+
+    /**
+     * Get the Stripe PaymentIntent id bound to this booking, if any.
+     *
+     * @return string
+     */
+    public function get_stripe_payment_intent_id() {
+        return (string) get_post_meta( $this->id, '_tt_stripe_payment_intent_id', true );
+    }
+
+    /**
+     * Bind a Stripe PaymentIntent id to this booking. Used for replay
+     * protection: a second make_payment call with a different intent will be
+     * rejected.
+     *
+     * @param string $intent_id
+     * @return void
+     */
+    public function set_stripe_payment_intent_id( $intent_id ) {
+        update_post_meta( $this->id, '_tt_stripe_payment_intent_id', sanitize_text_field( (string) $intent_id ) );
     }
 }

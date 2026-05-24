@@ -368,6 +368,10 @@ class Hooks {
      * @return  array
      */
     public function hide_checkout_fields( $fields ) {
+        if ( ! function_exists( 'WC' ) || ! WC()->session ) {
+            return $fields;
+        }
+
         $session_data = WC()->session->get( 'timetics_data' );
 
         if ( ! $session_data ) {
@@ -392,6 +396,10 @@ class Hooks {
      * @return  array
      */
     public function modify_order_data( $data ) {
+        if ( ! function_exists( 'WC' ) || ! WC()->session ) {
+            return $data;
+        }
+
         $session_data = WC()->session->get( 'timetics_data' );
 
         if ( ! $session_data ) {

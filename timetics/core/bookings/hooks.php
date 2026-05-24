@@ -27,12 +27,13 @@ class Hooks {
      */
     public function init() {
         add_action( 'timetics_after_booking_create', [$this, 'register_schedule'] );
-        add_action( 'init', [$this, 'run_booking_schedule'] );
+        add_action( 'timetics_booking_remainder', [$this, 'send_reminder_email'], 10, 1 );
         add_action( 'timetics_booking_clear_schedule', [$this, 'clear_booking_schedule'] );
 
         add_action( 'timetics_after_booking_create', [$this, 'reschedule_booking'], 10, 4 );
 
         add_action( 'init', [$this, 'register_booking_status'] );
+        add_action( 'init', [$this, 'maybe_migrate_reminder_schedules'], 99 );
 
         add_action('woocommerce_before_calculate_totals', [ $this, 'timetics_variation_ticket_total_price' ] );
 
@@ -80,27 +81,9 @@ class Hooks {
 
             $timestamp = intval($booking_timestamp)- intval($timestamp);
 
-            if ( ! wp_next_scheduled( 'timetics_booking_remainder_' . $booking_id ) ) {
-                wp_schedule_single_event( $timestamp, 'timetics_booking_remainder_' . $booking_id, [$booking_id] );
+            if ( ! wp_next_scheduled( 'timetics_booking_remainder', [$booking_id] ) ) {
+                wp_schedule_single_event( $timestamp, 'timetics_booking_remainder', [$booking_id] );
             }
-        }
-    }
-
-    /**
-     * Booking schedule
-     *
-     * @return  void
-     */
-    public function run_booking_schedule() {
-        $bookins = Booking::all();
-
-        if ( ! $bookins ) {
-            return;
-        }
-
-        // Run cron action.
-        foreach ( $bookins['items'] as $booking ) {
-            add_action( 'timetics_booking_remainder_' . $booking->ID, [$this, 'send_reminder_email'] );
         }
     }
 
@@ -143,12 +126,79 @@ class Hooks {
 
         // Run cron action.
         foreach ( $bookins['items'] as $booking ) {
-            $timestamp = wp_next_scheduled( 'timetics_booking_remainder_' . $booking->ID );
+            $timestamp = wp_next_scheduled( 'timetics_booking_remainder', [$booking->ID] );
 
             if ( $timestamp && $timestamp < time() ) {
-                wp_unschedule_event( $timestamp, 'timetics_booking_remainder_' . $booking->ID );
+                wp_unschedule_event( $timestamp, 'timetics_booking_remainder', [$booking->ID] );
             }
         }
+    }
+
+    /**
+     * Migrate any outstanding cron events scheduled with the legacy
+     * `timetics_booking_remainder_{id}` hook name to the unified
+     * `timetics_booking_remainder` hook with the booking id as an argument.
+     *
+     * Runs once per plugin version.
+     *
+     * @return void
+     */
+    public function maybe_migrate_reminder_schedules() {
+        $version = defined( 'TIMETICS_VERSION' ) ? TIMETICS_VERSION : '0';
+
+        if ( get_option( 'timetics_reminder_cron_migrated' ) === $version ) {
+            return;
+        }
+
+        $cron = _get_cron_array();
+
+        if ( ! is_array( $cron ) ) {
+            update_option( 'timetics_reminder_cron_migrated', $version, false );
+            return;
+        }
+
+        $changed = false;
+
+        foreach ( $cron as $timestamp => $hooks ) {
+            if ( ! is_array( $hooks ) ) {
+                continue;
+            }
+
+            foreach ( $hooks as $hook => $events ) {
+                if ( strpos( $hook, 'timetics_booking_remainder_' ) !== 0 ) {
+                    continue;
+                }
+
+                $booking_id = (int) substr( $hook, strlen( 'timetics_booking_remainder_' ) );
+
+                if ( ! $booking_id ) {
+                    unset( $cron[ $timestamp ][ $hook ] );
+                    $changed = true;
+                    continue;
+                }
+
+                $args = [$booking_id];
+                $key  = md5( serialize( $args ) );
+
+                $cron[ $timestamp ]['timetics_booking_remainder'][ $key ] = [
+                    'schedule' => false,
+                    'args'     => $args,
+                ];
+
+                unset( $cron[ $timestamp ][ $hook ] );
+                $changed = true;
+            }
+
+            if ( empty( $cron[ $timestamp ] ) ) {
+                unset( $cron[ $timestamp ] );
+            }
+        }
+
+        if ( $changed ) {
+            _set_cron_array( $cron );
+        }
+
+        update_option( 'timetics_reminder_cron_migrated', $version, false );
     }
 
     /**

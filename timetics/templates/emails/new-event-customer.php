@@ -32,17 +32,36 @@ defined( 'ABSPATH' ) || exit;
     $timetics_booking_cancel_url = $this->meeting->get_appointment_permalink() . '?id=' . $this->booking->get_id() . '&meeting_id=' . $this->meeting->get_id() .'&booking_action=cancel'. '&appointment_token=' . $this->booking->get_security_token();
     $timetics_booking_reschedule_url = $this->meeting->get_appointment_permalink() . '?id=' . $this->booking->get_id() . '&meeting_id=' . $this->meeting->get_id() . '&booking_action=reschedule'. '&appointment_token='. $this->booking->get_security_token();
 
+    $timetics_login_url        = wp_login_url();
+    $timetics_login_username   = $timetics_customer_email;
+    $timetics_set_password_url = '';
+
+    $timetics_customer_user = get_user_by( 'id', $this->customer->get_id() );
+
+    if ( $timetics_customer_user ) {
+        $timetics_reset_key = get_password_reset_key( $timetics_customer_user );
+
+        if ( ! is_wp_error( $timetics_reset_key ) ) {
+            $timetics_set_password_url = network_site_url(
+                'wp-login.php?action=rp&key=' . $timetics_reset_key . '&login=' . rawurlencode( $timetics_customer_user->user_login ),
+                'login'
+            );
+        }
+    }
 
     $timetics_placeholders = [
-        '{%meeting_title%}'    => $this->meeting->get_name(),
-        '{%meeting_date%}'     => $timetics_date,
-        '{%meeting_time%}'     => $timetics_time,
-        '{%meeting_location%}' => $timetics_location,
-        '{%meeting_duration%}' => $this->meeting->get_duration(),
-        '{%host_name%}'        => $timetics_staff_name,
-        '{%host_email%}'       => $this->staff->get_email(),
-        '{%customer_name%}'    => $timetics_customer_name,
-        '{%customer_email%}'   => $timetics_customer_email,
+        '{%meeting_title%}'     => $this->meeting->get_name(),
+        '{%meeting_date%}'      => $timetics_date,
+        '{%meeting_time%}'      => $timetics_time,
+        '{%meeting_location%}'  => $timetics_location,
+        '{%meeting_duration%}'  => $this->meeting->get_duration(),
+        '{%host_name%}'         => $timetics_staff_name,
+        '{%host_email%}'        => $this->staff->get_email(),
+        '{%customer_name%}'     => $timetics_customer_name,
+        '{%customer_email%}'    => $timetics_customer_email,
+        '{%login_url%}'         => $timetics_login_url,
+        '{%login_username%}'    => $timetics_login_username,
+        '{%set_password_url%}'  => $timetics_set_password_url,
     ];
 ?>
 
@@ -88,7 +107,7 @@ defined( 'ABSPATH' ) || exit;
             <?php else: ?>
                 <p class="greeting" style="color: #556880; margin-bottom: 5px">
                     <?php
-                    /* translators: %s: Customer name */
+                    /* translators: %s: Recipient name */
                     printf( esc_html__( 'Hi %s,', 'timetics' ), esc_html( $timetics_customer_name ) );?>
                 </p>
 

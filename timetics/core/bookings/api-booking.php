@@ -1067,6 +1067,25 @@ class Api_Booking extends Api {
         // Fire when booking is completed.
         do_action( 'timetics_after_booking_create', $booking->get_id(), $customer->get_id(), $meeting->get_id(), $data );
 
+        // Send booking creation emails for new bookings not processed through
+        // a separate payment flow. Online gateways (stripe/paypal/woocommerce)
+        // send this email themselves once payment is finalized, so excluding
+        // them here avoids a duplicate email for the same booking.
+        if ( 'created' === $action && 'failed' !== $status && ! in_array( $payment_method_l, ['stripe', 'paypal', 'woocommerce'], true ) ) {
+            $is_email_to_customer = timetics_get_option( 'booking_created_customer');
+            $is_email_to_host     = timetics_get_option( 'booking_created_host');
+
+            if ( $is_email_to_host ) {
+                $new_event_email = new New_Event_Email( $booking );
+                $new_event_email->send();
+            }
+
+            if ( $is_email_to_customer ) {
+                $new_event_customer_email = new New_Event_Customer_Email( $booking );
+                $new_event_customer_email->send();
+            }
+        }
+
         // Create or update calendar event.
         if ( $id ) {
             if ( 'cancel' === $status ) {
@@ -1351,30 +1370,20 @@ class Api_Booking extends Api {
         $meeting_id       = $meeting->get_id();
         $staff_id         = $booking_data['staff_id'];
 
-        $time            = is_string( $start_time ) ? strtotime( $start_time ) : $start_time;
-        $time            = gmdate( 'H:i', $time );
         $booking_entries = new Booking_Entry();
         $meeting         = new Appointment( $meeting_id );
+        $slot_datetime = timetics_convert_timezone( $start_date . ' ' . $start_time, $booking_timezone, $meeting->get_timezone() );
 
         $entries = $booking_entries->find( [
             'meeting_id' => $meeting_id,
             'staff_id'   => $staff_id,
-            'date'       => $start_date,
+            'date'       => $slot_datetime->format( 'Y-m-d' ),
+            'start'      => $slot_datetime->format( 'h:i a' ),
         ] );
 
-        $booked = false;
+        $booked = $entries ? $booking_entries->first() : false;
 
-        foreach ( $entries as $entry ) {
-            $booking      = new Booking( $entry->get_booking_id() );
-            $booking_time = timetics_convert_timezone( $booking->get_start_date() . ' ' . $entry->get_start(), $booking->get_timezone(), $booking_timezone )->format( 'H:i' );
-
-            if ( $booking_time == $time ) {
-                $booked = $entry;
-                break;
-            }
-        }
-
-        if ( $booked && $booked->get_booked() >= $meeting->get_capacity() ) {
+        if ( $booked && intval( $booked->get_booked() ) >= $meeting->get_effective_capacity() ) {
             return false;
         }
 
@@ -1504,7 +1513,7 @@ class Api_Booking extends Api {
         if ( (int) $booking->get_customer_id() === get_current_user_id() || current_user_can( 'manage_timetics' )) {
             return true;
         }
-    
+
         return false;
     }
 
@@ -1530,7 +1539,7 @@ class Api_Booking extends Api {
             if ( '' !== $stored_token && hash_equals( $stored_token, (string) $appointment_token ) ) {
                 return true;
             }
-        } 
+        }
 
         if (wp_verify_nonce($nonce, 'wp_rest') && current_user_can( 'manage_timetics' ) ) {
             return true;

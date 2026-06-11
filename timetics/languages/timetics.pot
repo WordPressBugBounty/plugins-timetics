@@ -2,14 +2,14 @@
 # This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Timetics - Appointment Booking Calendar & Scheduling System 1.0.57\n"
+"Project-Id-Version: Timetics - Appointment Booking Calendar & Scheduling System 1.0.58\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/timetics\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-05-21T05:26:52+00:00\n"
+"POT-Creation-Date: 2026-06-10T11:49:30+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: timetics\n"
@@ -107,15 +107,20 @@ msgid "Redirecting to upgrade page."
 msgstr ""
 
 #. translators: %s: action name
-#: core/addon/api-addon.php:206
+#: core/addon/api-addon.php:212
 #, php-format
 msgid "Could not %s the extension."
 msgstr ""
 
 #. translators: %s: action name
-#: core/addon/api-addon.php:219
+#: core/addon/api-addon.php:225
 #, php-format
 msgid "Extension %s successfully."
+msgstr ""
+
+#: core/addon/api-addon.php:254
+#: core/addon/api-addon.php:271
+msgid "Download URL must use HTTPS from a trusted domain."
 msgstr ""
 
 #: core/admin/hooks.php:74
@@ -465,7 +470,7 @@ msgstr ""
 #: core/bookings/api-booking.php:319
 #: core/bookings/api-booking.php:389
 #: core/bookings/api-booking.php:597
-#: core/bookings/api-booking.php:1597
+#: core/bookings/api-booking.php:1606
 #: core/integrations/stripe/api-stripe.php:85
 msgid "Invalid booking id."
 msgstr ""
@@ -518,7 +523,7 @@ msgstr ""
 
 #: core/bookings/api-booking.php:692
 #: core/bookings/api-booking.php:723
-#: core/bookings/api-booking.php:1656
+#: core/bookings/api-booking.php:1665
 msgid "Payment intent does not match this booking."
 msgstr ""
 
@@ -547,61 +552,61 @@ msgid "This booking alreay canceled"
 msgstr ""
 
 #. translators: Action
-#: core/bookings/api-booking.php:1172
+#: core/bookings/api-booking.php:1191
 #, php-format
 msgid "Successfully %s booking"
 msgstr ""
 
-#: core/bookings/api-booking.php:1285
+#: core/bookings/api-booking.php:1304
 #: core/bookings/hooks.php:391
 msgid "You are not allowed to delete this booking."
 msgstr ""
 
-#: core/bookings/api-booking.php:1411
+#: core/bookings/api-booking.php:1420
 msgid "Invalid meeting."
 msgstr ""
 
-#: core/bookings/api-booking.php:1416
+#: core/bookings/api-booking.php:1425
 msgid "Invalid timeslot."
 msgstr ""
 
-#: core/bookings/api-booking.php:1421
+#: core/bookings/api-booking.php:1430
 msgid "Team member not matched"
 msgstr ""
 
-#: core/bookings/api-booking.php:1426
+#: core/bookings/api-booking.php:1435
 msgid "Location type not matched"
 msgstr ""
 
-#: core/bookings/api-booking.php:1561
+#: core/bookings/api-booking.php:1570
 msgid "Booking not found."
 msgstr ""
 
-#: core/bookings/api-booking.php:1569
+#: core/bookings/api-booking.php:1578
 msgid "Unable to verify booking ownership."
 msgstr ""
 
-#: core/bookings/api-booking.php:1576
+#: core/bookings/api-booking.php:1585
 msgid "You are not allowed to change the email address for this booking."
 msgstr ""
 
-#: core/bookings/api-booking.php:1612
+#: core/bookings/api-booking.php:1621
 msgid "Invalid payment intent id."
 msgstr ""
 
-#: core/bookings/api-booking.php:1626
+#: core/bookings/api-booking.php:1635
 msgid "Booking already bound to another payment intent."
 msgstr ""
 
-#: core/bookings/api-booking.php:1639
+#: core/bookings/api-booking.php:1648
 msgid "Cannot verify payment intent with Stripe."
 msgstr ""
 
-#: core/bookings/api-booking.php:1667
+#: core/bookings/api-booking.php:1676
 msgid "Payment intent is bound to another booking."
 msgstr ""
 
-#: core/bookings/api-booking.php:1696
+#: core/bookings/api-booking.php:1705
 msgid "Payment intent bound."
 msgstr ""
 
@@ -1852,6 +1857,22 @@ msgstr ""
 
 #: utils/global-helper.php:825
 msgid "WPCafe — Restaurant plugin with Online Ordering, Delivery, Pickup, Food Menu, Reservations, and Table Management."
+msgstr ""
+
+#: utils/global-helper.php:840
+msgid "Aisentic"
+msgstr ""
+
+#: utils/global-helper.php:841
+msgid "AI assistant for WordPress — automate content, replies and on-site tasks without leaving your dashboard."
+msgstr ""
+
+#: utils/global-helper.php:857
+msgid "Optiontics"
+msgstr ""
+
+#: utils/global-helper.php:858
+msgid "Product add-ons / extras for food items — let customers pick toppings, sizes and other paid options along with the products."
 msgstr ""
 
 #: utils/pro-awareness/pro-awareness.php:156
@@ -4089,7 +4110,7 @@ msgid " Seat Plan is not Complete yet!"
 msgstr ""
 
 #: assets/src/frontend/pages/bookings/BookingSlot.js:290
-#: assets/src/frontend/pages/bookings/BookingSlot.js:396
+#: assets/src/frontend/pages/bookings/BookingSlot.js:400
 msgid "No slot available"
 msgstr ""
 

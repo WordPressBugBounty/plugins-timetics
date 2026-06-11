@@ -22,7 +22,7 @@ defined( 'ABSPATH' ) || exit;
     $timetics_date = $timetics_formatted['date'];
 
     $timetics_email_body  = timetics_get_option( 'booking_canceled_customer_email_body' );
-    $timetics_email_title = timetics_get_option( 'booking_canceled_host_email_title' );
+    $timetics_email_title = timetics_get_option( 'booking_canceled_customer_email_title' );
     $timetics_email_title = ! empty( $timetics_email_title ) ? $timetics_email_title : $this->get_title();
 
     $timetics_placeholders = [

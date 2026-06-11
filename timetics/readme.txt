@@ -3,7 +3,7 @@ Contributors: arraytics, ehsanriyadh
 Tags: appointment booking, booking, booking calendar, scheduling, appointment scheduler, online booking, elearning
 Requires at least: 5.2
 Tested up to: 7.0
-Stable tag: 1.0.57
+Stable tag: 1.0.58
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -317,6 +317,10 @@ Handles secure online payment transactions for appointment bookings made through
 **Note:** Optional integration, only active if you configure Stripe payment settings.
 
 == Changelog ==
+
+= 1.0.58 (Jun 10, 2026) =
+Fix: Frontend rendering error for creating meetings is now fixed.
+Tweak: Minor user experience improvements.
 
 = 1.0.57 (May 24, 2026) =
 Fix: Guest users not being redirected to frontend dashboard after login.

@@ -238,6 +238,23 @@ class Appointment extends PostModel {
     }
 
     /**
+     * Get the effective booking capacity used for availability checks.
+     *
+     * One-to-One meetings always allow a single booking per slot regardless of
+     * the stored capacity meta (which is only meaningful for group meetings),
+     * matching the one-to-one handling used elsewhere in the booking flow.
+     *
+     * @return  integer
+     */
+    public function get_effective_capacity() {
+        if ( 'one-to-one' === strtolower( (string) $this->get_type() ) ) {
+            return 1;
+        }
+
+        return intval( $this->get_capacity() );
+    }
+
+    /**
      * Get location
      *
      * @since 1.0.0
@@ -878,17 +895,17 @@ class Appointment extends PostModel {
             // Get buffer times in seconds
             $buffer_before = $this->get_buffer_time_before_in_seconds();
             $buffer_after = $this->get_buffer_time_after_in_seconds();
-            
+
             // Adjust the start time to include buffer before
             $adjusted_start = $start + $buffer_before;
-            
+
             // Adjust the end time to ensure we have enough time for the slot + buffer after
             $min_slot_duration = $interval + $buffer_after;
 
             for ( $time = $adjusted_start; $time + $min_slot_duration <= $end; $time += $interval + $buffer_after + $buffer_before ) {
                 $booked_entry = $this->get_booking_entries( $date, $time, $staff_id );
                 $status       = 'available';
-                $capacity     = $this->get_capacity();
+                $capacity     = $this->get_effective_capacity();
                 $booked       = 0;
 
                 if ( $booked_entry ) {
@@ -955,7 +972,7 @@ class Appointment extends PostModel {
      * Check if a time falls within a given time range
      *
      * @param   string  $current_time  Current time in h:i a format
-     * @param   string  $start_time    Start time in h:i a format  
+     * @param   string  $start_time    Start time in h:i a format
      * @param   string  $end_time      End time in h:i a format
      *
      * @return  bool

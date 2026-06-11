@@ -181,13 +181,19 @@ class Api_Addon extends Api {
         // All registered extensions are type=plugin — delegate to PluginManager.
         $slug = isset( $extension['slug'] ) ? $extension['slug'] : $name;
 
+        // Our-Plugins download_url wins over the wordpress.org slug lookup, so a
+        // non-wordpress.org URL (e.g. GitHub release zip) is not shadowed.
+        $download_url = ! empty( $extension['download_url'] ) ? $extension['download_url'] : '';
+
         switch ( $status ) {
             case 'install':
                 if ( ! function_exists( 'WP_Filesystem' ) ) {
                     require_once ABSPATH . 'wp-admin/includes/file.php';
                 }
                 WP_Filesystem();
-                $result = PluginManager::install_plugin( $slug );
+                $result = $download_url
+                    ? $this->install_from_url( $download_url )
+                    : PluginManager::install_plugin( $slug );
                 break;
             case 'activate':
                 $result = PluginManager::activate_plugin( $slug );
@@ -219,6 +225,66 @@ class Api_Addon extends Api {
                 'message' => sprintf( __( 'Extension %s successfully.', 'timetics' ), $status . 'd' ),
             ]
         );
+    }
+
+    /**
+     * Install a plugin from an explicit download URL.
+     *
+     * The URL must be HTTPS and its host (or a subdomain of it) must be in the
+     * trusted-domain allowlist. This lets us install Arraytics plugins hosted
+     * outside wordpress.org (e.g. GitHub release zips).
+     *
+     * @param string $url Absolute HTTPS download URL.
+     * @return bool|\WP_Error True on success, WP_Error on failure.
+     */
+    private function install_from_url( string $url ) {
+        $allowed_hosts = [
+            'wordpress.org',
+            'downloads.wordpress.org',
+            'arraytics.com',
+            'themewinter.com',
+            'github.com',
+        ];
+
+        $parsed = wp_parse_url( $url );
+
+        if ( empty( $parsed['scheme'] ) || 'https' !== strtolower( $parsed['scheme'] ) || empty( $parsed['host'] ) ) {
+            return new \WP_Error(
+                'invalid_download_url',
+                __( 'Download URL must use HTTPS from a trusted domain.', 'timetics' )
+            );
+        }
+
+        $host    = strtolower( $parsed['host'] );
+        $trusted = false;
+
+        foreach ( $allowed_hosts as $allowed ) {
+            if ( $host === $allowed || substr( $host, - ( strlen( $allowed ) + 1 ) ) === '.' . $allowed ) {
+                $trusted = true;
+                break;
+            }
+        }
+
+        if ( ! $trusted ) {
+            return new \WP_Error(
+                'invalid_download_url',
+                __( 'Download URL must use HTTPS from a trusted domain.', 'timetics' )
+            );
+        }
+
+        include_once ABSPATH . 'wp-admin/includes/file.php';
+        include_once ABSPATH . 'wp-admin/includes/misc.php';
+        include_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+
+        $skin     = new \Automatic_Upgrader_Skin();
+        $upgrader = new \Plugin_Upgrader( $skin );
+        $result   = $upgrader->install( $url );
+
+        if ( is_wp_error( $result ) ) {
+            return $result;
+        }
+
+        return $result ? true : false;
     }
 
     /**

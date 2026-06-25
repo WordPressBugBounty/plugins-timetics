@@ -364,9 +364,14 @@ class Calendar {
         $args['end']   = [$date['end']];
 
         if ( $args['google_meet'] ) {
+            // requestId must be unique per request; Google ignores the
+            // conference create request (no Meet link generated) if it
+            // matches a previously used id.
+            $request_id = function_exists( 'wp_generate_uuid4' ) ? wp_generate_uuid4() : uniqid( 'tt-meet-', true );
+
             $args['conferenceData'] = [
                 'createRequest' => [
-                    'requestId'             => 'sample123',
+                    'requestId'             => $request_id,
                     'conferenceSolutionKey' => ['type' => 'hangoutsMeet'],
                 ],
             ];

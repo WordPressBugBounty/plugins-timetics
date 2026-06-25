@@ -3,7 +3,7 @@ Contributors: arraytics, ehsanriyadh
 Tags: appointment booking, booking, booking calendar, scheduling, appointment scheduler, online booking, elearning
 Requires at least: 5.2
 Tested up to: 7.0
-Stable tag: 1.0.58
+Stable tag: 1.0.59
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -317,6 +317,15 @@ Handles secure online payment transactions for appointment bookings made through
 **Note:** Optional integration, only active if you configure Stripe payment settings.
 
 == Changelog ==
+
+= 1.0.59 (June 25, 2026) =
+New: Automation - Visual email flow builder with auto-seeded Automation templates.
+Fix: One-to-one meeting double-booking when backend slot is marked unavailable.
+Fix: Duplicate booking confirmation emails for paid bookings via Stripe, PayPal, and WooCommerce.
+Fix: Booking reminder email templates using wrong option keys (created instead of reminder).
+Fix: One-to-one meeting availability check now uses effective capacity of 1 instead of stored metadata.
+Fix: Service Time-slot duration missmatch with service duration variation in booking summery.
+Tweak   : Security improvements and hardening.
 
 = 1.0.58 (Jun 10, 2026) =
 Fix: Frontend rendering error for creating meetings is now fixed.

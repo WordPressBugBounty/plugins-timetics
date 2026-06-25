@@ -26,8 +26,8 @@ class PluginManager {
         $plugins = get_plugins();
 
         if ( is_array( $plugins ) ) {
-            foreach( $plugins as $plugin ) {
-                if ( $plugin['TextDomain'] === $slug ) {
+            foreach( $plugins as $plugin_path => $plugin ) {
+                if ( strpos( $plugin_path, $slug . '/' ) === 0 ) {
                     return true;
                 }
             }
@@ -122,7 +122,7 @@ class PluginManager {
 
         if ( is_array( $plugins ) ) {
             foreach( $plugins as $plugin_path => $plugin ) {
-                if ( $plugin['TextDomain'] === $slug ) {
+                if ( strpos( $plugin_path, $slug . '/' ) === 0 ) {
                     return $plugin_path;
                 }
             }

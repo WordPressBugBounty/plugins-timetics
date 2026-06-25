@@ -61,6 +61,7 @@ class Base {
         Google_Calendar_Sync::instance();
         Api_Booking_Calendar::instance();
         Api_Addon::instance();
+        add_action( 'init', array( Admin\Notification::instance(), 'init' ), 15 );
     }
 }
 

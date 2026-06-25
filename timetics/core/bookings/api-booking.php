@@ -11,6 +11,7 @@ use Timetics\Base\Api;
 use Timetics\Core\Appointments\Api_Appointment;
 use Timetics\Core\Appointments\Appointment;
 use Timetics\Core\Customers\Customer;
+use Timetics\Core\Admin\Notification;
 use Timetics\Core\Emails\Cancel_Event_Customer_Email;
 use Timetics\Core\Emails\Cancel_Event_Email;
 use Timetics\Core\Emails\New_Event_Customer_Email;
@@ -788,6 +789,8 @@ class Api_Booking extends Api {
                 $new_event_customer_email->send();
             }
 
+            do_action( 'timetics_gln_hook', 'booking_created', Notification::get_hook_data( $booking ) );
+
             do_action( 'timetics_booking_payment', $booking );
 
         }
@@ -1067,24 +1070,10 @@ class Api_Booking extends Api {
         // Fire when booking is completed.
         do_action( 'timetics_after_booking_create', $booking->get_id(), $customer->get_id(), $meeting->get_id(), $data );
 
-        // Send booking creation emails for new bookings not processed through
-        // a separate payment flow. Online gateways (stripe/paypal/woocommerce)
-        // send this email themselves once payment is finalized, so excluding
-        // them here avoids a duplicate email for the same booking.
-        if ( 'created' === $action && 'failed' !== $status && ! in_array( $payment_method_l, ['stripe', 'paypal', 'woocommerce'], true ) ) {
-            $is_email_to_customer = timetics_get_option( 'booking_created_customer');
-            $is_email_to_host     = timetics_get_option( 'booking_created_host');
-
-            if ( $is_email_to_host ) {
-                $new_event_email = new New_Event_Email( $booking );
-                $new_event_email->send();
-            }
-
-            if ( $is_email_to_customer ) {
-                $new_event_customer_email = new New_Event_Customer_Email( $booking );
-                $new_event_customer_email->send();
-            }
-        }
+        // Note: booking creation emails for new bookings are sent further below,
+        // AFTER the calendar event is created, so the Google Meet join link is
+        // available in the email. See the "created" branch after the schedule
+        // entry is created.
 
         // Create or update calendar event.
         if ( $id ) {
@@ -1102,6 +1091,8 @@ class Api_Booking extends Api {
                     $customer_cancel_event_email = new Cancel_Event_Customer_Email( $booking );
                     $customer_cancel_event_email->send();
                 }
+
+                do_action( 'timetics_gln_hook', 'booking_canceled', Notification::get_hook_data( $booking ) );
 
                 /**
                  * Added temporary for leagacy sass. It will remove in future.
@@ -1130,6 +1121,8 @@ class Api_Booking extends Api {
                         $update_event_customer_email = new Update_Event_Customer_Email( $booking );
                         $update_event_customer_email->send();
                     }
+
+                    do_action( 'timetics_gln_hook', 'booking_rescheduled', Notification::get_hook_data( $booking ) );
                 }
             }
         }
@@ -1179,6 +1172,36 @@ class Api_Booking extends Api {
 
             $book_entry_data = apply_filters( 'timetics_booking_schedule', $book_entry_data, $data );
             $booking_entry->create( $book_entry_data );
+        }
+
+        // For newly created bookings, create the calendar event now that the
+        // booking schedule entry exists. This generates the Google Meet link
+        // (stored in booking meta) so it can be shown on the success page and
+        // included in the notification emails sent below.
+        if ( 'created' === $action && 'cancel' !== $status ) {
+            $booking->create_event();
+        }
+
+        // Send booking creation emails for new bookings not processed through
+        // a separate payment flow. Online gateways (stripe/paypal/woocommerce)
+        // send this email themselves once payment is finalized, so excluding
+        // them here avoids a duplicate email for the same booking. Sent here
+        // (after create_event) so the Google Meet link is present in the email.
+        if ( 'created' === $action && 'failed' !== $status && ! in_array( $payment_method_l, ['stripe', 'paypal', 'woocommerce'], true ) ) {
+            $is_email_to_customer = timetics_get_option( 'booking_created_customer');
+            $is_email_to_host     = timetics_get_option( 'booking_created_host');
+
+            if ( $is_email_to_host ) {
+                $new_event_email = new New_Event_Email( $booking );
+                $new_event_email->send();
+            }
+
+            if ( $is_email_to_customer ) {
+                $new_event_customer_email = new New_Event_Customer_Email( $booking );
+                $new_event_customer_email->send();
+            }
+
+            do_action( 'timetics_gln_hook', 'booking_created', Notification::get_hook_data( $booking ) );
         }
 
         // Fire after booking schedule create.
@@ -1354,6 +1377,8 @@ class Api_Booking extends Api {
             $customer_cancel_event_email = new Cancel_Event_Customer_Email( $booking );
             $customer_cancel_event_email->send();
         }
+
+        do_action( 'timetics_gln_hook', 'booking_canceled', Notification::get_hook_data( $booking ) );
 
 
 

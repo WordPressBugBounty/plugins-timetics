@@ -8,6 +8,7 @@ namespace Timetics\Core\Integrations\Woocommerce;
 
 defined( 'ABSPATH' ) || exit;
 
+use Timetics\Core\Admin\Notification;
 use Timetics\Core\Appointments\Appointment;
 use Timetics\Core\Bookings\Booking;
 use Timetics\Core\Customers\Customer;
@@ -157,6 +158,8 @@ class Hooks {
             $new_event_customer_email = new New_Event_Customer_Email( $booking );
             $new_event_customer_email->send();
         }
+
+        do_action( 'timetics_gln_hook', 'booking_created', Notification::get_hook_data( $booking ) );
 
         WC()->session->set( 'timetics_data', null );
 
@@ -714,6 +717,8 @@ class Hooks {
                     $customer_cancel_event_email = new Cancel_Event_Customer_Email( $booking );
                     $customer_cancel_event_email->send();
                 }
+
+                do_action( 'timetics_gln_hook', 'booking_canceled', Notification::get_hook_data( $booking ) );
             }
 
         } finally {

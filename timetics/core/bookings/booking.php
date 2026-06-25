@@ -801,6 +801,8 @@ class Booking {
             ]
         );
 
+        $event = false;
+
         if ( $entries ) {
             $entry = $booking_entry->first();
 

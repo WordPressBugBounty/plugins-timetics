@@ -7,5 +7,6 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'UninstallerForm\\' => array($vendorDir . '/themewinter/uninstaller_form/src'),
+    'Ens\\' => array($vendorDir . '/themewinter/email-notification-sdk/src'),
     'Arraytics\\ToolsSdk\\' => array($vendorDir . '/arraytics/tools-sdk/src'),
 );

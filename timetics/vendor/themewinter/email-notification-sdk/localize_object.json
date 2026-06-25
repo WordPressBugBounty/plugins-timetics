@@ -1,0 +1,92 @@
+{
+    "nonce": "a8ad90e706",
+    "api_version": "v1",
+    "plugin_slug": "poptics",
+    "base_url": "http://localhost/products",
+    "triggers": [
+        {
+            "trigger_label": "Order Completed",
+            "trigger_value": "order_completed",
+            "trigger_data": [
+                {
+                    "label": "Order Amount",
+                    "value": "order_amount",
+                    "type": "number"
+                },
+                {
+                    "label": "Order Status",
+                    "value": "order_status",
+                    "type": "string"
+                },
+                {
+                    "label": "Order Date",
+                    "value": "order_date",
+                    "type": "date"
+                },
+                {
+                    "label": "email",
+                    "value": "email",
+                    "type": "string"
+                }
+            ],
+            "delay_dependencies": [
+                {
+                    "label": "Order Date",
+                    "value": "order_date"
+                }
+            ],
+            "email_receivers": [
+                {
+                    "label": "User Email",
+                    "value": "user_email"
+                },
+                {
+                    "label": "Admin Email",
+                    "value": "admin_email"
+                }
+            ]
+        },
+        {
+            "trigger_label": "Event Created",
+            "trigger_value": "event_created",
+            "trigger_data": [
+                {
+                    "label": "Purchase Price",
+                    "value": "purchase_price",
+                    "type": "number"
+                },
+                {
+                    "label": "Purchase Status",
+                    "value": "purchase_status",
+                    "type": "string"
+                },
+                {
+                    "label": "Purchase Date",
+                    "value": "purchase_date",
+                    "type": "date"
+                },
+                {
+                    "label": "email",
+                    "value": "email",
+                    "type": "string"
+                }
+            ],
+            "delay_dependency": [
+                {
+                    "label": "Order Date",
+                    "value": "order_date"
+                }
+            ],
+            "receivers": [
+                {
+                    "label": "User Email",
+                    "value": "user_email"
+                },
+                {
+                    "label": "Admin Email",
+                    "value": "admin_email"
+                }
+            ]
+        }
+    ]
+}

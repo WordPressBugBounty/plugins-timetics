@@ -1,0 +1,156 @@
+{
+    "name": "First flow",
+    "status": "draft",
+    "trigger": "ticket_purchased",
+    "flow_config": {
+        "nodes": [
+            {
+                "id": "node_1",
+                "type": "trigger",
+                "name": "trigger ",
+                "data": {
+                    "label": "trigger: ticket_purchased",
+                    "subtitle": "Event Ticket Purchased"
+                },
+                "position": {
+                    "x": 200,
+                    "y": 50
+                }
+            },
+            {
+                "id": "node_2",
+                "type": "end",
+                "name": "end",
+                "data": {
+                    "label": "end_flow",
+                    "subtitle": "End execution ends"
+                },
+                "position": {
+                    "x": 507.63901582154574,
+                    "y": 509.8755711969561
+                }
+            },
+            {
+                "id": "node_3",
+                "type": "condition",
+                "name": "condition",
+                "data": {
+                    "field": "order_amount",
+                    "operator": "<",
+                    "value": "2025-5-20",
+                    "label": "order_amount",
+                    "subtitle": "Order Amount < 10"
+                },
+                "position": {
+                    "x": 200,
+                    "y": 230
+                }
+            },
+            {
+                "id": "end_3",
+                "type": "end",
+                "name": "end",
+                "data": {
+                    "label": "End Flow",
+                    "subtitle": "Automation stops here"
+                },
+                "position": {
+                    "x": -106,
+                    "y": 668
+                }
+            },
+            {
+                "id": "node_5",
+                "type": "action",
+                "name": "email",
+                "data": {
+                    "actionType": "send_email",
+                    "receiverType": "admin_email",
+                    "label": "send_email",
+                    "subtitle": "Subject: This is test subj",
+                    "recipient": "test@test.com",
+                    "subject": "This is test subj",
+                    "body": "<p>hello dear,</p><p><br></p><p>Thank you for purchasing. You have ordered total {{order_amount}} on date: {{order_date}}</p><p><br></p><p>product link :<a href=\"https://ashikur-on-web.vercel.app/\" rel=\"noopener noreferrer\" target=\"_blank\"> https://ashikur-on-web.vercel.app/</a></p><ul><li>line 1</li><li>line 2</li></ul><p><br></p><p>We will send further details on this mail: {{email}}</p><p>Thank you</p>"
+                },
+                "position": {
+                    "x": 506.50000000000006,
+                    "y": 328
+                }
+            },
+            {
+                "id": "node_6",
+                "type": "action",
+                "name": "delay",
+                "data": {
+                    "actionType": "add_delay",
+                    "label": "add_delay",
+                    "subtitle": "Wait for 30 minutes",
+                    "delay": 30,
+                    "delayUnit": "minutes",
+                    "delayDependency": "created_at",
+                    "delayCondition": "after"
+                },
+                "position": {
+                    "x": -107,
+                    "y": 308
+                }
+            },
+            {
+                "id": "node_7",
+                "type": "action",
+                "name": "email",
+                "data": {
+                    "actionType": "send_email",
+                    "receiverType": "admin_email",
+                    "label": "send_email",
+                    "subtitle": "Subject: THis is test 2 subj",
+                    "recipient": "test2@test.com",
+                    "subject": "THis is test 2 subj",
+                    "body": "<p>hello {{email}},</p><p>My name is <strong>Ashik</strong></p><p>Thank you for purchasing. I have ordered {{order_amount}} on date: {{order_date}}</p><p><br></p><p>product link :<a href=\" https://ashikur-on-web.vercel.app/\" rel=\"noopener noreferrer\" target=\"_blank\"> https://ashikur-on-web.vercel.app/</a></p><p><br></p><p>bye</p>"
+                },
+                "position": {
+                    "x": -106.5,
+                    "y": 488
+                }
+            }
+        ],
+        "edges": [
+            {
+                "id": "edge_node_1->node_3",
+                "source": "node_1",
+                "target": "node_3",
+                "label": null
+            },
+            {
+                "id": "edge_node_3->node_5",
+                "source": "node_3",
+                "target": "node_5",
+                "label": "true"
+            },
+            {
+                "id": "edge_node_5_node_2",
+                "source": "node_5",
+                "target": "node_2",
+                "label": "true"
+            },
+            {
+                "id": "edge_node_3->node_6",
+                "source": "node_3",
+                "target": "node_6",
+                "label": "false"
+            },
+            {
+                "id": "edge_node_6->node_7",
+                "source": "node_6",
+                "target": "node_7",
+                "label": "false"
+            },
+            {
+                "id": "edge_node_7->end_3",
+                "source": "node_7",
+                "target": "end_3",
+                "label": "false"
+            }
+        ]
+    }
+}

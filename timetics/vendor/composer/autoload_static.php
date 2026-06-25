@@ -4,12 +4,20 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitd02707597fbf5927c7666b74bdb40ea9
+class ComposerStaticInitb20117cddd741a51e3bb6f90a34768e1
 {
+    public static $files = array (
+        '65bd208c04f25e98cf12b5c37b014f1e' => __DIR__ . '/..' . '/themewinter/email-notification-sdk/src/Utils/global-helpers.php',
+    );
+
     public static $prefixLengthsPsr4 = array (
         'U' => 
         array (
             'UninstallerForm\\' => 16,
+        ),
+        'E' => 
+        array (
+            'Ens\\' => 4,
         ),
         'A' => 
         array (
@@ -21,6 +29,10 @@ class ComposerStaticInitd02707597fbf5927c7666b74bdb40ea9
         'UninstallerForm\\' => 
         array (
             0 => __DIR__ . '/..' . '/themewinter/uninstaller_form/src',
+        ),
+        'Ens\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/themewinter/email-notification-sdk/src',
         ),
         'Arraytics\\ToolsSdk\\' => 
         array (
@@ -35,9 +47,9 @@ class ComposerStaticInitd02707597fbf5927c7666b74bdb40ea9
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitd02707597fbf5927c7666b74bdb40ea9::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitd02707597fbf5927c7666b74bdb40ea9::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInitd02707597fbf5927c7666b74bdb40ea9::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitb20117cddd741a51e3bb6f90a34768e1::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitb20117cddd741a51e3bb6f90a34768e1::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInitb20117cddd741a51e3bb6f90a34768e1::$classMap;
 
         }, null, ClassLoader::class);
     }

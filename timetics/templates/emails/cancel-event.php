@@ -81,7 +81,7 @@ defined( 'ABSPATH' ) || exit;
                         printf( esc_html__( '%1$s, %2$s %3$s', 'timetics' ), esc_html( $timetics_time ), esc_html( $timetics_day ), esc_html( $timetics_date ), esc_html( $timetics_timezone ) );?></p>
                     </div>
 
-                    <?php if ( 'virtual' === $timetics_location_type && $timetics_join_link ): ?>
+                    <?php if ( 'google-meet' === $timetics_location_type && $timetics_join_link ): ?>
                         <div class="single-data-entry" style="margin: 10px 0 20px;">
                             <p style="font-weight: 600; font-size: 14px; line-height: 1; color: #0C274A; margin: 0 0 5px;">
                                 <?php esc_html_e( 'Location:', 'timetics' );?>

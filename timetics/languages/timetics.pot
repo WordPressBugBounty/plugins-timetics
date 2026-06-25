@@ -2,14 +2,14 @@
 # This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Timetics - Appointment Booking Calendar & Scheduling System 1.0.58\n"
+"Project-Id-Version: Timetics - Appointment Booking Calendar & Scheduling System 1.0.59\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/timetics\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-06-10T11:49:30+00:00\n"
+"POT-Creation-Date: 2026-06-25T10:39:32+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: timetics\n"
@@ -236,6 +236,87 @@ msgstr ""
 msgid "Go Pro"
 msgstr ""
 
+#: core/admin/notification.php:48
+msgid "Automation"
+msgstr ""
+
+#: core/admin/notification.php:73
+msgid "Meeting Title"
+msgstr ""
+
+#: core/admin/notification.php:78
+#: core/admin/notification.php:161
+msgid "Meeting Date"
+msgstr ""
+
+#: core/admin/notification.php:83
+msgid "Meeting Time"
+msgstr ""
+
+#: core/admin/notification.php:88
+msgid "Meeting Location"
+msgstr ""
+
+#: core/admin/notification.php:93
+msgid "Google Meet Link"
+msgstr ""
+
+#: core/admin/notification.php:98
+msgid "Meeting Duration"
+msgstr ""
+
+#: core/admin/notification.php:103
+msgid "Host Name"
+msgstr ""
+
+#: core/admin/notification.php:108
+#: core/admin/notification.php:145
+msgid "Host Email"
+msgstr ""
+
+#: core/admin/notification.php:113
+msgid "Customer Name"
+msgstr ""
+
+#: core/admin/notification.php:118
+#: core/admin/notification.php:141
+msgid "Customer Email"
+msgstr ""
+
+#: core/admin/notification.php:123
+msgid "Login URL"
+msgstr ""
+
+#: core/admin/notification.php:128
+msgid "Login Username"
+msgstr ""
+
+#: core/admin/notification.php:133
+msgid "Set Password URL"
+msgstr ""
+
+#: core/admin/notification.php:149
+msgid "Custom Email"
+msgstr ""
+
+#: core/admin/notification.php:156
+#: assets/src/admin/pages/settings/Notification.js:55
+msgid "After Booking Confirmation"
+msgstr ""
+
+#: core/admin/notification.php:168
+#: assets/src/admin/pages/settings/Notification.js:79
+msgid "After Booking Cancellation"
+msgstr ""
+
+#: core/admin/notification.php:175
+msgid "After Booking Rescheduled"
+msgstr ""
+
+#: core/admin/notification.php:237
+msgid "Powered by Timetics"
+msgstr ""
+
 #: core/appointments/api-appointment-taxonomy.php:138
 #: core/appointments/api-appointment-taxonomy.php:170
 msgid "Category list"
@@ -274,7 +355,7 @@ msgstr ""
 #: core/appointments/api-appointment.php:316
 #: core/appointments/api-appointment.php:384
 #: core/appointments/api-appointment.php:623
-#: core/bookings/api-booking.php:275
+#: core/bookings/api-booking.php:276
 #: core/staffs/api-staff.php:331
 #: core/staffs/api-staff.php:369
 msgid "Something went wrong"
@@ -466,147 +547,147 @@ msgstr ""
 msgid "Google"
 msgstr ""
 
-#: core/bookings/api-booking.php:242
-#: core/bookings/api-booking.php:319
-#: core/bookings/api-booking.php:389
-#: core/bookings/api-booking.php:597
-#: core/bookings/api-booking.php:1606
+#: core/bookings/api-booking.php:243
+#: core/bookings/api-booking.php:320
+#: core/bookings/api-booking.php:390
+#: core/bookings/api-booking.php:598
+#: core/bookings/api-booking.php:1631
 #: core/integrations/stripe/api-stripe.php:85
 msgid "Invalid booking id."
 msgstr ""
 
-#: core/bookings/api-booking.php:295
+#: core/bookings/api-booking.php:296
 msgid "Recurring booking limit exit"
 msgstr ""
 
-#: core/bookings/api-booking.php:328
+#: core/bookings/api-booking.php:329
 msgid "Custom Field Booking Restricted "
 msgstr ""
 
-#: core/bookings/api-booking.php:354
+#: core/bookings/api-booking.php:355
 #: assets/src/frontend/pages/bookings/BookingStatus.js:52
 msgid "Something went wrong, Please try again."
 msgstr ""
 
-#: core/bookings/api-booking.php:364
-#: core/bookings/api-booking.php:403
+#: core/bookings/api-booking.php:365
+#: core/bookings/api-booking.php:404
 msgid "Successfully deleted booking"
 msgstr ""
 
-#: core/bookings/api-booking.php:545
+#: core/bookings/api-booking.php:546
 msgid "Your booking timezone is invalid"
 msgstr ""
 
-#: core/bookings/api-booking.php:550
+#: core/bookings/api-booking.php:551
 msgid "Your meeting timezone is invalid. Please update your meeting timezone with proper timezone."
 msgstr ""
 
-#: core/bookings/api-booking.php:570
+#: core/bookings/api-booking.php:571
 msgid "Get all entries"
 msgstr ""
 
-#: core/bookings/api-booking.php:611
+#: core/bookings/api-booking.php:612
 msgid "Booking has already been finalized."
 msgstr ""
 
-#: core/bookings/api-booking.php:635
+#: core/bookings/api-booking.php:636
 msgid "Missing payment intent."
 msgstr ""
 
-#: core/bookings/api-booking.php:648
+#: core/bookings/api-booking.php:649
 msgid "Cannot verify payment with Stripe."
 msgstr ""
 
-#: core/bookings/api-booking.php:678
+#: core/bookings/api-booking.php:679
 msgid "Payment verification failed."
 msgstr ""
 
-#: core/bookings/api-booking.php:692
-#: core/bookings/api-booking.php:723
-#: core/bookings/api-booking.php:1665
+#: core/bookings/api-booking.php:693
+#: core/bookings/api-booking.php:724
+#: core/bookings/api-booking.php:1690
 msgid "Payment intent does not match this booking."
 msgstr ""
 
-#: core/bookings/api-booking.php:734
+#: core/bookings/api-booking.php:735
 msgid "Payment already finalized."
 msgstr ""
 
 #. translators: Action
-#: core/bookings/api-booking.php:804
+#: core/bookings/api-booking.php:807
 #, php-format
 msgid "Payment %s"
 msgstr ""
 
 #. translators: %s: Time slot
-#: core/bookings/api-booking.php:964
+#: core/bookings/api-booking.php:967
 #, php-format
 msgid "%s time slot is not available"
 msgstr ""
 
-#: core/bookings/api-booking.php:974
+#: core/bookings/api-booking.php:977
 msgid "Couldn't possible to book. Plese try another time."
 msgstr ""
 
-#: core/bookings/api-booking.php:1017
+#: core/bookings/api-booking.php:1020
 msgid "This booking alreay canceled"
 msgstr ""
 
 #. translators: Action
-#: core/bookings/api-booking.php:1191
+#: core/bookings/api-booking.php:1214
 #, php-format
 msgid "Successfully %s booking"
 msgstr ""
 
-#: core/bookings/api-booking.php:1304
+#: core/bookings/api-booking.php:1327
 #: core/bookings/hooks.php:391
 msgid "You are not allowed to delete this booking."
 msgstr ""
 
-#: core/bookings/api-booking.php:1420
+#: core/bookings/api-booking.php:1445
 msgid "Invalid meeting."
 msgstr ""
 
-#: core/bookings/api-booking.php:1425
+#: core/bookings/api-booking.php:1450
 msgid "Invalid timeslot."
 msgstr ""
 
-#: core/bookings/api-booking.php:1430
+#: core/bookings/api-booking.php:1455
 msgid "Team member not matched"
 msgstr ""
 
-#: core/bookings/api-booking.php:1435
+#: core/bookings/api-booking.php:1460
 msgid "Location type not matched"
 msgstr ""
 
-#: core/bookings/api-booking.php:1570
+#: core/bookings/api-booking.php:1595
 msgid "Booking not found."
 msgstr ""
 
-#: core/bookings/api-booking.php:1578
+#: core/bookings/api-booking.php:1603
 msgid "Unable to verify booking ownership."
 msgstr ""
 
-#: core/bookings/api-booking.php:1585
+#: core/bookings/api-booking.php:1610
 msgid "You are not allowed to change the email address for this booking."
 msgstr ""
 
-#: core/bookings/api-booking.php:1621
+#: core/bookings/api-booking.php:1646
 msgid "Invalid payment intent id."
 msgstr ""
 
-#: core/bookings/api-booking.php:1635
+#: core/bookings/api-booking.php:1660
 msgid "Booking already bound to another payment intent."
 msgstr ""
 
-#: core/bookings/api-booking.php:1648
+#: core/bookings/api-booking.php:1673
 msgid "Cannot verify payment intent with Stripe."
 msgstr ""
 
-#: core/bookings/api-booking.php:1676
+#: core/bookings/api-booking.php:1701
 msgid "Payment intent is bound to another booking."
 msgstr ""
 
-#: core/bookings/api-booking.php:1705
+#: core/bookings/api-booking.php:1730
 msgid "Payment intent bound."
 msgstr ""
 
@@ -1045,7 +1126,7 @@ msgstr ""
 
 #: templates/emails/new-event-customer.php:179
 #: assets/src/admin/pages/bookings/RescheduleModal.js:177
-#: assets/src/frontend/pages/bookings/BookingSuccess.js:228
+#: assets/src/frontend/pages/bookings/BookingSuccess.js:241
 #: assets/src/frontend/pages/userAccount/TableHeader.js:20
 msgid "Reschedule"
 msgstr ""
@@ -1790,9 +1871,9 @@ msgstr ""
 #: utils/global-helper.php:333
 #: assets/src/admin/pages/bookings/FormField.js:657
 #: assets/src/admin/pages/meeting/LocationType.js:396
-#: assets/src/frontend/pages/bookings/BookingSuccess.js:190
+#: assets/src/frontend/pages/bookings/BookingSuccess.js:202
 #: assets/src/frontend/pages/bookings/ContactInfo.js:709
-#: assets/src/frontend/pages/bookings/SidebarInfo.js:370
+#: assets/src/frontend/pages/bookings/SidebarInfo.js:356
 msgid "Google Meet"
 msgstr ""
 
@@ -2701,7 +2782,7 @@ msgstr ""
 #: assets/src/admin/pages/bookings/FormField.js:658
 #: assets/src/admin/pages/meeting/LocationType.js:433
 #: assets/src/frontend/pages/bookings/ContactInfo.js:710
-#: assets/src/frontend/pages/bookings/SidebarInfo.js:375
+#: assets/src/frontend/pages/bookings/SidebarInfo.js:361
 msgid "Organizer Phone Number"
 msgstr ""
 
@@ -3370,6 +3451,14 @@ msgstr ""
 msgid "Preview Meeting"
 msgstr ""
 
+#: assets/src/admin/pages/notification-flow/EditNotificationFlow.js:20
+msgid "Edit Notification Flow"
+msgstr ""
+
+#: assets/src/admin/pages/notification-flow/ListNotificationFlow.js:19
+msgid "Notification Flows"
+msgstr ""
+
 #: assets/src/admin/pages/overview/constant.js:5
 msgid "Total Bookings"
 msgstr ""
@@ -3687,10 +3776,6 @@ msgstr ""
 msgid "Connect your Outlook Calendar to sync your booked events."
 msgstr ""
 
-#: assets/src/admin/pages/settings/Notification.js:55
-msgid "After Booking Confirmation"
-msgstr ""
-
 #: assets/src/admin/pages/settings/Notification.js:56
 msgid "Notification to Customer After Booking Confirmation"
 msgstr ""
@@ -3707,10 +3792,6 @@ msgstr ""
 #: assets/src/admin/pages/settings/Notification.js:68
 #: assets/src/admin/pages/settings/Notification.js:117
 msgid "The Organizer will receive a confirmation email containing a link to create that event on their calendar"
-msgstr ""
-
-#: assets/src/admin/pages/settings/Notification.js:79
-msgid "After Booking Cancellation"
 msgstr ""
 
 #: assets/src/admin/pages/settings/Notification.js:81
@@ -4163,15 +4244,15 @@ msgstr ""
 msgid "Where"
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/BookingSuccess.js:221
+#: assets/src/frontend/pages/bookings/BookingSuccess.js:234
 msgid "Need to make a change? "
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/BookingSuccess.js:230
+#: assets/src/frontend/pages/bookings/BookingSuccess.js:243
 msgid " or "
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/BookingSuccess.js:237
+#: assets/src/frontend/pages/bookings/BookingSuccess.js:250
 msgid "Cancel "
 msgstr ""
 
@@ -4316,11 +4397,11 @@ msgstr ""
 msgid "Total Price: "
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/SidebarInfo.js:353
+#: assets/src/frontend/pages/bookings/SidebarInfo.js:339
 msgid "Continue booking?"
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/SidebarInfo.js:418
+#: assets/src/frontend/pages/bookings/SidebarInfo.js:404
 msgid "Timezone: "
 msgstr ""
 
@@ -4332,7 +4413,7 @@ msgstr ""
 msgid "Select Organizer"
 msgstr ""
 
-#: assets/src/frontend/pages/meetings/MeetingsList.js:50
+#: assets/src/frontend/pages/meetings/MeetingsList.js:46
 msgid "No meetings found."
 msgstr ""
 

@@ -5,7 +5,8 @@
     "prefer-stable": true,
     "require": {
         "themewinter/uninstaller_form": "dev-main",
-        "arraytics/tools-sdk": "dev-main"
+        "arraytics/tools-sdk": "dev-main",
+        "themewinter/email-notification-sdk": "dev-main"
     },
     "repositories": [
         {
@@ -15,6 +16,10 @@
         {
             "type": "vcs",
             "url": "https://github.com/themewinter/tools-sdk"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/themewinter/email-notification-sdk"
         }
     ]
 }

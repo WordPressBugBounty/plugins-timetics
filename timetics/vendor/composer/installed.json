@@ -37,6 +37,43 @@
             "install-path": "../arraytics/tools-sdk"
         },
         {
+            "name": "themewinter/email-notification-sdk",
+            "version": "dev-main",
+            "version_normalized": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "git@github.com:themewinter/email-notification-sdk.git",
+                "reference": "cd56595844787809949d2e838c636064c6436807"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/themewinter/email-notification-sdk/zipball/cd56595844787809949d2e838c636064c6436807",
+                "reference": "cd56595844787809949d2e838c636064c6436807",
+                "shasum": ""
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^10"
+            },
+            "time": "2026-05-20T09:02:51+00:00",
+            "default-branch": true,
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "Ens\\": "src/"
+                },
+                "files": [
+                    "src/Utils/global-helpers.php"
+                ]
+            },
+            "description": "Reusable WordPress plugin's email notification flow handler package with REST API",
+            "support": {
+                "source": "https://github.com/themewinter/email-notification-sdk/tree/main",
+                "issues": "https://github.com/themewinter/email-notification-sdk/issues"
+            },
+            "install-path": "../themewinter/email-notification-sdk"
+        },
+        {
             "name": "themewinter/uninstaller_form",
             "version": "dev-main",
             "version_normalized": "dev-main",

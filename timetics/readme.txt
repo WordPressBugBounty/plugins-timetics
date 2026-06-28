@@ -3,7 +3,7 @@ Contributors: arraytics, ehsanriyadh
 Tags: appointment booking, booking, booking calendar, scheduling, appointment scheduler, online booking, elearning
 Requires at least: 5.2
 Tested up to: 7.0
-Stable tag: 1.0.59
+Stable tag: 1.0.60
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -317,6 +317,9 @@ Handles secure online payment transactions for appointment bookings made through
 **Note:** Optional integration, only active if you configure Stripe payment settings.
 
 == Changelog ==
+
+= 1.0.60 (June 28, 2026) =
+Fix: Fixed fatal error for email-automation classes.
 
 = 1.0.59 (June 25, 2026) =
 New: Automation - Visual email flow builder with auto-seeded Automation templates.

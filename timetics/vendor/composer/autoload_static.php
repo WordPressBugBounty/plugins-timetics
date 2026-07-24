@@ -41,7 +41,28 @@ class ComposerStaticInitb20117cddd741a51e3bb6f90a34768e1
     );
 
     public static $classMap = array (
+        'Arraytics\\ToolsSdk\\Extension' => __DIR__ . '/..' . '/arraytics/tools-sdk/src/Extension.php',
+        'Arraytics\\ToolsSdk\\PluginManager' => __DIR__ . '/..' . '/arraytics/tools-sdk/src/PluginManager.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'Ens\\Assets\\Enqueue' => __DIR__ . '/..' . '/themewinter/email-notification-sdk/src/Assets/Enqueue.php',
+        'Ens\\Base\\ForwardCalls' => __DIR__ . '/..' . '/themewinter/email-notification-sdk/src/Base/ForwardCalls.php',
+        'Ens\\Base\\PostModel' => __DIR__ . '/..' . '/themewinter/email-notification-sdk/src/Base/PostModel.php',
+        'Ens\\Core\\SDK' => __DIR__ . '/..' . '/themewinter/email-notification-sdk/src/Core/SDK.php',
+        'Ens\\Email\\EmailSender' => __DIR__ . '/..' . '/themewinter/email-notification-sdk/src/Email/EmailSender.php',
+        'Ens\\Flow\\Flow' => __DIR__ . '/..' . '/themewinter/email-notification-sdk/src/Flow/Flow.php',
+        'Ens\\Flow\\FlowAPI' => __DIR__ . '/..' . '/themewinter/email-notification-sdk/src/Flow/FlowAPI.php',
+        'Ens\\Flow\\FlowCPT' => __DIR__ . '/..' . '/themewinter/email-notification-sdk/src/Flow/FlowCPT.php',
+        'Ens\\Flow\\FlowManager' => __DIR__ . '/..' . '/themewinter/email-notification-sdk/src/Flow/FlowManager.php',
+        'Ens\\Hook\\ActionListener' => __DIR__ . '/..' . '/themewinter/email-notification-sdk/src/Hook/ActionListener.php',
+        'Ens\\Utils\\Helpers' => __DIR__ . '/..' . '/themewinter/email-notification-sdk/src/Utils/Helpers.php',
+        'Ens\\Whatsapp\\MetaCloudProvider' => __DIR__ . '/..' . '/themewinter/email-notification-sdk/src/Whatsapp/MetaCloudProvider.php',
+        'Ens\\Whatsapp\\TemplatesAPI' => __DIR__ . '/..' . '/themewinter/email-notification-sdk/src/Whatsapp/TemplatesAPI.php',
+        'Ens\\Whatsapp\\WhatsappSender' => __DIR__ . '/..' . '/themewinter/email-notification-sdk/src/Whatsapp/WhatsappSender.php',
+        'UninstallerForm\\Api\\FeedbackController' => __DIR__ . '/..' . '/themewinter/uninstaller_form/src/Api/FeedbackController.php',
+        'UninstallerForm\\HookRegistrar' => __DIR__ . '/..' . '/themewinter/uninstaller_form/src/HookRegistrar.php',
+        'UninstallerForm\\Support\\GoogleSheetClient' => __DIR__ . '/..' . '/themewinter/uninstaller_form/src/Support/GoogleSheetClient.php',
+        'UninstallerForm\\Support\\Localizer' => __DIR__ . '/..' . '/themewinter/uninstaller_form/src/Support/Localizer.php',
+        'UninstallerForm\\UninstallerForm' => __DIR__ . '/..' . '/themewinter/uninstaller_form/src/UninstallerForm.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

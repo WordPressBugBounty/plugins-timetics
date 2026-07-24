@@ -54,11 +54,37 @@ class Notification {
             )
             ->init();
 
+        add_filter( 'rest_pre_dispatch', array( $this, 'check_notification_flow_permission' ), 10, 3 );
         add_filter( 'ens_tt_available_actions', array( $this, 'register_triggers' ) );
         add_filter( 'timetics_notification_sdk_email_body', array( $this, 'wrap_email_body' ), 10, 1 );
         add_filter( 'timetics_notification_sdk_to_emails', array( $this, 'expand_custom_email' ), 10, 2 );
 
         add_action( 'admin_init', array( 'Timetics\Core\Admin\Notification_Seeder', 'maybe_seed' ), 20 );
+    }
+
+    /**
+     * Block non-admins from the SDK notification-flow REST endpoints.
+     *
+     * The SDK's FlowAPI registers these routes with permission_callback => true,
+     * so we enforce the capability here from the consumer plugin.
+     *
+     * @param  mixed            $result  Short-circuit value (null to continue).
+     * @param  \WP_REST_Server  $server
+     * @param  \WP_REST_Request $request
+     * @return mixed WP_Error on failure, original $result otherwise.
+     */
+    public function check_notification_flow_permission( $result, $server, $request ) {
+        if ( strpos( $request->get_route(), '/timetics/v1/notification-flow' ) === 0 ) {
+            if ( ! current_user_can( 'manage_options' ) ) {
+                return new \WP_Error(
+                    'rest_forbidden',
+                    __( 'Sorry, you are not allowed to do that.', 'timetics' ),
+                    array( 'status' => 403 )
+                );
+            }
+        }
+
+        return $result;
     }
 
     /**
@@ -151,31 +177,41 @@ class Notification {
             ),
         );
 
+        // Resolves against hook_data['meeting_date_timestamp'] (see get_hook_data),
+        // a true UTC timestamp, so a delay node anchored to it schedules correctly.
+        $delay_dependencies = array(
+            array(
+                'label' => __( 'Meeting Date', 'timetics' ),
+                'value' => 'meeting_date',
+            ),
+        );
+
         $actions = array(
             array(
                 'trigger_label'      => __( 'After Booking Confirmation', 'timetics' ),
                 'trigger_value'      => 'booking_created',
                 'trigger_data'       => $trigger_data,
-                'delay_dependencies' => array(
-                    array(
-                        'label' => __( 'Meeting Date', 'timetics' ),
-                        'value' => 'meeting_date',
-                    ),
-                ),
+                'delay_dependencies' => $delay_dependencies,
                 'email_receivers'    => $email_receivers,
             ),
             array(
                 'trigger_label'      => __( 'After Booking Cancellation', 'timetics' ),
                 'trigger_value'      => 'booking_canceled',
                 'trigger_data'       => $trigger_data,
-                'delay_dependencies' => array(),
+                // Offering Meeting Date here as well, not just on booking_created.
+                // An empty list left a delay node with nothing to anchor to, and
+                // the SDK then falls back to current_time( 'timestamp' ) — which is
+                // UTC plus the site's GMT offset, handed straight to
+                // wp_schedule_single_event() where a true UTC timestamp is expected.
+                // The email then fires GMT-offset hours away from the intended time.
+                'delay_dependencies' => $delay_dependencies,
                 'email_receivers'    => $email_receivers,
             ),
             array(
                 'trigger_label'      => __( 'After Booking Rescheduled', 'timetics' ),
                 'trigger_value'      => 'booking_rescheduled',
                 'trigger_data'       => $trigger_data,
-                'delay_dependencies' => array(),
+                'delay_dependencies' => $delay_dependencies,
                 'email_receivers'    => $email_receivers,
             ),
         );
@@ -260,8 +296,9 @@ class Notification {
         $staff    = new Staff( $booking->get_staff_id() );
         $customer = new Customer( $booking->get_customer_id() );
 
-        $formatted         = timetics_format_email_datetime( $booking->get_start_date(), $booking->get_start_time() );
-        $booking_timestamp = strtotime( $booking->get_start_date() . ' ' . $booking->get_start_time() );
+        $formatted = timetics_format_email_datetime( $booking->get_start_date(), $booking->get_start_time() );
+
+        $booking_timestamp = self::get_booking_timestamp( $booking );
 
         /* Pull the Google Meet link from the stored calendar event so it can be inserted as the {%meeting_meet_link%} tag in automation emails.
         */
@@ -281,6 +318,15 @@ class Notification {
         }
 
         return array(
+            // The booking id lets delayed flows be re-validated or re-scheduled
+            // when the booking changes after the flow started. `post_id` is the
+            // key the email-notification-sdk itself looks for; `booking_id` is
+            // the readable alias used inside Timetics.
+            'post_id'                => $booking->get_id(),
+            'booking_id'             => $booking->get_id(),
+            // Not $booking->get_status(): the cancel-by-delete path fires this
+            // trigger after the post row is gone, where get_post() returns null.
+            'booking_status'         => (string) get_post_status( $booking->get_id() ),
             'customer_email'         => $customer->get_email(),
             'host_email'             => $staff->get_email(),
             'custom_email'           => apply_filters( 'timetics_custom_notification_email', timetics_get_option( 'custom_notification_email', get_option( 'admin_email' ) ) ),
@@ -297,5 +343,38 @@ class Notification {
             'login_username'         => $customer->get_email(),
             'set_password_url'       => $set_password_url,
         );
+    }
+
+    /**
+     * Resolve a booking's start date/time to a real UTC timestamp.
+     *
+     * The stored date and time are wall-clock values in the booking's own
+     * timezone, so they must be interpreted in that timezone — strtotime()
+     * would read them as server time and shift every delay by the offset.
+     *
+     * @param  Booking $booking
+     * @return int Unix timestamp, 0 when the booking has no start date.
+     */
+    public static function get_booking_timestamp( Booking $booking ) {
+        $date = $booking->get_start_date();
+        $time = $booking->get_start_time();
+
+        if ( ! $date ) {
+            return 0;
+        }
+
+        $timezone = $booking->get_timezone();
+
+        if ( ! $timezone || ! timetics_is_valid_timezone( $timezone ) ) {
+            $timezone = timetics_reminder_fallback_timezone();
+        }
+
+        try {
+            $datetime = new \DateTime( $date . ' ' . $time, new \DateTimeZone( $timezone ) );
+        } catch ( \Exception $e ) {
+            return 0;
+        }
+
+        return $datetime->getTimestamp();
     }
 }

@@ -12,6 +12,7 @@ use Timetics\Core\Appointments\Api_Appointment;
 use Timetics\Core\Appointments\Appointment;
 use Timetics\Core\Customers\Customer;
 use Timetics\Core\Admin\Notification;
+use Timetics\Core\Admin\Notification_Flow_Guard;
 use Timetics\Core\Emails\Cancel_Event_Customer_Email;
 use Timetics\Core\Emails\Cancel_Event_Email;
 use Timetics\Core\Emails\New_Event_Customer_Email;
@@ -765,6 +766,12 @@ class Api_Booking extends Api {
             );
         }
 
+        // A failed payment means the booking did not happen, so release the slot
+        // it was holding and let it appear as free again.
+        if ( 'failed' === $post_status ) {
+            $booking->release_slot();
+        }
+
         if ( $default_booking_status === $post_status ) {
             // Rotate the security token so the same one cannot drive a second
             // approval after this booking has finalized.
@@ -1050,10 +1057,17 @@ class Api_Booking extends Api {
             'cancel_reason'       => $cancel_reason,
         ];
 
+        $old_meeting_timestamp = 0;
+
         if ( $id ) {
             $old_start_date = $booking->get_start_date();
             $old_start_time = $booking->get_start_time();
             $old_end_time   = $booking->get_end_time();
+
+            // Captured before the props are overwritten so pending delayed
+            // flows can be matched against the meeting time they were frozen
+            // with.
+            $old_meeting_timestamp = Notification::get_booking_timestamp( $booking );
         }
 
         if( 'created' == $action ){
@@ -1109,6 +1123,13 @@ class Api_Booking extends Api {
                 $booking->update_event();
 
                 if ( $date_time_changed ) {
+                    $reschedule_hook_data = Notification::get_hook_data( $booking );
+
+                    // Move any pending delayed flow onto the new meeting time so
+                    // the reminder keeps its offset instead of firing at the old
+                    // moment with the old details.
+                    Notification_Flow_Guard::reschedule_pending_flows( $booking->get_id(), $reschedule_hook_data );
+
                     $is_email_to_reschedule_customer = timetics_get_option( 'booking_rescheduled_customer');
                     $is_email_to_reschedule_host     = timetics_get_option( 'booking_rescheduled_host');
 
@@ -1122,7 +1143,14 @@ class Api_Booking extends Api {
                         $update_event_customer_email->send();
                     }
 
-                    do_action( 'timetics_gln_hook', 'booking_rescheduled', Notification::get_hook_data( $booking ) );
+                    // Hand the previous meeting timestamp to the SDK as well —
+                    // its delay node uses `previous_<key>` to drop a checkpoint
+                    // it scheduled itself on an earlier run.
+                    if ( $old_meeting_timestamp ) {
+                        $reschedule_hook_data['previous_meeting_date_timestamp'] = $old_meeting_timestamp;
+                    }
+
+                    do_action( 'timetics_gln_hook', 'booking_rescheduled', $reschedule_hook_data );
                 }
             }
         }
@@ -1330,35 +1358,8 @@ class Api_Booking extends Api {
             return new WP_HTTP_Response( $data, 403 );
         }
 
-        $booking_entry = new Booking_Entry();
 
-        $date_time = timetics_convert_timezone( $booking->get_start_date() . ' ' . $booking->get_start_time(), $booking->get_timezone(), $meeting->get_timezone() );
-
-        $entries = $booking_entry->find(
-            [
-                'staff_id'   => $booking->get_staff_id(),
-                'meeting_id' => $booking->get_appointment(),
-                'date'       => $date_time->format( 'Y-m-d' ),
-                'start'      => $date_time->format( 'h:i a' ),
-            ]
-        );
-
-        if ( $entries ) {
-            $entry = $booking_entry->first();
-
-            if ( 'one-to-one' == strtolower( $meeting->get_type() ) ) {
-                $entry->delete();
-            } else {
-                $booked        = intval( $entry->get_booked() ) - 1;
-                $booked_seat   = ! empty( $booking->get_seat() ) ? $booking->get_seat() : [];
-                $existing_seat = ! empty( $entry->get_seats() ) ? $entry->get_seats() : [];
-
-                $entry->update( [
-                    'booked' => $booked,
-                    'seats'  => array_values( array_diff( $existing_seat, $booked_seat ) ),
-                ] );
-            }
-        }
+        $booking->release_slot();
 
         $recurrences = $booking->get_recurrence();
         $booking->delete_event();
@@ -1412,7 +1413,20 @@ class Api_Booking extends Api {
             return false;
         }
 
-        return true;
+        /**
+         * Let integrations veto a slot at booking time.
+         *
+         * Slot listing is filtered separately, so without this a client posting
+         * straight to the REST endpoint could still book a slot that the UI
+         * hides — which is how a Google Calendar conflict turned into a real
+         * double booking. Integrations must fail open: return true when they
+         * cannot determine availability.
+         *
+         * @param bool        $available
+         * @param Appointment $meeting
+         * @param array       $booking_data
+         */
+        return (bool) apply_filters( 'timetics_is_slot_available', true, $meeting, $booking_data );
     }
 
     /**

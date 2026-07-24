@@ -497,17 +497,24 @@ class Api_Staff extends Api {
             return new WP_HTTP_Response( $data, 404 );
         }
 
-        $token  = timetics_get_google_access_token( $staff_id );
         $client = new Client();
 
         $revoked = false;
 
         switch( $integration ) {
             case 'google-auth':
-                $revoked = $client->revoke( $token );
-                if ( $revoked ) {
-                    update_user_meta( $staff_id, 'timetics_google_auth', '' );
+                $refresh_token = timetics_get_google_refresh_token( $staff_id );
+                if ( ! empty( $refresh_token ) ) {
+                    $client->revoke( $refresh_token );
                 }
+
+                // Always clear ALL local Google credentials so the account can be reconnected cleanly.
+                delete_user_meta( $staff_id, 'timetics_google_auth' );
+                delete_user_meta( $staff_id, 'timetics_google_refresh_token' );
+                delete_user_meta( $staff_id, 'timetics_google_auth_code' );
+                delete_user_meta( $staff_id, 'timetics_google_auth_error' );
+
+                $revoked = true;
 
                 break;
             case 'zoom-auth':
@@ -670,7 +677,7 @@ class Api_Staff extends Api {
 
         return $data;
     }
-    
+
     /**
      * Get items permission callback
      *

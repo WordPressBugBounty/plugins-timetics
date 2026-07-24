@@ -692,6 +692,26 @@ class Hooks {
             // Get current booking status
             $current_status = $booking->get_status();
 
+            // A cancelled / refunded order is terminal, so release the slot it was
+            // holding and let it appear as free again.
+            //
+            // We deliberately do NOT release on a 'failed' order. A WooCommerce
+            // booking is created in the 'failed' state while awaiting payment, and
+            // a failed order is retryable — the customer can re-pay. Releasing on
+            // 'failed' would free the slot, and a successful retry
+            // ( failed -> processing/approved ) would then revive the booking
+            // without re-holding the slot, causing an overbooking. A genuinely
+            // abandoned order is cancelled by WooCommerce's own unpaid-order
+            // handling ( hold-stock timeout ), which maps to 'cancel' and releases
+            // here.
+            //
+            // This runs before the "status unchanged" short-circuit below so that a
+            // refund after an already-cancelled booking ( cancel -> cancel,
+            // unchanged ) still guarantees a release. release_slot() is idempotent.
+            if ( 'cancel' === $booking_status ) {
+                $booking->release_slot();
+            }
+
             // Only update if status has actually changed
             if ( $current_status === $booking_status ) {
                 return;

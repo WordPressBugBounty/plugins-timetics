@@ -6,5 +6,26 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Arraytics\\ToolsSdk\\Extension' => $vendorDir . '/arraytics/tools-sdk/src/Extension.php',
+    'Arraytics\\ToolsSdk\\PluginManager' => $vendorDir . '/arraytics/tools-sdk/src/PluginManager.php',
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
+    'Ens\\Assets\\Enqueue' => $vendorDir . '/themewinter/email-notification-sdk/src/Assets/Enqueue.php',
+    'Ens\\Base\\ForwardCalls' => $vendorDir . '/themewinter/email-notification-sdk/src/Base/ForwardCalls.php',
+    'Ens\\Base\\PostModel' => $vendorDir . '/themewinter/email-notification-sdk/src/Base/PostModel.php',
+    'Ens\\Core\\SDK' => $vendorDir . '/themewinter/email-notification-sdk/src/Core/SDK.php',
+    'Ens\\Email\\EmailSender' => $vendorDir . '/themewinter/email-notification-sdk/src/Email/EmailSender.php',
+    'Ens\\Flow\\Flow' => $vendorDir . '/themewinter/email-notification-sdk/src/Flow/Flow.php',
+    'Ens\\Flow\\FlowAPI' => $vendorDir . '/themewinter/email-notification-sdk/src/Flow/FlowAPI.php',
+    'Ens\\Flow\\FlowCPT' => $vendorDir . '/themewinter/email-notification-sdk/src/Flow/FlowCPT.php',
+    'Ens\\Flow\\FlowManager' => $vendorDir . '/themewinter/email-notification-sdk/src/Flow/FlowManager.php',
+    'Ens\\Hook\\ActionListener' => $vendorDir . '/themewinter/email-notification-sdk/src/Hook/ActionListener.php',
+    'Ens\\Utils\\Helpers' => $vendorDir . '/themewinter/email-notification-sdk/src/Utils/Helpers.php',
+    'Ens\\Whatsapp\\MetaCloudProvider' => $vendorDir . '/themewinter/email-notification-sdk/src/Whatsapp/MetaCloudProvider.php',
+    'Ens\\Whatsapp\\TemplatesAPI' => $vendorDir . '/themewinter/email-notification-sdk/src/Whatsapp/TemplatesAPI.php',
+    'Ens\\Whatsapp\\WhatsappSender' => $vendorDir . '/themewinter/email-notification-sdk/src/Whatsapp/WhatsappSender.php',
+    'UninstallerForm\\Api\\FeedbackController' => $vendorDir . '/themewinter/uninstaller_form/src/Api/FeedbackController.php',
+    'UninstallerForm\\HookRegistrar' => $vendorDir . '/themewinter/uninstaller_form/src/HookRegistrar.php',
+    'UninstallerForm\\Support\\GoogleSheetClient' => $vendorDir . '/themewinter/uninstaller_form/src/Support/GoogleSheetClient.php',
+    'UninstallerForm\\Support\\Localizer' => $vendorDir . '/themewinter/uninstaller_form/src/Support/Localizer.php',
+    'UninstallerForm\\UninstallerForm' => $vendorDir . '/themewinter/uninstaller_form/src/UninstallerForm.php',
 );

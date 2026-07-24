@@ -50,24 +50,45 @@ if ( ! function_exists( 'timetics_get_google_access_token' ) ) {
     function timetics_get_google_access_token( $user_id = 0 ) {
         $data = timetics_get_google_auth( $user_id );
 
-        if ( ! $data ) {
+        if ( empty( $data ) || empty( $data['access_token'] ) ) {
             return false;
         }
 
-        if (  ( $data['expires_in'] - 30 ) < time() ) {
-            $refresh_toekn = timetics_get_google_refresh_token( $user_id );
-            $client        = timetics_get_google_client();
+        $expires_in = isset( $data['expires_in'] ) ? (int) $data['expires_in'] : 0;
 
-            $data = $client->fetch_access_token_with_refresh_token( $refresh_toekn );
+        // Token still valid (30s safety margin) — use it as-is.
+        if ( ( $expires_in - 30 ) > time() ) {
+            return $data['access_token'];
+        }
 
-            if ( ! $data ) {
+        // Needs a refresh.
+        $refresh_token = timetics_get_google_refresh_token( $user_id );
+
+        if ( empty( $refresh_token ) ) {
+            return false;
+        }
+
+        $client   = timetics_get_google_client();
+        $response = $client->fetch_access_token_with_refresh_token( $refresh_token );
+
+        if ( is_wp_error( $response ) ) {
+            $error_data = $response->get_error_data();
+            $transient  = ! is_array( $error_data ) || ! empty( $error_data['transient'] );
+
+            if ( $transient ) {
                 return false;
             }
 
-            timetics_update_google_auth( $user_id, $data );
+            // Permanent failure (invalid_grant): the refresh token is dead and the account genuinely needs to be re-connected. Flag it so the UI can reflect the real state.
+            update_user_meta( $user_id, 'timetics_google_auth_error', $response->get_error_code() );
+
+            return false;
         }
 
-        return $data['access_token'];
+        // Persisting a fresh credential also clears any stale auth-error flag
+        timetics_update_google_auth( $user_id, $response );
+
+        return $response['access_token'];
     }
 }
 
@@ -108,6 +129,10 @@ if ( ! function_exists( 'timetics_update_google_auth' ) ) {
      * @return void
      */
     function timetics_update_google_auth( $user_id = 0, $data = [] ) {
+        if ( empty( $data ) || ! is_array( $data ) ) {
+            return;
+        }
+
         if ( ! empty( $data['code'] ) ) {
             update_user_meta( $user_id, 'timetics_google_auth_code', $data['code'] );
         }
@@ -116,9 +141,15 @@ if ( ! function_exists( 'timetics_update_google_auth' ) ) {
             update_user_meta( $user_id, 'timetics_google_refresh_token', $data['refresh_token'] );
         }
 
-        $data['expires_in'] = $data['expires_in'] + time();
+        // Google returns expires_in as a lifetime in seconds (~3600).
+        // Guard against a missing/zero value: storing time() alone would make the
+        // token look permanently expired, forcing a refresh on every request and
+        // hammering Google's token endpoint until it rate-limits the app.
+        $lifetime           = ! empty( $data['expires_in'] ) ? (int) $data['expires_in'] : 3600;
+        $data['expires_in'] = time() + $lifetime;
 
         update_user_meta( $user_id, 'timetics_google_auth', $data );
+        delete_user_meta( $user_id, 'timetics_google_auth_error' );
     }
 }
 
@@ -322,7 +353,13 @@ if ( ! function_exists( 'timetics_get_staff_integrations' ) ) {
      * @return array
      */
     function timetics_get_staff_integrations( $user_id = 0 ) {
-        $google_auth        = timetics_get_google_access_token( $user_id );
+        timetics_get_google_access_token( $user_id );
+
+        $refresh_token      = timetics_get_google_refresh_token( $user_id );
+        $auth_error         = get_user_meta( $user_id, 'timetics_google_auth_error', true );
+        $is_connected       = ! empty( $refresh_token ) && empty( $auth_error );
+        $needs_reauth       = ! empty( $refresh_token ) && ! empty( $auth_error );
+
         $google_credentials = timetics_get_google_credentials();
         $is_setup           = ! empty( $google_credentials['client_id'] ) && ! empty( $google_credentials['client_secret'] );
         $current_user_id    = ( $user_id == get_current_user_id() ) ? true : false;
@@ -333,7 +370,8 @@ if ( ! function_exists( 'timetics_get_staff_integrations' ) ) {
                 'name'         => esc_html__( 'Google Meet', 'timetics' ),
                 'description'  => esc_html__( 'Connect your Meet to sync your booked events.', 'timetics' ),
                 'auth_url'     => timetics_get_google_auth_url(),
-                'connected'    => ! empty( $google_auth ),
+                'connected'    => $is_connected,
+                'needs_reauth' => $needs_reauth,
                 'setup'        => $is_setup,
                 'current_user' => $current_user_id,
             ],
@@ -342,7 +380,8 @@ if ( ! function_exists( 'timetics_get_staff_integrations' ) ) {
                 'name'         => esc_html__( 'Google Calendar', 'timetics' ),
                 'description'  => esc_html__( 'Connect your Meet to sync your booked events.', 'timetics' ),
                 'auth_url'     => timetics_get_google_auth_url(),
-                'connected'    => ! empty( $google_auth ),
+                'connected'    => $is_connected,
+                'needs_reauth' => $needs_reauth,
                 'setup'        => $is_setup,
                 'current_user' => $current_user_id,
             ],
@@ -905,6 +944,27 @@ if ( ! function_exists( 'timetics_get_enabled_modules' ) ) {
     }
 }
 
+if ( ! function_exists( 'timetics_reminder_fallback_timezone' ) ) {
+    /**
+     * Timezone to interpret a booking's stored wall clock in when the booking
+     * itself carries no usable timezone.
+     *
+     * A booking normally stores the customer's timezone next to the customer's
+     * local start time, and that pair must be read together. Bookings created
+     * before that meta existed, or from the admin side, have no timezone — those
+     * times were entered against the site clock, so the site timezone is the
+     * closer reading. Falling back to UTC put every reminder on such a booking
+     * out by the site's GMT offset.
+     *
+     * @return  string  A timezone identifier or ±hh:mm offset accepted by DateTimeZone.
+     */
+    function timetics_reminder_fallback_timezone() {
+        $timezone = wp_timezone_string();
+
+        return $timezone ? $timezone : 'UTC';
+    }
+}
+
 if ( ! function_exists( 'timetics_format_email_datetime' ) ) {
     /**
      * Format date, time and day according to WordPress admin settings
@@ -919,8 +979,8 @@ if ( ! function_exists( 'timetics_format_email_datetime' ) ) {
         $wp_date_format = get_option( 'date_format' );
         $wp_time_format = get_option( 'time_format' );
 
-        $datetime = $start_time 
-            ? $start_date . ' ' . $start_time 
+        $datetime = $start_time
+            ? $start_date . ' ' . $start_time
             : $start_date;
 
         $timestamp = strtotime( $datetime );

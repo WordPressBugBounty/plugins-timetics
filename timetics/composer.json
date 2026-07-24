@@ -8,6 +8,20 @@
         "arraytics/tools-sdk": "dev-main",
         "themewinter/email-notification-sdk": "dev-main"
     },
+    "require-dev": {
+        "phpunit/phpunit": "^9.6",
+        "yoast/phpunit-polyfills": "^1.1",
+        "wp-phpunit/wp-phpunit": "^6.3"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Timetics\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "./node_modules/.bin/wp-env start && ./node_modules/.bin/wp-env run tests-cli --env-cwd=wp-content/plugins/timetics -- php -d auto_prepend_file=tests/phpunit-prepend.php vendor/phpunit/phpunit/phpunit",
+        "test:coverage": "./node_modules/.bin/wp-env start && ./node_modules/.bin/wp-env run tests-cli --env-cwd=wp-content/plugins/timetics -- php -d auto_prepend_file=tests/phpunit-prepend.php vendor/phpunit/phpunit/phpunit --coverage-html=tests/_coverage"
+    },
     "repositories": [
         {
             "type": "vcs",

@@ -22,6 +22,22 @@ class Calendar {
      *
      * @return array List of calendar events.
      */
+    /**
+     * Format an instant as RFC3339 in UTC ("...Z").
+     *
+     * Google rejects bounds whose "+hh:mm" offset reaches it unescaped, so
+     * every timeMin/timeMax the plugin sends goes through here.
+     *
+     * @param int|\DateTimeInterface $when Timestamp or date object.
+     *
+     * @return string
+     */
+    public static function to_rfc3339_utc( $when ) {
+        $timestamp = $when instanceof \DateTimeInterface ? $when->getTimestamp() : (int) $when;
+
+        return gmdate( 'Y-m-d\TH:i:s\Z', $timestamp );
+    }
+
     public function get_events( $user_id, $api_filters = array() ) {
         $access_token = timetics_get_google_access_token($user_id);
 
@@ -29,14 +45,20 @@ class Calendar {
             return ['error' => 'Access token not found or expired.'];
         }
 
-        // Define the time range for the last 3 months
-        // Use gmdate() for API queries to ensure UTC timestamps.
-        $three_months_ago   = gmdate( 'c', strtotime( '-3 months' ) );
-        $three_months_ahead = gmdate( 'c', strtotime( '+3 months' ) ); // 3 months ahead date-time in RFC3339 format
+        // Define the time range for the last 3 months.
+        //
+        // Always formatted as UTC with a trailing "Z" rather than an offset:
+        // an offset like "+06:00" carries a plus sign that survives into the
+        // query string, where Google reads it as a space. The bounds then fail
+        // to parse and the API answers with no items at all — which this class
+        // cannot distinguish from "no events", so every event silently
+        // disappeared. "Z" sidesteps the escaping problem entirely.
+        $three_months_ago   = self::to_rfc3339_utc( strtotime( '-3 months' ) );
+        $three_months_ahead = self::to_rfc3339_utc( strtotime( '+3 months' ) );
 
         $filters = array(
-            'timeMin' => rawurlencode($three_months_ago),
-            'timeMax' => rawurlencode($three_months_ahead),
+            'timeMin' => $three_months_ago,
+            'timeMax' => $three_months_ahead,
             'orderBy' => 'startTime',
             'singleEvents' => 'true',
         );
@@ -75,26 +97,58 @@ class Calendar {
                 continue;
             }
             
-            $start = ! empty($event['start']['dateTime']) ? $event['start']['dateTime'] : $event['start']['date'];
-            $end = ! empty($event['end']['dateTime']) ? $event['end']['dateTime'] : $event['end']['date'];
+            // Google sends `dateTime` for timed events and a date-only `date`
+            // for all-day ones. All-day bounds have no time and no timezone, so
+            // they must not be run through setTimezone() — that shifts the
+            // wall-clock and used to collapse them to 00:00:00-00:00:00, which
+            // blocked nothing at all. Note Google's all-day end date is
+            // EXCLUSIVE: a single day off is 08-10 to 08-11.
+            $all_day = empty( $event['start']['dateTime'] );
+
+            $start = $all_day ? $event['start']['date'] : $event['start']['dateTime'];
+            $end   = $all_day ? $event['end']['date'] : $event['end']['dateTime'];
+
+            if ( $all_day ) {
+                $filtered_events[] = [
+                    'id'          => $event['id'] ?? '',
+                    'all_day'     => true,
+                    'start_date'  => $start,
+                    'start_time'  => '00:00:00',
+                    'end_date'    => $end,
+                    'end_time'    => '00:00:00',
+                    'summary'     => $event['summary'] ?? '',
+                    'description' => $event['description'] ?? '',
+                ];
+
+                continue;
+            }
 
             $timezone = $event['start']['timeZone'] ?? wp_timezone_string();
             $timezone = new \DateTimeZone( $timezone );
 
             $start_dt = new \DateTime( $start );
-            $start_dt->setTimezone( $timezone );
+            $end_dt   = new \DateTime( $end );
 
-            $end_dt = new \DateTime( $end );
+            // Absolute instants, captured before the display conversion below,
+            // so overlap maths never has to reason about wall-clock strings.
+            $start_timestamp = $start_dt->getTimestamp();
+            $end_timestamp   = $end_dt->getTimestamp();
+
+            $start_dt->setTimezone( $timezone );
             $end_dt->setTimezone( $timezone );
 
             $filtered_events[] = [
-                'id'         => $event['id'] ?? '',
-                'start_date' => $start_dt->format( 'Y-m-d' ),
-                'start_time' => $start_dt->format( 'H:i:s' ),
-                'end_date'   => $end_dt->format( 'Y-m-d' ),
-                'end_time'   => $end_dt->format( 'H:i:s' ),
-                'summary'    => $event['summary'] ?? '',
-                'description'=> $event['description'] ?? '',
+                'id'              => $event['id'] ?? '',
+                'all_day'         => false,
+                'start_date'      => $start_dt->format( 'Y-m-d' ),
+                'start_time'      => $start_dt->format( 'H:i:s' ),
+                'end_date'        => $end_dt->format( 'Y-m-d' ),
+                'end_time'        => $end_dt->format( 'H:i:s' ),
+                'start_timestamp' => $start_timestamp,
+                'end_timestamp'   => $end_timestamp,
+                'timezone'        => $timezone->getName(),
+                'summary'         => $event['summary'] ?? '',
+                'description'     => $event['description'] ?? '',
             ];
         }
 

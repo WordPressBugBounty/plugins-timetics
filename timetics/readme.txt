@@ -1,22 +1,22 @@
-=== Timetics - Appointment Booking Calendar & Scheduling System ===
+=== Timetics – Appointment Booking Calendar & Scheduling ===
 Contributors: arraytics, ehsanriyadh
-Tags: appointment booking, booking, booking calendar, scheduling, appointment scheduler, online booking, elearning
+Tags: appointment booking, booking calendar, appointment scheduler, online booking, online scheduling, reservation system, elearning, booking system
 Requires at least: 5.2
 Tested up to: 7.0
-Stable tag: 1.0.60
+Stable tag: 1.0.61
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Online booking and scheduling system for appointments, meetings, consultations, classes, payments, reminders, and calendar sync.
+Appointment booking and scheduling plugin with online booking calendar, payments, reminders, and calendar sync.
 
 == Description ==
 
-[**Timetics**](https://arraytics.com/timetics/) is a powerful appointment booking, meeting scheduler, and online booking system for professionals that helps you manage appointments, scheduling, and reservations in one simple dashboard.
+[**WPTimetics**](https://arraytics.com/timetics/) is an appointment booking and scheduling system that helps businesses accept online bookings, manage appointments, organize staff schedules, and automate booking workflows from one dashboard.
 
-With its smart booking calendar and real-time availability, customers can choose their preferred time slot booking and confirm meetings instantly. You can easily handle daily schedules using the built-in appointment calendar and automated calendar booking features.
+Customers can book appointments through an online booking calendar, choose available time slots, receive instant confirmations, and pay online. Built-in calendar management, automated reminders, and calendar sync help reduce manual scheduling and avoid booking conflicts.
 
-Whether you run coaching sessions, consultations, eLearning and LMS sessions, services, or team meetings, Timetics works as a complete appointment scheduler and meeting scheduler that saves time and removes manual follow-ups.
+Whether you run coaching sessions, consultations, eLearning and LMS appointments, classes, professional services, or team meetings, WPTimetics helps you manage bookings, schedules, payments, and customer communication more efficiently.
 
 [youtube https://youtu.be/qBqTz2wF3kk]
 
@@ -318,6 +318,14 @@ Handles secure online payment transactions for appointment bookings made through
 
 == Changelog ==
 
+= 1.0.61 (July 22, 2026) =
+Fix: Google Calendar two-way sync no longer duplicates events for paid WooCommerce bookings.
+Fix: Google Calendar event fetching now handles timezone offsets correctly.
+Fix: Expired Google tokens now show a re-auth prompt instead of appearing disconnected.
+Fix: Reminder emails now use the correct timezone and skip cancelled, deleted, or rescheduled bookings.
+Fix: Failed-payment bookings now release their slots; group-meeting seats no longer go negative.
+Fix: Notification flow REST API hardened against unauthorized access.
+
 = 1.0.60 (June 28, 2026) =
 Fix: Fixed fatal error for email-automation classes.
 
@@ -516,200 +524,6 @@ Fix: Issue causing no data on booking list after accessing edit drawer
 Fix: Sync problem between Calendar and Booking List view
 Fix: Overflow issue with staff working time
 
-= 1.0.18 ( February 01, 2024 ) =
-Tweak: Filter by booking date on the bookings list view
-Tweak: Calendar data and filter params sync
-Tweak: No Slot available message added on Frontend
-Tweak: Stripe payment client-side validation added
-Fix: Meeting category messages not showing issue fixed
-Fix: Meeting filter related issues fixed
-Fix: Meeting "Duplicate" suffix on edit issue fixed
-Fix: On Calendar view initial load, no bookings showing issue fixed
-Fix: Booking cancellation field not showing issue fixed
-Fix: Booking time synchronization with google calendar issues fixed
-Fix: Fronted booking list view API fetching issue fixed
-Fix: Staff Re-invite button loading issue fixed
-Fix: Staff email not edited issue fixed
-Fix: Protected route issue fixed
-Fix: Custom time setting field state clear issue fixed
-Fix: Notification email not sending properly issues fixed
-
-= 1.0.17 ( January 22, 2024 ) =
-Tweak: Meeting and Profile tab design update
-Tweak: Frontend booking confirmation and payment flow update
-Tweak: Meeting and Bookings empty data state design update.
-Tweak: "Select Staff" added in the category-wise meeting list view on frontend
-Tweak: Frontend booking time slot generation time reduced
-Tweak: Added loading state on notification switch
-Fix: Meeting list pagination and responsive issue fixed
-Fix: Increase / Decrease of numerical values on page scroll issue fixed
-Fix: Admin and frontend booking meeting end time issue fixed
-Fix: Settings default availability and staff availability setup issue issue fixed
-Fix: Meeting data range select issue fixed
-Fix: Staff selecting issue resolved in the category-wise meeting list view on frontend
-
-= 1.0.16 ( January 03, 2024 ) =
-Tweak: Calendar and booking list view optimized.
-Tweak: Calendar day view style updated.
-Tweak: Currency symbol added on frontend and dashboard.
-Tweak: Frontend category meeting list view loader added on selecting meeting.
-Fix: Admin booking invalid meeting end time issues fixed.
-
-= 1.0.15 ( December 24, 2023 ) =
-New: Category template variation added.
-New: Calendar day preview added.
-Tweak: Merged calendar view and bookings list view into one page.
-Tweak: Replaced side menu bookings with the calendar and changed menu position.
-Tweak: Meeting duration field added on meeting creation.
-Tweak: Settings page UI update.
-Fix: Primary and secondary color code setup issues fixed
-Fix: Resolved onboarding time and availability issues.
-Fix: User dashboard rescheduling issue fixed.
-Fix: Calendar booking details popover placement issue fixed.
-
-= 1.0.14 ( December 06, 2023 ) =
-Tweak: Payment does not enable show notice frontend
-Tweak: Frontend sidebar price icon update
-Fix: Meeting minimum notice time issue
-Fix: Searching meeting issue fix on create/edit category modal.
-Fix: Onboarding time availability issue
-Fix: New staff add failed redirecting issue
-Fix: Totals bookings count issue on the overview page
-Fix: Category edit issue meeting list page
-Fix: Customer bookings count issue on the customer page
-Fix: Booking search issue
-
-= 1.0.13 ( November 02, 2023 ) =
-New   : Error page added.
-New   : Re-Invitation mail button added on the staff list.
-Tweak : Scroll bar add-on frontend time slot list.
-Tweak : Component loading spinner  improvement.
-Tweak : UX improvement for host schedules while create or edit a meeting.
-Fix   : Setting page availability weekly hours issue fixing.
-Fix   : Meeting list page icon color issue fixing.
-Fix   : Staff removed the error issue fixing.
-Fix   : Booking from admin panel was buggy .
-Fix   : Accurate host data was not showing while editing a meeting.
-Fix   : Booking couldn't delete if meeting deleted
-Fix   : Current passord cound't match
-Fix   : Booking default status couldn't work
-
-= 1.0.12 ( October 22, 2023 ) =
-Fix     : Couldn't authenticate google meet properly, it throws error when token expire
-Fix     : Couldn't create same google meet meeting link for one to many meetings
-Fix     : Timeslot doesn't show correctly, for different timezone
-Fix     : Booking number showing wrong information if timezone different
-Fix     : Staff member last name is required
-Fix     : Couldn't set default content for notification email
-Fix     : Select google meet for meeting and not connect to google meet it didn't show error message
-Fix     : Staff default status should be active if user is admin
-Fix     : Staff image couldn't save properly
-Fix     : Persmission validation for meeting and booking
-Fix     : Staff password showing on staff api response
-Fix     : Staff delete not working for multisite
-Fix     : Google meet disconnect option not working
-Fix     : Default content should not same for staff and customer
-Fix     : Staffs select tooltip remove on meeting update
-Fix     : Bookings search field disabled
-Fix     : Availability and block days settings
-Tweak   : Set google meet connect option on settings for admin
-Tweak   : Cancel and reschedule link on booking email
-Tweak   : Support automatic payment method to stripe
-Tweak   : Added template type for email
-Tweak   : Update login url for staff
-
-= 1.0.11 ( September 13, 2023 ) =
-Fix   : Deleting a customer also deleted from the user panel
-Fix   : Disconnecting zoom authentication could not work
-Fix   : Invitation sending before placing order on woocommerce
-Fix   : After "cancelled" the appointment is not put back into the system as an available slot
-Fix   : Currency could not save properly
-Fix   : Category functionality couldn't work properly
-Tweak : Network call optimization from frontend
-Tweak : Design update on booking pannel
-Tweak : Payment option update on booking
-New   : Meeting preview button added on meeting update page
-
-= 1.0.10 ( August 30, 2023 ) =
-New     : Generate demo data for meeting, booking, staff and customer.
-Tweak   : Location-type phone call added attendee or organizer phone number option.
-Tweak   : Show phone number field on booking if enable attendee phone number.
-Fix     : Timeslot for diffrent timezone is not working properly
-
-= 1.0.9 ( August 09, 2023 )=
-Fix : Compatible with WordPress 6.3
-
-= 1.0.8 ( August 02, 2023 )=
-New    : User onboarding
-New    : Country code added in phone number field
-Tweak  : Bug fix for meeting creation in the event of no date range is provided.
-Tweak  : customer's phone number is shown on the booking details modal
-Fix    : Payment Setting tab  API call issue fixed
-Fix    : Frontend translation issue
-
-= 1.0.7 ( July 08, 2023 )=
-New   : Customer Dashboard
-Tweak : Details report about meetings, bookings and customer
-New   : Auto timezone detect for customer
-
-= 1.0.6 ( June 13, 2023 )=
-New   : Show meeting for booking in single page application
-New   : Reschedule Appointment
-Tweak : Calendar Localization
-Tweak : Accordion, tab, icon, shortcode page design updated
-Fix   : Couldn't send email booking notification to customer
-Fix   : Timet slot couldn't available if booking cancel
-Fix   : One to many meeting and meeting with Seatmap from admin couldn't book properly
-
-= 1.0.5 ( May 28, 2023 )=
-New  : WooCommerce Integration
-Tweak: Field rearrange in the meeting creation
-Fix  : Available booking slot is not working properly on current date
-Fix  : Couldn't redirect to admin dashboard after skiping staff integration
-
-= 1.0.4 ( May 13, 2023 )=
-
-- Tweak: Added new hook for calendar settings on frontend
-- Tweak: ptimize icon component
-- Fix : Time Format issue fixed
-
-= 1.0.3 ( April 12, 2023 )=
-Tweak: Admin UI improvement
-Fix: Date issue fix in frontend
-
-= 1.0.2 ( April 3, 2023 )=
-Added: Added filter on booking entry
-Added: Added Phone number field in frontend
-Added: Added filter for meeting data
-Fix  : Booking Confirmation mail sending issue
-Fix  : Total earnings showing wrong value
-Fix  : Coudn't send google meet link when booking create
-Fix  : Email template jonning link updated
-Tweak: Location type
-Tweak: Updated meeting price
-Tweak: Updated post property
-Tweak: Added filter on meeting timeslot
-Tweak: Added meeting type for filtering
-Tweak: Refactoring post model
-
-= 1.0.1 ( February 13, 2023 )=
-Added: date and time format support
-Added: Meeting list shortcode added
-Added: Added additional notes on booking
-Added: Booking status show in booking list.
-Tweak: Added location on booking
-Tweak: Added location type on booking
-Tweak: Added default booking status from admin settings
-Tweak: Added default currency on admin settings
-Tweak: Added start of week on localize for frontend
-Tweak: Shortcodes page design improvement
-Tweak: Create meeting location improvement.
-Tweak:  All table responsive improvement.
-Tweak: Front-end booking part responsive improvement.
-Fix  : Deprecated error on google calendar for php8
-Fix  : Input field focus issue fixed.
-Fix  : Stripe payment error handle to front-end.
-
 = 1.0.0 ( January 30, 2023 )=
 
 - initial release
@@ -742,6 +556,6 @@ The fastest way to install Timetics and start accepting online appointment booki
 4. Go to **Dashboard → Plugins → Installed Plugins** and click **Activate** next to Timetics.
 5. The onboarding wizard will guide you through your initial booking system configuration.
 
-### Updating Timetics
+### Updating WPTimetics
 
-Timetics updates automatically through the WordPress dashboard. If you have made custom code modifications to the plugin files, back up your changes before updating. After any update, if you experience permalink issues, go to **Settings → Permalinks** and click **Save Changes** to refresh your rewrite rules.
+WPTimetics updates automatically through the WordPress dashboard. If you have made custom code modifications to the plugin files, back up your changes before updating. After any update, if you experience permalink issues, go to **Settings → Permalinks** and click **Save Changes** to refresh your rewrite rules.

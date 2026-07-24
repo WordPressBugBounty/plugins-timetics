@@ -2,14 +2,14 @@
 # This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Timetics - Appointment Booking Calendar & Scheduling System 1.0.60\n"
+"Project-Id-Version: Timetics - Appointment Booking Calendar & Scheduling System 1.0.61\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/timetics\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-06-28T05:07:29+00:00\n"
+"POT-Creation-Date: 2026-07-22T10:27:15+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: timetics\n"
@@ -240,80 +240,84 @@ msgstr ""
 msgid "Automation"
 msgstr ""
 
-#: core/admin/notification.php:73
+#: core/admin/notification.php:81
+msgid "Sorry, you are not allowed to do that."
+msgstr ""
+
+#: core/admin/notification.php:99
 msgid "Meeting Title"
 msgstr ""
 
-#: core/admin/notification.php:78
-#: core/admin/notification.php:161
+#: core/admin/notification.php:104
+#: core/admin/notification.php:184
 msgid "Meeting Date"
 msgstr ""
 
-#: core/admin/notification.php:83
+#: core/admin/notification.php:109
 msgid "Meeting Time"
 msgstr ""
 
-#: core/admin/notification.php:88
+#: core/admin/notification.php:114
 msgid "Meeting Location"
 msgstr ""
 
-#: core/admin/notification.php:93
+#: core/admin/notification.php:119
 msgid "Google Meet Link"
 msgstr ""
 
-#: core/admin/notification.php:98
+#: core/admin/notification.php:124
 msgid "Meeting Duration"
 msgstr ""
 
-#: core/admin/notification.php:103
+#: core/admin/notification.php:129
 msgid "Host Name"
 msgstr ""
 
-#: core/admin/notification.php:108
-#: core/admin/notification.php:145
+#: core/admin/notification.php:134
+#: core/admin/notification.php:171
 msgid "Host Email"
 msgstr ""
 
-#: core/admin/notification.php:113
+#: core/admin/notification.php:139
 msgid "Customer Name"
 msgstr ""
 
-#: core/admin/notification.php:118
-#: core/admin/notification.php:141
+#: core/admin/notification.php:144
+#: core/admin/notification.php:167
 msgid "Customer Email"
 msgstr ""
 
-#: core/admin/notification.php:123
+#: core/admin/notification.php:149
 msgid "Login URL"
 msgstr ""
 
-#: core/admin/notification.php:128
+#: core/admin/notification.php:154
 msgid "Login Username"
 msgstr ""
 
-#: core/admin/notification.php:133
+#: core/admin/notification.php:159
 msgid "Set Password URL"
 msgstr ""
 
-#: core/admin/notification.php:149
+#: core/admin/notification.php:175
 msgid "Custom Email"
 msgstr ""
 
-#: core/admin/notification.php:156
+#: core/admin/notification.php:191
 #: assets/src/admin/pages/settings/Notification.js:55
 msgid "After Booking Confirmation"
 msgstr ""
 
-#: core/admin/notification.php:168
+#: core/admin/notification.php:198
 #: assets/src/admin/pages/settings/Notification.js:79
 msgid "After Booking Cancellation"
 msgstr ""
 
-#: core/admin/notification.php:175
+#: core/admin/notification.php:211
 msgid "After Booking Rescheduled"
 msgstr ""
 
-#: core/admin/notification.php:237
+#: core/admin/notification.php:273
 msgid "Powered by Timetics"
 msgstr ""
 
@@ -355,7 +359,7 @@ msgstr ""
 #: core/appointments/api-appointment.php:316
 #: core/appointments/api-appointment.php:384
 #: core/appointments/api-appointment.php:623
-#: core/bookings/api-booking.php:276
+#: core/bookings/api-booking.php:277
 #: core/staffs/api-staff.php:331
 #: core/staffs/api-staff.php:369
 msgid "Something went wrong"
@@ -547,152 +551,152 @@ msgstr ""
 msgid "Google"
 msgstr ""
 
-#: core/bookings/api-booking.php:243
-#: core/bookings/api-booking.php:320
-#: core/bookings/api-booking.php:390
-#: core/bookings/api-booking.php:598
-#: core/bookings/api-booking.php:1631
+#: core/bookings/api-booking.php:244
+#: core/bookings/api-booking.php:321
+#: core/bookings/api-booking.php:391
+#: core/bookings/api-booking.php:599
+#: core/bookings/api-booking.php:1645
 #: core/integrations/stripe/api-stripe.php:85
 msgid "Invalid booking id."
 msgstr ""
 
-#: core/bookings/api-booking.php:296
+#: core/bookings/api-booking.php:297
 msgid "Recurring booking limit exit"
 msgstr ""
 
-#: core/bookings/api-booking.php:329
+#: core/bookings/api-booking.php:330
 msgid "Custom Field Booking Restricted "
 msgstr ""
 
-#: core/bookings/api-booking.php:355
+#: core/bookings/api-booking.php:356
 #: assets/src/frontend/pages/bookings/BookingStatus.js:52
 msgid "Something went wrong, Please try again."
 msgstr ""
 
-#: core/bookings/api-booking.php:365
-#: core/bookings/api-booking.php:404
+#: core/bookings/api-booking.php:366
+#: core/bookings/api-booking.php:405
 msgid "Successfully deleted booking"
 msgstr ""
 
-#: core/bookings/api-booking.php:546
+#: core/bookings/api-booking.php:547
 msgid "Your booking timezone is invalid"
 msgstr ""
 
-#: core/bookings/api-booking.php:551
+#: core/bookings/api-booking.php:552
 msgid "Your meeting timezone is invalid. Please update your meeting timezone with proper timezone."
 msgstr ""
 
-#: core/bookings/api-booking.php:571
+#: core/bookings/api-booking.php:572
 msgid "Get all entries"
 msgstr ""
 
-#: core/bookings/api-booking.php:612
+#: core/bookings/api-booking.php:613
 msgid "Booking has already been finalized."
 msgstr ""
 
-#: core/bookings/api-booking.php:636
+#: core/bookings/api-booking.php:637
 msgid "Missing payment intent."
 msgstr ""
 
-#: core/bookings/api-booking.php:649
+#: core/bookings/api-booking.php:650
 msgid "Cannot verify payment with Stripe."
 msgstr ""
 
-#: core/bookings/api-booking.php:679
+#: core/bookings/api-booking.php:680
 msgid "Payment verification failed."
 msgstr ""
 
-#: core/bookings/api-booking.php:693
-#: core/bookings/api-booking.php:724
-#: core/bookings/api-booking.php:1690
+#: core/bookings/api-booking.php:694
+#: core/bookings/api-booking.php:725
+#: core/bookings/api-booking.php:1704
 msgid "Payment intent does not match this booking."
 msgstr ""
 
-#: core/bookings/api-booking.php:735
+#: core/bookings/api-booking.php:736
 msgid "Payment already finalized."
 msgstr ""
 
 #. translators: Action
-#: core/bookings/api-booking.php:807
+#: core/bookings/api-booking.php:814
 #, php-format
 msgid "Payment %s"
 msgstr ""
 
 #. translators: %s: Time slot
-#: core/bookings/api-booking.php:967
+#: core/bookings/api-booking.php:974
 #, php-format
 msgid "%s time slot is not available"
 msgstr ""
 
-#: core/bookings/api-booking.php:977
+#: core/bookings/api-booking.php:984
 msgid "Couldn't possible to book. Plese try another time."
 msgstr ""
 
-#: core/bookings/api-booking.php:1020
+#: core/bookings/api-booking.php:1027
 msgid "This booking alreay canceled"
 msgstr ""
 
 #. translators: Action
-#: core/bookings/api-booking.php:1214
+#: core/bookings/api-booking.php:1242
 #, php-format
 msgid "Successfully %s booking"
 msgstr ""
 
-#: core/bookings/api-booking.php:1327
-#: core/bookings/hooks.php:391
+#: core/bookings/api-booking.php:1355
+#: core/bookings/hooks.php:560
 msgid "You are not allowed to delete this booking."
 msgstr ""
 
-#: core/bookings/api-booking.php:1445
+#: core/bookings/api-booking.php:1459
 msgid "Invalid meeting."
 msgstr ""
 
-#: core/bookings/api-booking.php:1450
+#: core/bookings/api-booking.php:1464
 msgid "Invalid timeslot."
 msgstr ""
 
-#: core/bookings/api-booking.php:1455
+#: core/bookings/api-booking.php:1469
 msgid "Team member not matched"
 msgstr ""
 
-#: core/bookings/api-booking.php:1460
+#: core/bookings/api-booking.php:1474
 msgid "Location type not matched"
 msgstr ""
 
-#: core/bookings/api-booking.php:1595
+#: core/bookings/api-booking.php:1609
 msgid "Booking not found."
 msgstr ""
 
-#: core/bookings/api-booking.php:1603
+#: core/bookings/api-booking.php:1617
 msgid "Unable to verify booking ownership."
 msgstr ""
 
-#: core/bookings/api-booking.php:1610
+#: core/bookings/api-booking.php:1624
 msgid "You are not allowed to change the email address for this booking."
 msgstr ""
 
-#: core/bookings/api-booking.php:1646
+#: core/bookings/api-booking.php:1660
 msgid "Invalid payment intent id."
 msgstr ""
 
-#: core/bookings/api-booking.php:1660
+#: core/bookings/api-booking.php:1674
 msgid "Booking already bound to another payment intent."
 msgstr ""
 
-#: core/bookings/api-booking.php:1673
+#: core/bookings/api-booking.php:1687
 msgid "Cannot verify payment intent with Stripe."
 msgstr ""
 
-#: core/bookings/api-booking.php:1701
+#: core/bookings/api-booking.php:1715
 msgid "Payment intent is bound to another booking."
 msgstr ""
 
-#: core/bookings/api-booking.php:1730
+#: core/bookings/api-booking.php:1744
 msgid "Payment intent bound."
 msgstr ""
 
 #. translators: %s: Number of approved bookings
-#: core/bookings/hooks.php:263
+#: core/bookings/hooks.php:432
 #, php-format
 msgid "Approved <span class=\"count\">(%s)</span>"
 msgid_plural "Approved <span class=\"count\">(%s)</span>"
@@ -700,7 +704,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: Number of pending bookings
-#: core/bookings/hooks.php:270
+#: core/bookings/hooks.php:439
 #, php-format
 msgid "Pending <span class=\"count\">(%s)</span>"
 msgid_plural "Pending <span class=\"count\">(%s)</span>"
@@ -708,7 +712,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: Number of cancelled bookings
-#: core/bookings/hooks.php:276
+#: core/bookings/hooks.php:445
 #, php-format
 msgid "Cancelled <span class=\"count\">(%s)</span>"
 msgid_plural "Cancelled <span class=\"count\">(%s)</span>"
@@ -716,7 +720,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: Number of completed bookings
-#: core/bookings/hooks.php:282
+#: core/bookings/hooks.php:451
 #, php-format
 msgid "Completed <span class=\"count\">(%s)</span>"
 msgid_plural "Completed <span class=\"count\">(%s)</span>"
@@ -784,6 +788,10 @@ msgstr ""
 
 #: core/integrations/auth.php:113
 msgid "Google Auth Error"
+msgstr ""
+
+#: core/integrations/google/client.php:177
+msgid "Failed to obtain Google access token."
 msgstr ""
 
 #: core/integrations/stripe/api-stripe.php:98
@@ -933,20 +941,20 @@ msgstr ""
 msgid "Successfully deleted staff"
 msgstr ""
 
-#: core/staffs/api-staff.php:528
+#: core/staffs/api-staff.php:535
 msgid "Something went wrong, please try again"
 msgstr ""
 
-#: core/staffs/api-staff.php:537
+#: core/staffs/api-staff.php:544
 msgid "Successfully disconnected"
 msgstr ""
 
-#: core/staffs/api-staff.php:601
+#: core/staffs/api-staff.php:608
 msgid "Current password does not match"
 msgstr ""
 
 #. translators: Action
-#: core/staffs/api-staff.php:632
+#: core/staffs/api-staff.php:639
 #, php-format
 msgid "Successfully %s staff"
 msgstr ""
@@ -1868,7 +1876,7 @@ msgstr ""
 msgid "Zambian kwacha"
 msgstr ""
 
-#: utils/global-helper.php:333
+#: utils/global-helper.php:370
 #: assets/src/admin/pages/bookings/FormField.js:657
 #: assets/src/admin/pages/meeting/LocationType.js:396
 #: assets/src/frontend/pages/bookings/BookingSuccess.js:202
@@ -1877,82 +1885,82 @@ msgstr ""
 msgid "Google Meet"
 msgstr ""
 
-#: utils/global-helper.php:334
-#: utils/global-helper.php:343
+#: utils/global-helper.php:371
+#: utils/global-helper.php:381
 msgid "Connect your Meet to sync your booked events."
 msgstr ""
 
-#: utils/global-helper.php:342
+#: utils/global-helper.php:380
 #: assets/src/admin/module/onboard/components/Calendar.js:21
 #: assets/src/frontend/pages/bookings/AddCalender.js:68
 msgid "Google Calendar"
 msgstr ""
 
-#: utils/global-helper.php:469
+#: utils/global-helper.php:508
 msgid "Stripe"
 msgstr ""
 
-#: utils/global-helper.php:473
+#: utils/global-helper.php:512
 msgid "Local Pay"
 msgstr ""
 
-#: utils/global-helper.php:477
+#: utils/global-helper.php:516
 msgid "Woocommerce"
 msgstr ""
 
-#: utils/global-helper.php:544
+#: utils/global-helper.php:583
 msgid "Timetics Meeting"
 msgstr ""
 
-#: utils/global-helper.php:550
+#: utils/global-helper.php:589
 msgid "Timetics meeting"
 msgstr ""
 
-#: utils/global-helper.php:776
+#: utils/global-helper.php:815
 msgid "Eventin"
 msgstr ""
 
-#: utils/global-helper.php:777
+#: utils/global-helper.php:816
 msgid "Best Free WordPress Event Calendar Plugin to manage booking, registration, RSVPs, schedule recurring events and sell event tickets with WooCommerce."
 msgstr ""
 
-#: utils/global-helper.php:792
+#: utils/global-helper.php:831
 msgid "Booktics"
 msgstr ""
 
-#: utils/global-helper.php:793
+#: utils/global-helper.php:832
 msgid "The ultimate online booking plugin for WordPress — services, staff, schedules, and payments in one place."
 msgstr ""
 
-#: utils/global-helper.php:808
+#: utils/global-helper.php:847
 msgid "Poptics"
 msgstr ""
 
-#: utils/global-helper.php:809
+#: utils/global-helper.php:848
 msgid "Discover the ultimate popup mix with Poptics Popup Builder to boost your lead generation and sales conversions."
 msgstr ""
 
-#: utils/global-helper.php:824
+#: utils/global-helper.php:863
 msgid "WPCafe"
 msgstr ""
 
-#: utils/global-helper.php:825
+#: utils/global-helper.php:864
 msgid "WPCafe — Restaurant plugin with Online Ordering, Delivery, Pickup, Food Menu, Reservations, and Table Management."
 msgstr ""
 
-#: utils/global-helper.php:840
+#: utils/global-helper.php:879
 msgid "Aisentic"
 msgstr ""
 
-#: utils/global-helper.php:841
+#: utils/global-helper.php:880
 msgid "AI assistant for WordPress — automate content, replies and on-site tasks without leaving your dashboard."
 msgstr ""
 
-#: utils/global-helper.php:857
+#: utils/global-helper.php:896
 msgid "Optiontics"
 msgstr ""
 
-#: utils/global-helper.php:858
+#: utils/global-helper.php:897
 msgid "Product add-ons / extras for food items — let customers pick toppings, sizes and other paid options along with the products."
 msgstr ""
 

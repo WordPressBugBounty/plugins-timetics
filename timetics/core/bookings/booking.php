@@ -660,6 +660,81 @@ class Booking {
     }
 
     /**
+     * Find the Booking_Entry (shared per-slot schedule record) this booking occupies.
+     *
+     * @param  Appointment|null $meeting Optional pre-built meeting for this booking.
+     * @return Booking_Entry|null        The first matching entry, or null if none.
+     */
+    private function find_slot_entry( $meeting = null ) {
+        $meeting       = $meeting ?: new Appointment( $this->get_appointment() );
+        $booking_entry = new Booking_Entry();
+
+        $date_time = timetics_convert_timezone(
+            $this->get_start_date() . ' ' . $this->get_start_time(),
+            $this->get_timezone(),
+            $meeting->get_timezone()
+        );
+
+        $entries = $booking_entry->find(
+            [
+                'staff_id'   => $this->get_staff_id(),
+                'meeting_id' => $this->get_appointment(),
+                'date'       => $date_time->format( 'Y-m-d' ),
+                'start'      => $date_time->format( 'h:i a' ),
+            ]
+        );
+
+        return $entries ? $booking_entry->first() : null;
+    }
+
+    /**
+     * Release the slot held by this booking.
+     *
+     * @return void
+     */
+    public function release_slot() {
+        if ( ! $this->is_booking() ) {
+            return;
+        }
+
+        // Idempotency guard: never release the same booking's slot twice.
+        if ( $this->get_prop( 'slot_released' ) ) {
+            return;
+        }
+
+        $meeting = new Appointment( $this->get_appointment() );
+        $entry   = $this->find_slot_entry( $meeting );
+
+        if ( $entry ) {
+            if ( 'one-to-one' === strtolower( $meeting->get_type() ) ) {
+                $entry->delete();
+            } else {
+                $booked        = max( 0, intval( $entry->get_booked() ) - 1 );
+                $booked_seat   = ! empty( $this->get_seat() ) ? $this->get_seat() : [];
+                $existing_seat = ! empty( $entry->get_seats() ) ? $entry->get_seats() : [];
+
+                $entry->update(
+                    [
+                        'booked' => $booked,
+                        'seats'  => array_values( array_diff( $existing_seat, $booked_seat ) ),
+                    ]
+                );
+            }
+        } elseif ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+            error_log(
+                sprintf(
+                    'Timetics release_slot: no Booking_Entry found for booking #%d ( staff %s, meeting %s ).',
+                    $this->id,
+                    $this->get_staff_id(),
+                    $this->get_appointment()
+                )
+            );
+        }
+
+        update_post_meta( $this->id, $this->meta_prefix . 'slot_released', 1 );
+    }
+
+    /**
      * Delete booking
      *
      * @return bool | WP_Error
@@ -775,37 +850,23 @@ class Booking {
     }
 
     public function create_appointment_event() {
-        $data = [
-            'summary'     => timetics_get_option( 'booking_created_customer_email_title' ),
-            'description' => timetics_get_option( 'booking_created_customer_email_body' ),
-        ];
-
+        // No summary/description passed, so prepare_event() falls back to the
+        // meeting's own name and description. The booking-created email subject
+        // and body used to be reused here, which put the notification copy
+        // ("New meeting scheduled!", greeting, date and time lines) into the
+        // calendar entry instead of the meeting's details.
         $calendar   = new Calendar();
-        $event_data = $this->prepare_event( $data );
+        $event_data = $this->prepare_event();
 
         if ( ! $event_data ) {
             return;
         }
 
-        $booking_entry = new Booking_Entry();
-        $meeting       = new Appointment( $this->get_appointment() );
-
-        $date_time = timetics_convert_timezone( $this->get_start_date() .' '. $this->get_start_time(), $this->get_timezone(), $meeting->get_timezone() );
-
-        $entries = $booking_entry->find(
-            [
-                'staff_id'   => $this->get_staff_id(),
-                'meeting_id' => $this->get_appointment(),
-                'date'       => $date_time->format('Y-m-d'),
-                'start'      => $date_time->format('h:i a'),
-            ]
-        );
+        $entry = $this->find_slot_entry();
 
         $event = false;
 
-        if ( $entries ) {
-            $entry = $booking_entry->first();
-
+        if ( $entry ) {
             $event = $entry->get_google_event();
 
             if ( ! $event ) {
@@ -818,6 +879,13 @@ class Booking {
 
         if ( $event ) {
             update_post_meta( $this->id, $this->meta_prefix . 'calendar_event', $event );
+
+            // Also record the bare event id. Google_Calendar_Sync uses this meta
+            // to recognise events Timetics itself created, so that they are not
+            // pulled back in as external events and used to block their own slot.
+            if ( ! empty( $event['id'] ) ) {
+                $this->set_google_event_id( $event['id'] );
+            }
         }
     }
 
@@ -831,13 +899,11 @@ class Booking {
             return;
         }
 
-        $data = [
-            'summary'     => timetics_get_option( 'booking_rescheduled_customer_email_title' ),
-            'description' => timetics_get_option( 'booking_rescheduled_customer_email_body' ),
-        ];
-
+        // Same as create_appointment_event(): the meeting's name and description
+        // belong in the calendar entry, not the reschedule email copy. Keeping
+        // them consistent also stops a reschedule from rewriting the title.
         $calendar       = new Calendar();
-        $event_data     = $this->prepare_event( $data );
+        $event_data     = $this->prepare_event();
         $calendar_event = $this->get_event();
 
         if ( ! is_array( $calendar_event ) ) {
@@ -881,6 +947,10 @@ class Booking {
 
             // update calendar event data.
             update_post_meta( $this->id, $this->meta_prefix . 'calendar_event', $event );
+
+            // The event no longer exists in Google, so drop the id used by
+            // Google_Calendar_Sync to skip Timetics-created events.
+            $this->set_google_event_id( '' );
         }
     }
 
@@ -1078,11 +1148,26 @@ class Booking {
      * @return bool
      */
     public function set_google_event_id( $event_id ) {
-        return $this->save_metadata( 'google_event_id', $event_id );
+        // Written directly rather than through save_metadata(), which takes an
+        // array and only accepts keys declared in $this->data — neither is true
+        // here, so it silently discarded every write.
+        $meta_key = $this->meta_prefix . 'google_event_id';
+
+        if ( ! $event_id ) {
+            return delete_post_meta( $this->id, $meta_key );
+        }
+
+        return update_post_meta( $this->id, $meta_key, $event_id );
     }
 
     public function set_sync_status( $status ) {
-        return $this->save_metadata( 'google_calendar_sync_status', $status );
+        $meta_key = $this->meta_prefix . 'google_calendar_sync_status';
+
+        if ( ! $status ) {
+            return delete_post_meta( $this->id, $meta_key );
+        }
+
+        return update_post_meta( $this->id, $meta_key, $status );
     }
 
     public function get_sync_status() {
@@ -1095,7 +1180,7 @@ class Booking {
      */
     public function get_all_google_event_ids() {
         $meta_key = $this->meta_prefix . 'google_event_id';
-    
+
         $posts = get_posts(
             array(
                 'post_type'      => 'any',

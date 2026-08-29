@@ -6,6 +6,8 @@
  */
 namespace Timetics\Core\DummyData;
 
+defined( 'ABSPATH' ) || exit;
+
 use Timetics\Base\Api;
 use Timetics\Core\Appointments\Appointment;
 use Timetics\Core\Bookings\Booking;

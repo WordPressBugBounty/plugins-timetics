@@ -8,9 +8,10 @@
  */
 namespace Timetics\Core\Appointments;
 
+defined( 'ABSPATH' ) || exit;
+
 use DateTime;
 use Timetics\Base\PostModel;
-use Timetics\Core\Bookings\Booking;
 use Timetics\Core\Bookings\Booking_Entry;
 use Timetics\Core\Staffs\Staff;
 use WP_Query;
@@ -555,7 +556,7 @@ class Appointment extends PostModel {
     public function get_author() {
         $post = get_post( $this->id );
 
-        return $post->post_author;
+        return $post ? (int) $post->post_author : 0;
     }
 
     /**
@@ -667,11 +668,13 @@ class Appointment extends PostModel {
             'post_title'  => $this->data['name'],
             'post_type'   => $this->post_type,
             'post_status' => 'publish',
-            'post_author' => get_current_user_id(),
         ];
 
         if ( ! empty( $this->id ) ) {
             $args['ID'] = $this->id;
+        } else {
+            // Only on creation — setting this on update reassigns post_author to whoever edits it.
+            $args['post_author'] = get_current_user_id();
         }
 
         // Insert or Update appointment.
@@ -765,7 +768,8 @@ class Appointment extends PostModel {
 
         $args = wp_parse_args( $args, $defaults );
 
-        if ( ! empty( $args['staff'] ) ) {
+        // isset()/'' check, not empty() — empty(0) skipped this filter, leaking all staff data to guests.
+        if ( isset( $args['staff'] ) && '' !== $args['staff'] ) {
             $args['meta_query'][] = [
                 'key'     => '_tt_apointment_staff',
                 'value'   => $args['staff'],
@@ -916,7 +920,9 @@ class Appointment extends PostModel {
                     $booked = $booked_entry->get_booked();
                 }
 
-                $datetime = $this->convert_timezone( $time, $time_zone );
+                // $time is only a clock reading, so pass the slot's own date or
+                // today's DST offset gets applied to a date in the other season.
+                $datetime = $this->convert_timezone( $date . ' ' . gmdate( 'g:ia', $time ), $time_zone );
 
                 $slot = [
                     'status'     => $status,
@@ -955,17 +961,44 @@ class Appointment extends PostModel {
         ] );
 
         foreach ( $entries as $entry ) {
-            $booking      = new Booking( $entry->get_booking_id() );
             $start_time   = $entry->get_start();
             $end_time     = $entry->get_end();
 
             // Check if current time slot falls within the booking duration
-            if ( $this->is_time_in_range( $time, $start_time, $end_time ) ) {
-                return $entry;
+            if ( ! $this->is_time_in_range( $time, $start_time, $end_time ) ) {
+                continue;
             }
+
+            if ( $this->is_orphan_entry( $entry ) ) {
+                continue;
+            }
+
+            return $entry;
         }
 
         return false;
+    }
+
+    /**
+     * Whether an entry outlived its booking and should stop blocking the slot.
+     *
+     * Only single-booking entries qualify: a shared entry names just its first
+     * booker in `booking_id`, and entries with none belong to events/imports.
+     *
+     * @param   Booking_Entry  $entry
+     *
+     * @return  bool
+     */
+    private function is_orphan_entry( $entry ) {
+        $booking_id = $entry->get_booking_id();
+
+        if ( ! $booking_id || intval( $entry->get_booked() ) > 1 ) {
+            return false;
+        }
+
+        $booking = get_post( $booking_id );
+
+        return ! $booking || 'timetics-booking' !== $booking->post_type;
     }
 
     /**
@@ -1051,7 +1084,8 @@ class Appointment extends PostModel {
             $end   = strtotime( $day['end'] );
 
             for ( $time = $start; $time <= $end; $time += $interval ) {
-                $datetime = $this->convert_timezone( $time, $time_zone );
+                // Slot's own date, see get_schedule_by_date().
+                $datetime = $this->convert_timezone( $date . ' ' . gmdate( 'g:ia', $time ), $time_zone );
                 $slot     = $datetime->format( 'g:ia' );
                 $slots[]  = $slot;
             }

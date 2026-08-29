@@ -6,6 +6,8 @@
  */
 namespace Timetics\Core\Integrations\Google\Service;
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Class Calendar
  */
@@ -123,7 +125,7 @@ class Calendar {
                 continue;
             }
 
-            $timezone = $event['start']['timeZone'] ?? wp_timezone_string();
+            $timezone = $event['start']['timeZone'] ?? timetics_wp_timezone_string();
             $timezone = new \DateTimeZone( $timezone );
 
             $start_dt = new \DateTime( $start );
@@ -365,7 +367,7 @@ class Calendar {
         $start_time = isset( $data['start']['time'] ) ? $data['start']['time'] : gmdate( 'H:i:s' );
         $end_date   = isset( $data['end']['date'] ) ? $data['end']['date'] : gmdate( 'Y-m-d' );
         $end_time   = isset( $data['end']['time'] ) ? $data['end']['time'] : gmdate( 'H:i:s' );
-        $timezone   = isset( $data['timezone'] ) ? $data['timezone'] : wp_timezone_string();
+        $timezone   = isset( $data['timezone'] ) ? $data['timezone'] : timetics_wp_timezone_string();
 
         // Create DateTime objects with proper timezone to avoid double conversion.
         $start_datetime = new \DateTime( $start_date . ' ' . $start_time, new \DateTimeZone( $timezone ) );

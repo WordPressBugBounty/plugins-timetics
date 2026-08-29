@@ -6,6 +6,8 @@
  */
 namespace Timetics\Core\Services;
 
+defined( 'ABSPATH' ) || exit;
+
 use Timetics\Base\Api;
 use Timetics\Utils\Singleton;
 use WP_REST_Request;

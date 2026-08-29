@@ -6,6 +6,8 @@
  */
 namespace Timetics\Base;
 
+defined( 'ABSPATH' ) || exit;
+
 interface FileReaderInterface {
     /**
      * Get data by reading file

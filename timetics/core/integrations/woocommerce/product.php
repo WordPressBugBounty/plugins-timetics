@@ -6,6 +6,8 @@
  */
 namespace Timetics\Core\Integrations\Woocommerce;
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * WooCommerce Product class
  */

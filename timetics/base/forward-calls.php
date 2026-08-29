@@ -6,6 +6,8 @@
  */
 namespace Timetics\Base;
 
+defined( 'ABSPATH' ) || exit;
+
 use BadMethodCallException;
 use Timetics\Base\PostModel;
 

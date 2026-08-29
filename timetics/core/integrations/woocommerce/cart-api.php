@@ -7,6 +7,8 @@
 
 namespace Timetics\Core\Integrations\Woocommerce;
 
+defined( 'ABSPATH' ) || exit;
+
 use Timetics\Base\Api;
 use Timetics\Core\Appointments\Appointment;
 use Timetics\Utils\Singleton;
@@ -66,8 +68,36 @@ class Cart_Api extends Api {
         $data = json_decode( $requst->get_body(), true );
 
         $booking_id = ! empty( $data['booking_id'] ) ? intval( $data['booking_id'] ) : 0;
-        $meeting_id = ! empty( $data['meeting_id'] ) ? intval( $data['meeting_id'] ) : 0;
-        $price      = ! empty( $data['price'] ) ? intval( $data['price'] ) : 0;
+        $token      = ! empty( $data['security_token'] ) ? sanitize_text_field( $data['security_token'] ) : '';
+
+        $booking = new \Timetics\Core\Bookings\Booking( $booking_id );
+        // everything from the booking record itself once ownership is proven.
+        if ( ! $booking_id || '' === $token || ! $booking->is_booking() ) {
+            return new \WP_HTTP_Response(
+                [
+                    'success'     => 0,
+                    'status_code' => 404,
+                    'message'     => __( 'Invalid booking.', 'timetics' ),
+                ],
+                404
+            );
+        }
+
+        $stored = (string) $booking->get_security_token();
+
+        if ( '' === $stored || ! hash_equals( $stored, $token ) ) {
+            return new \WP_HTTP_Response(
+                [
+                    'success'     => 0,
+                    'status_code' => 403,
+                    'message'     => __( 'Invalid booking token.', 'timetics' ),
+                ],
+                403
+            );
+        }
+
+        $meeting_id = (int) $booking->get_appointment();
+        $price      = (int) $booking->get_total();
 
         // Set session for timetics data for woocommerce.
         WC()->session->set( 'timetics_data', [

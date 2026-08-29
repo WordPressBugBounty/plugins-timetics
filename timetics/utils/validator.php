@@ -6,6 +6,8 @@
  */
 namespace Timetics\Utils;
 
+defined( 'ABSPATH' ) || exit;
+
 use WP_Error;
 
 /**

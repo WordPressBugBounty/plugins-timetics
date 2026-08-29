@@ -6,6 +6,8 @@
  */
 namespace Timetics\Core\Emails;
 
+defined( 'ABSPATH' ) || exit;
+
 use Timetics\Core\Staffs\Staff;
 
 class Re_Invite_Staff extends Email {

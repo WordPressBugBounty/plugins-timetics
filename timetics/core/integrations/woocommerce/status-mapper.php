@@ -1,6 +1,8 @@
 <?php
 namespace Timetics\Core\Integrations\Woocommerce;
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Class Status_Mapper
  *

@@ -7,6 +7,8 @@
 
 namespace Timetics\Base;
 
+defined( 'ABSPATH' ) || exit;
+
 use Timetics\Base\ForwardCalls;
 
 /**

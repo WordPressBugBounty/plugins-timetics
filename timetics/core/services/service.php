@@ -6,6 +6,8 @@
  */
 namespace Timetics\Core\Services;
 
+defined( 'ABSPATH' ) || exit;
+
 use WP_Term_Query;
 
 class Service {

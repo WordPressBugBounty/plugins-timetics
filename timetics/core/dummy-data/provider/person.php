@@ -6,6 +6,8 @@
  */
 namespace Timetics\Core\DummyData\Provider;
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Person provider class
  */

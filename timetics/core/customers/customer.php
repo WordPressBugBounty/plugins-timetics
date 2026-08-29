@@ -415,12 +415,17 @@ class Customer {
      * @return  WP_Query
      */
     private function booking_query() {
-        $default_booking_status = timetics_get_option( 'default_booking_status', 'approved' );
+        // Not tied to "default_booking_status" (that's what status a NEW
+        // booking starts in, not which bookings count here) — otherwise an
+        // approved booking can vanish from the customer's count/history the
+        // moment it's approved, on any site where new bookings default to
+        // pending. See core/reports/api-report.php for the same fix.
+        $counted_statuses = apply_filters( 'timetics/report/counted_statuses', [ 'approved', 'completed' ] );
 
         $query = new \WP_Query(
             [
 				'post_type'   => 'timetics-booking',
-				'post_status' => $default_booking_status,
+				'post_status' => $counted_statuses,
                 // @codingStandardsIgnoreStart
 				'meta_key'    => '_tt_booking_customer',
 				'meta_value'  => $this->id,

@@ -369,10 +369,12 @@ class Notice{
     }
 
     public static function dismiss_ajax_call() {
-        $post_arr       = filter_input_array( INPUT_POST, FILTER_SANITIZE_STRING );
-		$notice_id      = ( isset( $post_arr['notice_id'] ) ) ? $post_arr['notice_id'] : '';
-		$dismissible    = ( isset( $post_arr['dismissible'] ) ) ? $post_arr['dismissible'] : '';
-		$expired_time   = ( isset( $post_arr['expired_time'] ) ) ? $post_arr['expired_time'] : '';
+        check_ajax_referer( 'wpmet_notice_dismiss', 'nonce' );
+
+        $post_arr       = wp_unslash( $_POST );
+		$notice_id      = ( isset( $post_arr['notice_id'] ) ) ? sanitize_key( $post_arr['notice_id'] ) : '';
+		$dismissible    = ( isset( $post_arr['dismissible'] ) ) ? sanitize_text_field( $post_arr['dismissible'] ) : '';
+		$expired_time   = ( isset( $post_arr['expired_time'] ) ) ? absint( $post_arr['expired_time'] ) : 0;
 
 		if ( ! empty( $notice_id ) ) {
 			if ( 'user' === $dismissible ) {
@@ -388,6 +390,7 @@ class Notice{
 	}
 
 	public static function enqueue_scripts() {
+		$nonce = wp_create_nonce( 'wpmet_notice_dismiss' );
 		echo "
 			<script>
                 jQuery(document).ready(function ($) {
@@ -409,6 +412,7 @@ class Notice{
                                 notice_id 		: notice_id,
                                 dismissible 	: dismissible,
                                 expired_time 	: expired_time,
+                                nonce           : '" . esc_js( $nonce ) . "',
                             },
                         });
                     });

@@ -6,6 +6,8 @@
  */
 namespace Timetics\Core\Integrations\Stripe;
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Class StripePayment
  */

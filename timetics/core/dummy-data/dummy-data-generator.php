@@ -1,5 +1,8 @@
 <?php
 namespace Timetics\Core\DummyData;
+
+defined( 'ABSPATH' ) || exit;
+
 use Timetics\Core\Appointments\Appointment;
 use Timetics\Core\Staffs\Staff;
 use Timetics\Core\Customers\Customer;

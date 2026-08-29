@@ -77,6 +77,7 @@ class Hooks {
         echo wp_kses_post( $notice );
 
         $admin_ajax_url = admin_url('admin-ajax.php');
+        $nonce          = wp_create_nonce( 'timetics_dismiss_wc_notice' );
 
         ?>
             <script>
@@ -84,6 +85,7 @@ class Hooks {
                     $('.notice.is-dismissible').on('click', '.notice-dismiss', function() {
                         var data = {
                             action: 'dismiss_woocommerce_notice',
+                            nonce: '<?php echo esc_js( $nonce ); ?>',
                         };
 
                         $.post('<?php echo esc_url( $admin_ajax_url ); ?>', data, function(response) {
@@ -101,6 +103,8 @@ class Hooks {
      * @return void
      */
     public function dismiss_woocommerce_notice() {
+        check_ajax_referer( 'timetics_dismiss_wc_notice', 'nonce' );
+
         // Store the notice state in user meta
         update_user_meta( get_current_user_id(), 'timetics_woocommerce_notice_dismissed', true );
 

@@ -2,8 +2,8 @@
 Contributors: arraytics, ehsanriyadh
 Tags: appointment booking, booking calendar, appointment scheduler, online booking, online scheduling, reservation system, elearning, booking system
 Requires at least: 5.2
-Tested up to: 7.0
-Stable tag: 1.0.61
+Tested up to: 7.1
+Stable tag: 1.0.62
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -205,7 +205,6 @@ If you’re impressed with Timetics Appointments Booking Calendar and Scheduling
 
 📅 **[Eventin](https://wordpress.org/plugins/wp-event-solution/)** - Free all-in-one event management and ticketing for WordPress.
 🍽️ **[WPCafe](https://wordpress.org/plugins/wp-cafe/)** - Online food ordering, restaurant menu, delivery, and table reservations.
-🎨 **[Poptics](https://wordpress.org/plugins/poptics/)** - Conversion-driven popups to turn visitors into leads and sales.
 📅 **[Booktics](https://wordpress.org/plugins/booktics/)** - Professional service-based booking for WordPress businesses.
 
 == Screenshots ==
@@ -317,6 +316,16 @@ Handles secure online payment transactions for appointment bookings made through
 **Note:** Optional integration, only active if you configure Stripe payment settings.
 
 == Changelog ==
+
+= 1.0.62 (August 27, 2026) =
+
+Fix: Dashboard and report totals no longer disappear when the default booking status setting is changed.
+Fix: Team members now see only their own bookings, earnings and customers on the dashboard.
+Fix: Deleted bookings now free their time slot instead of keeping it blocked.
+Fix: Rescheduling now frees the old time slot even when the booking and the meeting use different timezones.
+Fix: Group meeting seat counts now go up and down correctly.
+Fix: Slot times now show correctly for dates in a different daylight saving period.
+Fix: Security improvements and hardening.
 
 = 1.0.61 (July 22, 2026) =
 Fix: Google Calendar two-way sync no longer duplicates events for paid WooCommerce bookings.

@@ -6,6 +6,8 @@
  */
 namespace Timetics\Core\Staffs;
 
+defined( 'ABSPATH' ) || exit;
+
 use Timetics\Base\Api;
 use Timetics\Core\Integrations\Google\Client;
 use Timetics\Core\Staffs\Staff;
@@ -59,7 +61,7 @@ class Api_Staff extends Api {
                     'methods'             => \WP_REST_Server::DELETABLE,
                     'callback'            => [$this, 'bulk_delete'],
                     'permission_callback' => function () {
-                        return current_user_can( 'manage_timetics' );
+                        return current_user_can( 'manage_options' );
                     },
                 ],
             ]
@@ -82,15 +84,15 @@ class Api_Staff extends Api {
                 [
                     'methods'             => \WP_REST_Server::EDITABLE,
                     'callback'            => [$this, 'update_item'],
-                    'permission_callback' => function () {
-                        return current_user_can( 'manage_timetics' );
+                    'permission_callback' => function ( $request ) {
+                        return current_user_can( 'manage_options' ) || (int) $request['staff_id'] === get_current_user_id();
                     },
                 ],
                 [
                     'methods'             => \WP_REST_Server::DELETABLE,
                     'callback'            => [$this, 'delete_item'],
                     'permission_callback' => function () {
-                        return current_user_can( 'manage_timetics' );
+                        return current_user_can( 'manage_options' );
                     },
                 ],
 				[
@@ -109,7 +111,7 @@ class Api_Staff extends Api {
                     'methods'             => \WP_REST_Server::READABLE,
                     'callback'            => [$this, 're_invite_staff'],
                     'permission_callback' => function () {
-                        return current_user_can( 'manage_timetics' );
+                        return current_user_can( 'manage_options' );
                     },
                 ],
             ]
@@ -132,8 +134,8 @@ class Api_Staff extends Api {
                 [
                     'methods'             => \WP_REST_Server::READABLE,
                     'callback'            => [$this, 'get_integrations'],
-                    'permission_callback' => function () {
-                        return current_user_can( 'manage_timetics' );
+                    'permission_callback' => function ( $request ) {
+                        return current_user_can( 'manage_options' ) || (int) $request['staff_id'] === get_current_user_id();
                     },
                 ],
             ]
@@ -144,8 +146,8 @@ class Api_Staff extends Api {
                 [
                     'methods'             => \WP_REST_Server::READABLE,
                     'callback'            => [$this, 'auth_revoke'],
-                    'permission_callback' => function () {
-                        return current_user_can( 'manage_timetics' );
+                    'permission_callback' => function ( $request ) {
+                        return current_user_can( 'manage_options' ) || (int) $request['staff_id'] === get_current_user_id();
                     },
                 ],
             ]

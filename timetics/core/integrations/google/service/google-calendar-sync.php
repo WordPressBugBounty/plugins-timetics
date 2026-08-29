@@ -298,7 +298,7 @@ class Google_Calendar_Sync {
             $staff_id   = ! empty( $booking_data['staff_id'] ) ? intval( $booking_data['staff_id'] ) : 0;
             $start_date = ! empty( $booking_data['start_date'] ) ? $booking_data['start_date'] : '';
             $start_time = ! empty( $booking_data['start_time'] ) ? $booking_data['start_time'] : '';
-            $timezone   = ! empty( $booking_data['timezone'] ) ? $booking_data['timezone'] : wp_timezone_string();
+            $timezone   = ! empty( $booking_data['timezone'] ) ? $booking_data['timezone'] : timetics_wp_timezone_string();
 
             if ( ! $staff_id || ! $start_date || ! $start_time ) {
                 return $available;

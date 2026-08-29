@@ -7,6 +7,8 @@
 
 namespace Timetics\Core\BookingCalendars;
 
+defined( 'ABSPATH' ) || exit;
+
 use Timetics\Base\Api;
 use Timetics\Core\Appointments\Appointment;
 use Timetics\Utils\Singleton;

@@ -2,6 +2,7 @@
     "name": "arraytics/tools-sdk",
     "description": "A PHP package for tools.",
     "type": "library",
+    "license": "GPL-2.0-or-later",
     "autoload": {
         "psr-4": {
             "Arraytics\\ToolsSdk\\": "src/"

@@ -6,6 +6,8 @@
  */
 namespace Timetics\Core\Services;
 
+defined( 'ABSPATH' ) || exit;
+
 use Timetics\Base\Taxonomy;
 
 /**

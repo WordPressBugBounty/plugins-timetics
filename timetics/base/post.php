@@ -6,6 +6,8 @@
  */
 namespace Timetics\Base;
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Class Post
  */

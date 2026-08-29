@@ -6,6 +6,8 @@
  */
 namespace Timetics\Core\Settings;
 
+defined( 'ABSPATH' ) || exit;
+
 use Timetics\Base\Api;
 use Timetics\Core\Admin\Hooks;
 use Timetics\Utils\Singleton;
@@ -39,6 +41,8 @@ class Api_Settings extends Api {
                     'methods'             => \WP_REST_Server::READABLE,
                     'callback'            => [$this, 'get_settings'],
                     'permission_callback' => function () {
+                        // The public booking app needs a small, explicitly safe
+                        // settings payload. get_settings() filters it by role.
                         return true;
                     },
                 ],
@@ -84,17 +88,13 @@ class Api_Settings extends Api {
      */
     public function get_settings() {
         $settings = apply_filters( 'timetics_settings', timetics_get_settings() );
-        $is_admin = current_user_can( 'manage_timetics' );
-        //only run for non user capabilities
-        if ( ! $is_admin ) {
-            $exclude_settings = $this->exclude_settings_for_customer(); 
-            foreach($settings as $key => $setting){
-                if( in_array( $key, $exclude_settings )){
-                    unset( $settings[$key] );
-                }
-            }
+
+        // The booking and staff interfaces need non-sensitive display and scheduling
+        // settings. Never send credentials or webhook URLs to non-administrators.
+        if ( ! current_user_can( 'manage_options' ) ) {
+            $settings = $this->get_staff_safe_settings( $settings );
         }
-        
+
         $data = [
             'status_code' => 200,
             'success'     => 1,
@@ -103,6 +103,45 @@ class Api_Settings extends Api {
         ];
 
         return rest_ensure_response( $settings );
+    }
+
+    /**
+     * Return only settings that staff need to use the admin interface.
+     *
+     * This is deliberately an allow-list. New settings remain private until they
+     * have been reviewed and explicitly added here.
+     *
+     * @param array $settings Plugin settings.
+     *
+     * @return array
+     */
+    private function get_staff_safe_settings( $settings ) {
+        $safe_keys = [
+            'availability',
+            'apple_calendar',
+            'blocked_days',
+            'busyness_category',
+            'calendar_locale',
+            'currency',
+            'custom_fields',
+            'default_booking_status',
+            'guest_enabled',
+            'guest_limit',
+            'google_calendar',
+            'locale_timezone',
+            'paypal_status',
+            'primary_color',
+            'remainder_time',
+            'secondary_color',
+            'slot_interval',
+            'stripe_status',
+            'outlook_calendar',
+            'wc_integration',
+            'wc_checkout_url',
+            'zoom_connection_type',
+        ];
+
+        return array_intersect_key( (array) $settings, array_flip( $safe_keys ) );
     }
 
     /**
@@ -244,62 +283,4 @@ class Api_Settings extends Api {
         return rest_ensure_response( $response );
     }
 
-    public function exclude_settings_for_customer() {
-        $allowed_keys = [
-            "booking_created_customer_email_from",
-            "booking_created_customer_email_title",
-            "booking_created_customer_email_body",
-            "booking_created_host_email_from",
-            "booking_created_host_email_title",
-            "booking_created_host_email_body",
-            "booking_canceled_customer_email_from",
-            "booking_canceled_customer_email_title",
-            "booking_canceled_customer_email_body",
-            "booking_canceled_host_email_from",
-            "booking_canceled_host_email_title",
-            "booking_canceled_host_email_body",
-            "booking_rescheduled_customer_email_from",
-            "booking_rescheduled_customer_email_title",
-            "booking_rescheduled_customer_email_body",
-            "booking_rescheduled_host_email_from",
-            "booking_rescheduled_host_email_title",
-            "booking_rescheduled_host_email_body",
-            "booking_reminder_customer_email_from",
-            "booking_reminder_customer_email_title",
-            "booking_reminder_customer_email_body",
-            "booking_reminder_host_email_from",
-            "booking_reminder_host_email_title",
-            "booking_reminder_host_email_body",
-            "google_auth_redirect_uri",
-            "google_app_client_id",
-            "google_app_client_secret",
-            "zoom_client_id",
-            "zoom_client_secret",
-            "zoom_auth_redirect_uri",
-            "fluentcrm_webhook",
-            "zapier_webhook",
-            "pabbly_webhook",
-            "twillo_account_id",
-            "twillo_token",
-            "twillo_phone_number",
-            "booking_created_customer",
-            "booking_created_host",
-            "booking_canceled_customer",
-            "booking_canceled_host",
-            "booking_rescheduled_customer",
-            "booking_rescheduled_host",
-            "booking_reminder_customer",
-            "booking_reminder_host",
-            "stripe_pub_key",
-            "stripe_secret_key",
-            "paypal_client_id",
-            "paypal_client_secret",
-            "outlook_app_client_id",
-            "outlook_app_client_secret",
-            "outlook_auth_redirect_uri",
-        ];
-       
-       
-        return $allowed_keys;
-    }
 }

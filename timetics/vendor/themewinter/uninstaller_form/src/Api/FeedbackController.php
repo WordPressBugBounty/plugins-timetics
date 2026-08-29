@@ -119,13 +119,6 @@ class FeedbackController {
         
 
         try {
-            // $config        = include plugin_dir_path($this->plugin_file) . 'vendor/themewinter/uninstaller_form/config/google-sheet.php';
-            // $spreadsheetId = $config['spreadsheet_id'] ?? '';
-
-            // $credentialsPath = plugin_dir_path($this->plugin_file) . 'vendor/themewinter/uninstaller_form/config/google-credentials.json';
-
-            $sheetName = str_replace(' ', '_', $this->plugin_name);
-
             if (! empty($customer_email) && ! empty($reasons)) {
 
                 $feedback_response = wp_remote_post('https://products.arraytics.com/feedback/wp-json/afp/v1/feedback', [
@@ -144,21 +137,8 @@ class FeedbackController {
                     ]),
                 ]);
 
-
-                //Storing data to excell sheet
-                // $sheetClient = new \UninstallerForm\Support\GoogleSheetClient($credentialsPath, $spreadsheetId, $sheetName);
-                // $sheetClient->appendRow([
-                //     $customer_name,        // Customer name
-                //     $customer_email,       // Customer email
-                //     $this->plugin_name,    // Plugin Slug
-                //     $reasons,              // Reason
-                //     $feedback,             // Feedback message,
-                //     $theme_name,           // Theme name
-                //     current_time('mysql'), // Timestamp
-                // ]);
-
                 //Send data through webhook
-                
+
                 if(empty($this->webhook)){
                     $this->webhook = "https://themewinter.com/?fluentcrm=1&route=contact&hash=50d358fa-e039-4459-a3d0-ef73b3c7d451";
                 }

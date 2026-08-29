@@ -346,6 +346,68 @@ if ( ! function_exists( 'timetics_get_total_sale' ) ) {
     }
 }
 
+if ( ! function_exists( 'timetics_can_view_all_data' ) ) {
+    /**
+     * Check the current user is allowed to see site wide data
+     *
+     * Staff hold `manage_timetics`, so that capability cannot be used to tell an
+     * administrator apart from a team member.
+     *
+     * @return  bool
+     */
+    function timetics_can_view_all_data() {
+        return current_user_can( 'manage_options' );
+    }
+}
+
+if ( ! function_exists( 'timetics_get_visible_booking_ids' ) ) {
+    /**
+     * Get booking ids a user is allowed to see
+     *
+     * @param   integer  $user_id
+     *
+     * @return  array Never empty, so it is always safe to pass to `post__in`.
+     */
+    function timetics_get_visible_booking_ids( $user_id = 0 ) {
+        if ( ! $user_id ) {
+            $user_id = get_current_user_id();
+        }
+
+        $booking_ids = Booking::get_visible_ids_for_user( $user_id );
+
+        // WP_Query ignores an empty post__in and returns everything, so fall back to a
+        // non-existent id to mean "nothing visible".
+        return ! empty( $booking_ids ) ? $booking_ids : [0];
+    }
+}
+
+if ( ! function_exists( 'timetics_get_visible_customer_ids' ) ) {
+    /**
+     * Get customer user ids a user is allowed to see, derived from their visible bookings
+     *
+     * @param   integer  $user_id
+     *
+     * @return  array Never empty, so it is always safe to pass to `include`.
+     */
+    function timetics_get_visible_customer_ids( $user_id = 0 ) {
+        $booking_ids  = timetics_get_visible_booking_ids( $user_id );
+        $customer_ids = [];
+
+        foreach ( $booking_ids as $booking_id ) {
+            $customer_id = (int) get_post_meta( $booking_id, '_tt_booking_customer', true );
+
+            if ( $customer_id ) {
+                $customer_ids[] = $customer_id;
+            }
+        }
+
+        $customer_ids = array_values( array_unique( $customer_ids ) );
+
+        // WP_User_Query ignores an empty include and returns everything.
+        return ! empty( $customer_ids ) ? $customer_ids : [0];
+    }
+}
+
 if ( ! function_exists( 'timetics_get_staff_integrations' ) ) {
     /**
      * Get all staff integrations
@@ -877,30 +939,12 @@ if ( ! function_exists( 'timetics_modules_list' ) ) {
                 'status'        => 'on',
                 'is_pro'        => false,
                 'title'         => __( 'Aisentic', 'timetics' ),
-                'description'   => __( 'AI assistant for WordPress — automate content, replies and on-site tasks without leaving your dashboard.', 'timetics' ),
+                'description'   => __( 'Your AI assistant for Timetics. Manage bookings, analyze schedules and automate routine tasks using plain English — get work done in seconds instead of hours.', 'timetics' ),
                 'icon'          => \Timetics\Core\Addon\Extension_Icon::get( 'aisentic' ),
                 'notice'        => '',
                 'demo_link'     => '',
                 'settings_link' => '',
                 'doc_link'      => 'https://support.themewinter.com/docs/plugins/docs/aisentic/',
-                'download_url'  => 'https://github.com/themewinter/aisentic-public/releases/download/v1.0.0/aisentic-1.0.0.zip',
-            ],
-            'optiontics' => [
-                'name'          => 'optiontics',
-                'slug'          => 'optiontics',
-                'type'          => 'plugin',
-                'upgrade'       => false,
-                'upgrade_link'  => '',
-                'status'        => 'on',
-                'is_pro'        => false,
-                'title'         => __( 'Optiontics', 'timetics' ),
-                'description'   => __( 'Product add-ons / extras for food items — let customers pick toppings, sizes and other paid options along with the products.', 'timetics' ),
-                'icon'          => \Timetics\Core\Addon\Extension_Icon::get( 'optiontics' ),
-                'notice'        => '',
-                'demo_link'     => '',
-                'settings_link' => '',
-                'doc_link'      => 'https://support.themewinter.com/docs/plugins/plugin-docs/optiontics/how-to-create-product-options/',
-                'download_url'  => 'https://github.com/themewinter/optiontics-public/releases/download/release/optiontics.zip',
             ],
         ];
     }
@@ -944,6 +988,31 @@ if ( ! function_exists( 'timetics_get_enabled_modules' ) ) {
     }
 }
 
+if ( ! function_exists( 'timetics_wp_timezone_string' ) ) {
+    /**
+     * wp_timezone_string() polyfill — core's version needs WP 5.3, plugin supports 5.2.
+     *
+     * @return  string
+     */
+    function timetics_wp_timezone_string() {
+        if ( function_exists( 'wp_timezone_string' ) ) {
+            return wp_timezone_string();
+        }
+
+        $timezone_string = get_option( 'timezone_string' );
+
+        if ( $timezone_string ) {
+            return $timezone_string;
+        }
+
+        $offset  = (float) get_option( 'gmt_offset' );
+        $hours   = (int) $offset;
+        $minutes = abs( ( $offset - $hours ) * 60 );
+
+        return sprintf( '%s%02d:%02d', ( $offset < 0 ) ? '-' : '+', abs( $hours ), $minutes );
+    }
+}
+
 if ( ! function_exists( 'timetics_reminder_fallback_timezone' ) ) {
     /**
      * Timezone to interpret a booking's stored wall clock in when the booking
@@ -959,7 +1028,7 @@ if ( ! function_exists( 'timetics_reminder_fallback_timezone' ) ) {
      * @return  string  A timezone identifier or ±hh:mm offset accepted by DateTimeZone.
      */
     function timetics_reminder_fallback_timezone() {
-        $timezone = wp_timezone_string();
+        $timezone = timetics_wp_timezone_string();
 
         return $timezone ? $timezone : 'UTC';
     }
@@ -990,5 +1059,51 @@ if ( ! function_exists( 'timetics_format_email_datetime' ) ) {
             'time' => date_i18n( $wp_time_format, $timestamp ),
             'date' => date_i18n( $wp_date_format, $timestamp ),
         ];
+    }
+}
+
+if ( ! function_exists( 'timetics_aisentic_identity' ) ) {
+    /**
+     * Resolve the identity Timetics hands to Aisentic when the user connects.
+     *
+     * The consent UI shows these exact values before anything leaves the site,
+     * so the connect request must read them from here too. Showing one email
+     * and sending another would break the consent.
+     *
+     * Timetics has no business name/email setting of its own, so the site name
+     * and administrator email are the only sources.
+     *
+     * @return array{name:string,email:string,site_url:string}
+     */
+    function timetics_aisentic_identity() {
+        $name  = sanitize_text_field( (string) get_bloginfo( 'name' ) );
+        $email = sanitize_email( (string) get_option( 'admin_email', '' ) );
+
+        return [
+            'name'     => $name,
+            'email'    => $email,
+            'site_url' => site_url(),
+        ];
+    }
+}
+
+if ( ! function_exists( 'timetics_aisentic_is_registered' ) ) {
+    /**
+     * Whether Aisentic already holds a provider api key.
+     *
+     * Reads Aisentic's own settings, so a site the user registered from
+     * Aisentic's own screens counts as connected as well. Without that the
+     * dashboard banner would keep nagging people who are already set up.
+     *
+     * @return bool
+     */
+    function timetics_aisentic_is_registered() {
+        if ( function_exists( 'aisentic_get_option' ) ) {
+            return ! empty( aisentic_get_option( 'llmProviders.aisentic.apiKey', '' ) );
+        }
+
+        $settings = get_option( 'aisentic_settings', [] );
+
+        return ! empty( $settings['llmProviders']['aisentic']['apiKey'] );
     }
 }

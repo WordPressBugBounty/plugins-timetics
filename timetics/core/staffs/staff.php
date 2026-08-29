@@ -332,10 +332,11 @@ class Staff {
 
         $user = get_user_by( 'email', $email );
 
-        if ( $user && ! in_array( 'timetics-staff', $user->roles, true ) ) {
-            $user->add_role( 'timetics-staff' );
-
-            return $user->ID;
+        // An existing account with this email is a conflict, not an instruction
+        // to promote it — silently granting the staff role let a caller take
+        // over any account by submitting its email.
+        if ( $user ) {
+            return new \WP_Error( 'timetics_staff_email_exists', __( 'A user with this email address already exists.', 'timetics' ) );
         }
 
         $user_id = wp_insert_user( $args );
@@ -368,10 +369,12 @@ class Staff {
 
         $user_data = get_user_by( 'email', $email );
 
-        if ( $user_data && ! in_array( 'timetics-staff', $user_data->roles, true ) ) {
-            $user_data->add_role( 'timetics-staff' );
-
-            return $user_data->ID;
+        // Only a conflict if it belongs to someone other than the staff member
+        // being edited — otherwise every update where they keep their own
+        // email would (incorrectly) hit this branch. See create() for why a
+        // match must never silently grant the staff role.
+        if ( $user_data && (int) $user_data->ID !== (int) $this->id ) {
+            return new \WP_Error( 'timetics_staff_email_exists', __( 'A user with this email address already exists.', 'timetics' ) );
         }
 
         $updated = wp_update_user( $user );

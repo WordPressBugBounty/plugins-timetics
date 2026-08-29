@@ -30,7 +30,7 @@ class Hooks {
         add_action( 'timetics_booking_remainder', [$this, 'send_reminder_email'], 10, 2 );
         add_action( 'timetics_booking_clear_schedule', [$this, 'clear_booking_schedule'] );
 
-        add_action( 'timetics_after_booking_create', [$this, 'reschedule_booking'], 10, 4 );
+        add_action( 'before_delete_post', [$this, 'release_slot_on_delete'] );
 
         add_action( 'init', [$this, 'register_booking_status'] );
         add_action( 'init', [$this, 'maybe_migrate_reminder_schedules'], 99 );
@@ -371,7 +371,30 @@ class Hooks {
     }
 
     /**
+     * Give a booking's slot back when its post is permanently deleted.
+     *
+     * Only the REST controller released the entry; deletes from the posts
+     * screen, WP-CLI or wp_delete_post() left it blocking the slot for good.
+     * Hooked to permanent deletion, not trash, so a restore keeps its slot.
+     *
+     * @param   integer  $post_id
+     *
+     * @return  void
+     */
+    public function release_slot_on_delete( $post_id ) {
+        if ( 'timetics-booking' !== get_post_type( $post_id ) ) {
+            return;
+        }
+
+        ( new Booking( $post_id ) )->release_slot();
+    }
+
+    /**
      * Update bookked entry if reschedule
+     *
+     * @deprecated 1.0.62 Ran after the booking already held its new time, so it
+     *                    looked up the slot moved *into*, not the one left behind.
+     *                    Use Booking::release_slot_at() with the previous slot.
      *
      * @param   integer  $booking_id
      * @param   integer  $customer_id

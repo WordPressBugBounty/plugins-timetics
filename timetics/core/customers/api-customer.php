@@ -6,6 +6,8 @@
  */
 namespace Timetics\Core\Customers;
 
+defined( 'ABSPATH' ) || exit;
+
 use Timetics\Base\Api;
 use Timetics\Core\Bookings\Api_Booking;
 use Timetics\Utils\Singleton;
@@ -58,7 +60,7 @@ class Api_Customer extends Api {
                     'methods'             => \WP_REST_Server::DELETABLE,
                     'callback'            => [$this, 'bulk_delete'],
                     'permission_callback' => function () {
-                        return current_user_can( 'manage_timetics' );
+                        return current_user_can( 'manage_options' );
                     },
                 ],
             ]
@@ -76,10 +78,15 @@ class Api_Customer extends Api {
                     'callback'            => [$this, 'get_item'],
                     'permission_callback' => function ( $request ) {
                         $customer_id = (int) $request['customer_id'];
-                        if ( current_user_can( 'manage_timetics' ) || current_user_can( 'manage_options' ) ) {
+
+                        if ( timetics_can_view_all_data() || get_current_user_id() === $customer_id ) {
                             return true;
                         }
-                        return current_user_can( 'timetics-customer' ) && get_current_user_id() === $customer_id;
+
+                        // manage_timetics is not admin-only — staff may only view a
+                        // customer they actually have a visible booking with.
+                        return current_user_can( 'manage_timetics' )
+                            && in_array( $customer_id, timetics_get_visible_customer_ids(), true );
                     },
                 ],
                 [
@@ -121,10 +128,13 @@ class Api_Customer extends Api {
                     'callback'            => [$this, 'get_bookings'],
                     'permission_callback' => function ( $request ) {
                         $customer_id = (int) $request['customer_id'];
-                        if ( current_user_can( 'manage_timetics' ) || current_user_can( 'manage_options' ) ) {
+
+                        if ( timetics_can_view_all_data() || get_current_user_id() === $customer_id ) {
                             return true;
                         }
-                        return current_user_can( 'timetics-customer' ) && get_current_user_id() === $customer_id;
+
+                        return current_user_can( 'manage_timetics' )
+                            && in_array( $customer_id, timetics_get_visible_customer_ids(), true );
                     },
                 ],
             ]
@@ -142,12 +152,17 @@ class Api_Customer extends Api {
         $per_page = ! empty( $request['per_page'] ) ? intval( $request['per_page'] ) : 20;
         $paged    = ! empty( $request['paged'] ) ? intval( $request['paged'] ) : 1;
 
-        $customer = Customer::all(
-            [
-                'number' => $per_page,
-                'paged'  => $paged,
-            ]
-        );
+        $args = [
+            'number' => $per_page,
+            'paged'  => $paged,
+        ];
+
+        // Staff only see customers from their own bookings, administrators see everyone.
+        if ( ! timetics_can_view_all_data() ) {
+            $args['include'] = timetics_get_visible_customer_ids( get_current_user_id() );
+        }
+
+        $customer = Customer::all( $args );
 
         $items = [];
 
@@ -215,13 +230,22 @@ class Api_Customer extends Api {
         $paged    = ! empty( $request['paged'] ) ? intval( $request['paged'] ) : 1;
         $search   = ! empty( $request['search'] ) ? sanitize_text_field( $request['search'] ) : '';
 
+        $query_args = array(
+            'role'   => 'timetics-customer',
+            'number' => $per_page,
+            'paged'  => $paged,
+        );
+
+        // Staff only see customers from their own bookings, administrators see everyone.
+        if ( ! timetics_can_view_all_data() ) {
+            $query_args['include'] = timetics_get_visible_customer_ids( get_current_user_id() );
+        }
+
         // Get search.
         $users = new WP_User_Query(
-            array(
-                'role'   => 'timetics-customer',
-                'number' => $per_page,
-                'paged'  => $paged,
-
+            array_merge(
+                $query_args,
+                array(
                 // @codingStandardsIgnoreStart
                 'meta_query' => array(
                     'relation' => 'OR',
@@ -247,6 +271,7 @@ class Api_Customer extends Api {
                     ),
                 ),
                 // @codingStandardsIgnoreEnd
+                )
             )
         );
 
@@ -290,8 +315,10 @@ class Api_Customer extends Api {
     public function update_item_permission_callback( $request ) {
         $customer_id = (int) $request['customer_id'];
 
-        // Admins can always update any customer
-        if ( current_user_can( 'manage_timetics' ) || current_user_can( 'manage_options' ) ) {
+        // Admins can always update any customer. manage_timetics is not
+        // admin-only — every timetics-staff account has it — so it must not
+        // grant edit access to someone else's customer record.
+        if ( current_user_can( 'manage_options' ) ) {
             return true;
         }
 
@@ -593,7 +620,7 @@ class Api_Customer extends Api {
         $booking = new Api_Booking();
 
         foreach ( $bookings->posts as $item ) {
-            $items[] = $booking->prepare_item( $item->ID );
+            $items[] = $booking->prepare_item( $item->ID, false );
         }
 
         $data = [

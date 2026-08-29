@@ -196,6 +196,27 @@ class Api_Addon extends Api {
                     : PluginManager::install_plugin( $slug );
                 break;
             case 'activate':
+                // Activate can be reached on a plugin that was never installed
+                // (onboarding offers it in one click), so install on demand.
+                if ( ! PluginManager::is_installed( $slug ) ) {
+                    if ( ! function_exists( 'WP_Filesystem' ) ) {
+                        require_once ABSPATH . 'wp-admin/includes/file.php';
+                    }
+                    WP_Filesystem();
+                    $install = $download_url
+                        ? $this->install_from_url( $download_url )
+                        : PluginManager::install_plugin( $slug );
+
+                    if ( false === $install || is_wp_error( $install ) ) {
+                        return $this->send_error(
+                            is_wp_error( $install )
+                                ? $install->get_error_message()
+                                : __( 'Plugin installation failed.', 'timetics' ),
+                            [ 'status' => 500 ]
+                        );
+                    }
+                }
+
                 $result = PluginManager::activate_plugin( $slug );
                 break;
             case 'deactivate':
@@ -214,13 +235,40 @@ class Api_Addon extends Api {
             return $this->send_error( $message, [ 'status' => 500 ] );
         }
 
+        $data = [
+            'name'   => $name,
+            'status' => $status,
+        ];
+
+        /*
+         * Registration only runs when the caller sent explicit consent, which
+         * today means the onboarding checkbox or the dashboard banner button.
+         * Activating from About Us installs the plugin and stops there, so no
+         * identity leaves the site without the user opting in.
+         */
+        if ( 'aisentic' === $name && 'activate' === $status && ! empty( $params['consent'] ) && PluginManager::is_activated( $slug ) ) {
+            // Snapshot before the handshake so the caller can tell a fresh
+            // registration (tokens just granted) from re-activating a site that
+            // was already connected (no new tokens).
+            $was_registered = timetics_aisentic_is_registered();
+
+            $this->register_aisentic_site();
+
+            $is_registered = timetics_aisentic_is_registered();
+
+            // The banner needs to know whether the handshake actually landed so
+            // it can show an error instead of silently disappearing.
+            $data['aisentic_registered'] = $is_registered;
+
+            // True only when this request is what connected the site, so the
+            // "150K tokens added" message never fires on a plain re-activation.
+            $data['aisentic_newly_registered'] = $is_registered && ! $was_registered;
+        }
+
         return rest_ensure_response(
             [
                 'success' => true,
-                'data'    => [
-                    'name'   => $name,
-                    'status' => $status,
-                ],
+                'data'    => $data,
                 /* translators: %s: action name */
                 'message' => sprintf( __( 'Extension %s successfully.', 'timetics' ), $status . 'd' ),
             ]
@@ -228,11 +276,62 @@ class Api_Addon extends Api {
     }
 
     /**
+     * Record the user's consent and hand the identity to Aisentic.
+     *
+     * Values come from timetics_aisentic_identity() so they match what the
+     * consent UI showed. Aisentic swallows provider errors and skips the call
+     * when it already has an api key, so this never affects the activation
+     * response.
+     *
+     * @return void
+     */
+    private function register_aisentic_site() {
+        // Older Aisentic builds have no listener for the action below, so the
+        // handshake would go nowhere. Skip instead of storing consent for a
+        // registration that cannot happen.
+        if ( ! class_exists( 'Aisentic\Api\Services\Registration_Service' ) ) {
+            return;
+        }
+
+        $identity = timetics_aisentic_identity();
+
+        // No email means nothing to register with, and Aisentic would reject
+        // the call anyway. Fail closed rather than inventing a value.
+        if ( empty( $identity['email'] ) ) {
+            return;
+        }
+
+        // Proof of consent: who agreed, when, and for which email. Also lets
+        // the banner tell "declined" apart from "never asked".
+        update_option(
+            'timetics_aisentic_consent',
+            [
+                'agreed'  => true,
+                'time'    => gmdate( 'c' ),
+                'user_id' => get_current_user_id(),
+                'email'   => $identity['email'],
+            ],
+            false
+        );
+
+        /**
+         * Fires after the user opts in to connecting the site with Aisentic.
+         *
+         * Aisentic's Timetics integration listens for this, registers the site
+         * with its provider and marks itself connected.
+         *
+         * @param string $account_name Account name shown in the consent UI.
+         * @param string $email        Account email shown in the consent UI.
+         * @param string $site_url     Site URL to register with the provider.
+         */
+        do_action( 'timetics/aisentic/register_site', $identity['name'], $identity['email'], $identity['site_url'] );
+    }
+
+    /**
      * Install a plugin from an explicit download URL.
      *
      * The URL must be HTTPS and its host (or a subdomain of it) must be in the
-     * trusted-domain allowlist. This lets us install Arraytics plugins hosted
-     * outside wordpress.org (e.g. GitHub release zips).
+     * trusted-domain allowlist.
      *
      * @param string $url Absolute HTTPS download URL.
      * @return bool|\WP_Error True on success, WP_Error on failure.
@@ -243,7 +342,6 @@ class Api_Addon extends Api {
             'downloads.wordpress.org',
             'arraytics.com',
             'themewinter.com',
-            'github.com',
         ];
 
         $parsed = wp_parse_url( $url );

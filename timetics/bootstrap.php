@@ -426,11 +426,39 @@ final class Bootstrap {
             'timeticsPro'         => class_exists('TimeticsPro') ? true : false,
             'demo_url'            =>  $this->demo_url(),
             'current_user'        => timetics_get_current_user(),
+            'aisentic'            => $this->get_aisentic_state(),
 		);
 
         $localize_obj = apply_filters( 'timetics_admin_localize_data', $localize_obj );
 
         wp_localize_script( 'timetics-dashboard-scripts', 'timetics', $localize_obj );
+    }
+
+    /**
+     * Aisentic connect state for the onboarding consent box and dashboard banner.
+     *
+     * Both surfaces show the email before the user opts in, so the value comes
+     * from the same resolver the connect request uses.
+     *
+     * @return array Aisentic identity plus active/registered flags.
+     */
+    private function get_aisentic_state() {
+        $identity = timetics_aisentic_identity();
+
+        return [
+            'name'       => $identity['name'],
+            'email'      => $identity['email'],
+            'active'     => class_exists( 'Aisentic\Init' ),
+            'registered' => timetics_aisentic_is_registered(),
+            'icon'       => \Timetics\Core\Addon\Extension_Icon::get( 'aisentic' ),
+            /*
+             * Aisentic builds before the registration handshake have no
+             * listener for our hook. Connecting would fail silently there, so
+             * the UI hides the offer instead of promising something dead.
+             */
+            'supports_registration' => class_exists( 'Aisentic\Api\Services\Registration_Service' ),
+            'terms_url'  => 'https://arraytics.com/terms-of-service/',
+        ];
     }
 
     /**
@@ -466,8 +494,8 @@ final class Bootstrap {
         wp_register_script( 'timetics-frontend-scripts', TIMETICS_ASSETS_URL . 'js/frontend.js', [ 'jquery', 'wp-plugins', 'wp-i18n', 'wp-element', 'wp-dom', 'wp-data' ], TIMETICS_VERSION, true );
 
         $calendar_locale = timetics_get_option('calendar_locale');
-        if (!empty($calendar_locale)) {
-            wp_register_script( 'calendar-locale', "https://npmcdn.com/flatpickr/dist/l10n/{$calendar_locale}.js", [ 'jquery', 'wp-plugins', 'wp-i18n', 'wp-element', 'wp-dom', 'wp-data' ], TIMETICS_VERSION, true );
+        if (!empty($calendar_locale) && file_exists( TIMETICS_PLUGIN_DIR . "assets/js/local/{$calendar_locale}.js" ) ) {
+            wp_register_script( 'calendar-locale', TIMETICS_ASSETS_URL . "js/local/{$calendar_locale}.js", [ 'jquery', 'wp-plugins', 'wp-i18n', 'wp-element', 'wp-dom', 'wp-data' ], TIMETICS_VERSION, true );
         }
 
         // load text domain
@@ -568,7 +596,7 @@ final class Bootstrap {
 		\Wpmet\Libs\Banner::instance('timetics')
 			->is_test(true)
 			->set_filter(ltrim($filter_string, ','))
-			->set_api_url('https://banner.themefunction.com/public/jhanda')
+			->set_api_url('https://banner.arraytics.com/public/jhanda')
 			->set_plugin_screens('timetics')
 			->set_plugin_screens('toplevel_page_timetics')
  			->call();

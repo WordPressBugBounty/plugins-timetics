@@ -6,6 +6,8 @@
  */
 namespace Timetics\Core\DummyData;
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Facotry Class
  */

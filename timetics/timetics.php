@@ -4,7 +4,7 @@
  * Plugin Name:       Timetics - Appointment Booking Calendar & Scheduling System
  * Plugin URI:        https://arraytics.com/timetics/
  * Description:       Schedule, Appointment and Seat Booking plugin.
- * Version:           1.0.61
+ * Version:           1.0.62
  * Requires at least: 5.2
  * Requires PHP:      7.3
  * Author:            Arraytics
@@ -56,7 +56,7 @@ final class Timetics {
      * @return string
      */
     public static function get_version() {
-        return '1.0.61';
+        return '1.0.62';
     }
 
     /**
@@ -118,6 +118,7 @@ final class Timetics {
      */
     public function load_text_domain() {
         $locale = determine_locale();
+        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WordPress core localization hook.
         $locale = apply_filters( 'plugin_locale', $locale, 'timetics' );
         $locale = apply_filters( 'timetics_plugin_locale', $locale, 'timetics' );
 
@@ -133,8 +134,12 @@ final class Timetics {
             load_textdomain( 'timetics', WP_LANG_DIR . '/plugins/' . $mofile );
         }
 
-        // Loco "Author" location (plugin's own /languages/).
-        load_plugin_textdomain( 'timetics', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+        // Bundled translations remain available while WordPress loads language
+        // packs for this text domain automatically.
+        $bundled_mofile = plugin_dir_path( __FILE__ ) . 'languages/' . $mofile;
+        if ( file_exists( $bundled_mofile ) ) {
+            load_textdomain( 'timetics', $bundled_mofile );
+        }
     }
 
     /**
@@ -152,7 +157,6 @@ final class Timetics {
         // block for showing banner.
 		require_once plugin_dir_path( __FILE__ ) . '/utils/notice/notice.php';
 		require_once plugin_dir_path( __FILE__ ) . '/utils/banner/banner.php';
-		require_once plugin_dir_path( __FILE__ ) . '/utils/pro-awareness/pro-awareness.php';
 
         // Include the bootstrap file if not loaded.
         if ( ! class_exists( 'Timetics\Bootstrap' ) ) {
@@ -161,9 +165,6 @@ final class Timetics {
 
         // init notice class.
 		\Oxaim\Libs\Notice::init();
-
-		// init pro menu class.
-		\Wpmet\Libs\Pro_Awareness::init();
 
         // Initialize the bootstraper if exists.
         if ( class_exists( 'Timetics\Bootstrap' ) ) {

@@ -6,6 +6,8 @@
  */
 namespace Timetics\Base;
 
+defined( 'ABSPATH' ) || exit;
+
 use Timetics\Utils\Singleton;
 
 /**
@@ -34,11 +36,22 @@ class Role {
         $roles = $this->get_roles();
 
         foreach ( $roles as $role ) {
+            // add_role() is a no-op if the role already exists, so on upgrade an
+            // existing timetics-staff role keeps whatever caps it had before —
+            // prune anything no longer in the definition below.
+            $existing = get_role( $role['name'] );
+
             add_role(
                 $role['name'],
                 $role['display_name'],
                 $role['capabilities']
             );
+
+            if ( $existing ) {
+                foreach ( array_diff( array_keys( $existing->capabilities ), array_keys( $role['capabilities'] ) ) as $stale_cap ) {
+                    $existing->remove_cap( $stale_cap );
+                }
+            }
         }
     }
 
@@ -54,15 +67,7 @@ class Role {
                 'display_name' => esc_html__( 'Staff', 'timetics' ),
                 'capabilities' => [
                     'read'                   => true,
-                    'delete_posts'           => true,
-                    'delete_published_posts' => true,
-                    'edit_posts'             => true,
-                    'publish_posts'          => true,
                     'upload_files'           => true,
-                    'edit_pages'             => true,
-                    'edit_published_pages'   => true,
-                    'publish_pages'          => true,
-                    'delete_published_pages' => false,
                     'read_booking'           => true,
                     'read_meeting'           => true,
                     'edit_profile'           => true,
@@ -148,12 +153,6 @@ class Role {
 
         foreach ( $users as $user ) {
             $user->add_role('timetics-customer');
-        }
-
-        foreach ( $users as $user ) {
-            if ( ! user_can( $user, 'delete_published_pages' ) ) {
-                $user->add_cap( 'delete_published_pages', true );
-            }
         }
     }
 }

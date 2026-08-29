@@ -6,6 +6,8 @@
  */
 namespace Timetics\Core\Staffs\Calendars;
 
+defined( 'ABSPATH' ) || exit;
+
 use Timetics\Core\Integrations\Google\Service\Calendar;
 
 /**

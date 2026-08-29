@@ -249,16 +249,13 @@ $timetics_integrations = timetics_get_staff_integrations( $timetics_user->ID );
 
                         onboard.addEventListener('click', function(event) {
                             event.preventDefault();
-                            let data = {
-                            action: 'timetics_staff_onboard_skip'
-                        }
 
                         fetch('<?php echo esc_url( admin_url('admin-ajax.php') ); ?>', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/x-www-form-urlencoded'
                             },
-                            body: 'action=timetics_staff_onboard_skip'
+                            body: 'action=timetics_staff_onboard_skip&nonce=<?php echo esc_js( wp_create_nonce( 'timetics_staff_onboard_skip' ) ); ?>'
 ,
                             })
                             .then(response => response.json())

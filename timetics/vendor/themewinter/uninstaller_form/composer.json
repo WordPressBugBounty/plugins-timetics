@@ -2,6 +2,7 @@
   "name": "themewinter/uninstaller_form",
   "description": "Reusable WordPress plugin uninstaller feedback form with REST API",
   "type": "library",
+  "license": "GPL-2.0-or-later",
   "autoload": {
     "psr-4": {
       "UninstallerForm\\": "src/"

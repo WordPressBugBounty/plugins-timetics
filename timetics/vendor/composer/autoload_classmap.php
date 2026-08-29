@@ -25,7 +25,6 @@ return array(
     'Ens\\Whatsapp\\WhatsappSender' => $vendorDir . '/themewinter/email-notification-sdk/src/Whatsapp/WhatsappSender.php',
     'UninstallerForm\\Api\\FeedbackController' => $vendorDir . '/themewinter/uninstaller_form/src/Api/FeedbackController.php',
     'UninstallerForm\\HookRegistrar' => $vendorDir . '/themewinter/uninstaller_form/src/HookRegistrar.php',
-    'UninstallerForm\\Support\\GoogleSheetClient' => $vendorDir . '/themewinter/uninstaller_form/src/Support/GoogleSheetClient.php',
     'UninstallerForm\\Support\\Localizer' => $vendorDir . '/themewinter/uninstaller_form/src/Support/Localizer.php',
     'UninstallerForm\\UninstallerForm' => $vendorDir . '/themewinter/uninstaller_form/src/UninstallerForm.php',
 );

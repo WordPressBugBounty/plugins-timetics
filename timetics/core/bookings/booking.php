@@ -7,6 +7,8 @@
 
 namespace Timetics\Core\Bookings;
 
+defined( 'ABSPATH' ) || exit;
+
 use Timetics\Core\Appointments\Appointment;
 use Timetics\Core\Customers\Customer;
 use Timetics\Core\Integrations\Google\Service\Calendar;
@@ -662,16 +664,23 @@ class Booking {
     /**
      * Find the Booking_Entry (shared per-slot schedule record) this booking occupies.
      *
-     * @param  Appointment|null $meeting Optional pre-built meeting for this booking.
-     * @return Booking_Entry|null        The first matching entry, or null if none.
+     * @param  Appointment|null $meeting    Optional pre-built meeting for this booking.
+     * @param  string           $start_date Slot date. Defaults to the booking's own.
+     * @param  string           $start_time Slot start. Defaults to the booking's own.
+     * @param  string           $timezone   Timezone of the two above. Defaults to the booking's own.
+     * @return Booking_Entry|null           The first matching entry, or null if none.
      */
-    private function find_slot_entry( $meeting = null ) {
+    private function find_slot_entry( $meeting = null, $start_date = '', $start_time = '', $timezone = '' ) {
         $meeting       = $meeting ?: new Appointment( $this->get_appointment() );
         $booking_entry = new Booking_Entry();
 
+        $start_date = $start_date ?: $this->get_start_date();
+        $start_time = $start_time ?: $this->get_start_time();
+        $timezone   = $timezone ?: $this->get_timezone();
+
         $date_time = timetics_convert_timezone(
-            $this->get_start_date() . ' ' . $this->get_start_time(),
-            $this->get_timezone(),
+            $start_date . ' ' . $start_time,
+            $timezone,
             $meeting->get_timezone()
         );
 
@@ -702,36 +711,66 @@ class Booking {
             return;
         }
 
-        $meeting = new Appointment( $this->get_appointment() );
-        $entry   = $this->find_slot_entry( $meeting );
-
-        if ( $entry ) {
-            if ( 'one-to-one' === strtolower( $meeting->get_type() ) ) {
-                $entry->delete();
-            } else {
-                $booked        = max( 0, intval( $entry->get_booked() ) - 1 );
-                $booked_seat   = ! empty( $this->get_seat() ) ? $this->get_seat() : [];
-                $existing_seat = ! empty( $entry->get_seats() ) ? $entry->get_seats() : [];
-
-                $entry->update(
-                    [
-                        'booked' => $booked,
-                        'seats'  => array_values( array_diff( $existing_seat, $booked_seat ) ),
-                    ]
-                );
-            }
-        } elseif ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-            error_log(
-                sprintf(
-                    'Timetics release_slot: no Booking_Entry found for booking #%d ( staff %s, meeting %s ).',
-                    $this->id,
-                    $this->get_staff_id(),
-                    $this->get_appointment()
-                )
-            );
-        }
+        $this->release_slot_at( $this->get_start_date(), $this->get_start_time() );
 
         update_post_meta( $this->id, $this->meta_prefix . 'slot_released', 1 );
+    }
+
+    /**
+     * Release the entry for one named slot of this booking.
+     *
+     * Rescheduling saves the new time first, so the old slot has to be named
+     * rather than read off the booking. No idempotency guard: the booking lives
+     * on and may release more slots as it moves.
+     *
+     * @param   string  $start_date  Slot date, Y-m-d.
+     * @param   string  $start_time  Slot start.
+     * @param   string  $timezone    Timezone of the two above. Defaults to the booking's own.
+     *
+     * @return  void
+     */
+    public function release_slot_at( $start_date, $start_time, $timezone = '' ) {
+        if ( ! $this->is_booking() ) {
+            return;
+        }
+
+        $meeting = new Appointment( $this->get_appointment() );
+        $entry   = $this->find_slot_entry( $meeting, $start_date, $start_time, $timezone );
+
+        if ( ! $entry ) {
+            if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Debug-only diagnostics for a missing booking entry.
+                error_log(
+                    sprintf(
+                        'Timetics release_slot: no Booking_Entry found for booking #%d ( staff %s, meeting %s, slot %s %s ).',
+                        $this->id,
+                        $this->get_staff_id(),
+                        $this->get_appointment(),
+                        $start_date,
+                        $start_time
+                    )
+                );
+            }
+
+            return;
+        }
+
+        if ( 'one-to-one' === strtolower( $meeting->get_type() ) ) {
+            $entry->delete();
+
+            return;
+        }
+
+        $booked        = max( 0, intval( $entry->get_booked() ) - 1 );
+        $booked_seat   = ! empty( $this->get_seat() ) ? $this->get_seat() : [];
+        $existing_seat = ! empty( $entry->get_seats() ) ? $entry->get_seats() : [];
+
+        $entry->update(
+            [
+                'booked' => $booked,
+                'seats'  => array_values( array_diff( $existing_seat, $booked_seat ) ),
+            ]
+        );
     }
 
     /**

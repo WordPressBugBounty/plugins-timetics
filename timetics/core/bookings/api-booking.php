@@ -6,6 +6,8 @@
  */
 namespace Timetics\Core\Bookings;
 
+defined( 'ABSPATH' ) || exit;
+
 use Error;
 use Timetics\Base\Api;
 use Timetics\Core\Appointments\Api_Appointment;
@@ -141,7 +143,9 @@ class Api_Booking extends Api {
                     'methods'             => \WP_REST_Server::READABLE,
                     'callback'            => [$this, 'search_items'],
                     'permission_callback' => function () {
-                        return current_user_can( 'edit_posts' );
+                        // edit_booking is admin-only in this plugin (see get_items()) —
+                        // staff need manage_timetics to search their own bookings at all.
+                        return current_user_can( 'manage_timetics' ) || current_user_can( 'manage_options' );
                     },
                 ],
             ]
@@ -206,7 +210,7 @@ class Api_Booking extends Api {
         $items    = [];
 
         foreach ( $bookings['items'] as $item ) {
-            $items[] = $this->prepare_item( $item->ID );
+            $items[] = $this->prepare_item( $item->ID, false );
         }
 
         /**
@@ -436,14 +440,23 @@ class Api_Booking extends Api {
         $paged    = ! empty( $request['paged'] ) ? intval( $request['paged'] ) : 1;
         $search   = ! empty( $request['search'] ) ? sanitize_text_field( $request['search'] ) : '';
 
+        $query_args = array(
+            'post_type'      => 'timetics-booking',
+            'posts_per_page' => $per_page,
+            'paged'          => $paged,
+            'post_status'    => 'any',
+        );
+
+        if ( ! current_user_can( 'manage_options' ) ) {
+            $allowed_ids            = Booking::get_visible_ids_for_user( get_current_user_id() );
+            $query_args['post__in'] = ! empty( $allowed_ids ) ? $allowed_ids : [ 0 ];
+        }
+
         // Get search.
         $booking = new WP_Query(
-            array(
-                'post_type'      => 'timetics-booking',
-                'posts_per_page' => $per_page,
-                'paged'          => $paged,
-                'post_status'    => 'any',
-
+            array_merge(
+                $query_args,
+                array(
                 // @codingStandardsIgnoreStart
                 'meta_query' => array(
                     'relation' => 'OR',
@@ -499,6 +512,7 @@ class Api_Booking extends Api {
                     ),
                 ),
                 // @codingStandardsIgnoreEnd
+                )
             )
         );
 
@@ -506,7 +520,7 @@ class Api_Booking extends Api {
         $items = [];
 
         foreach ( $booking->posts as $item ) {
-            $items[] = $this->prepare_item( $item->ID );
+            $items[] = $this->prepare_item( $item->ID, false );
         }
 
         /**
@@ -928,17 +942,25 @@ class Api_Booking extends Api {
             $email = $email_validation;
         }
 
-        $validate = $this->validate(
-            $data, [
-                'first_name',
-                'email',
-                'payment_method',
-                'appointment',
-                'start_date',
-                'start_time',
-                'end_time',
-            ]
-        );
+        $required_fields = [
+            'first_name',
+            'email',
+            'appointment',
+            'start_date',
+            'start_time',
+            'end_time',
+        ];
+
+        // Payment method is only chosen once, at booking creation. Later
+        // updates (status change, reschedule, staff swap, ...) shouldn't have
+        // to resubmit it — requiring it here made admin actions like
+        // cancelling from the calendar popover fail whenever the form didn't
+        // carry the original payment method in its state.
+        if ( 'created' === $action ) {
+            $required_fields[] = 'payment_method';
+        }
+
+        $validate = $this->validate( $data, $required_fields );
 
         if ( is_wp_error( $validate ) ) {
             $data = [
@@ -997,28 +1019,38 @@ class Api_Booking extends Api {
             ]
         );
 
-        // Update booking schedule.
+        // Update booking schedule. Release the slot the booking currently holds;
+        // the new one is taken further below.
         if ( $id ) {
+            // Entries are stored in the meeting's timezone, so the booking's own
+            // date/time has to be converted before the lookup. Without this the
+            // entry is missed whenever the two timezones differ and it stays
+            // behind blocking a slot nobody holds.
+            $old_meeting  = new Appointment( $booking->get_appointment() );
+            $old_datetime = timetics_convert_timezone(
+                $booking->get_start_date() . ' ' . $booking->get_start_time(),
+                $booking->get_timezone(),
+                $old_meeting->get_timezone()
+            );
 
             $entries = $booking_entry->find(
                 [
                     'staff_id'   => $booking->get_staff_id(),
                     'meeting_id' => $booking->get_appointment(),
-                    'date'       => $booking->get_start_date(),
-                    'start'      => $booking->get_start_time(),
+                    'date'       => $old_datetime->format( 'Y-m-d' ),
+                    'start'      => $old_datetime->format( 'h:i a' ),
                 ]
-
             );
 
             if ( $entries ) {
                 $entry = $booking_entry->first();
 
-                if ( 'one-to-one' == strtolower( $meeting->get_type() ) ) {
+                if ( 'one-to-one' == strtolower( $old_meeting->get_type() ) ) {
                     $entry->delete();
                 } else {
                     $booked      = intval( $entry->get_booked() ) - 1;
                     $booked_data = apply_filters( 'timetics_booking_update_schedule', $entry, ['booked' => $booked], $data, $booking );
-                    $entry->update( $booked_data );
+                    $entry->update( $this->normalize_schedule_update( $booked_data, $booked ) );
                 }
             }
         }
@@ -1159,47 +1191,42 @@ class Api_Booking extends Api {
         $date_time = timetics_convert_timezone( $start_date . ' ' . $start_time, $timezone, $meeting->get_timezone() );
         $end_time  = timetics_convert_timezone( $start_date . ' ' . $end_time, $timezone, $meeting->get_timezone() );
 
-        // Create booking schedule.
-        $entries = $booking_entry->find(
-            [
-                'staff_id'   => $staff->get_id(),
-                'meeting_id' => $meeting->get_id(),
-                'date'       => $date_time->format( 'Y-m-d' ),
-                'start'      => $date_time->format( 'h:i a' ),
-            ]
-        );
+        // Create booking schedule. Skipped on cancel — the slot for this
+        // booking was already released above, and re-running this block would
+        // either recreate the just-deleted entry (one-to-one) or double the
+        // decrement (group), re-blocking or over-freeing the slot.
+        if ( 'cancel' !== $status ) {
+            $entries = $booking_entry->find(
+                [
+                    'staff_id'   => $staff->get_id(),
+                    'meeting_id' => $meeting->get_id(),
+                    'date'       => $date_time->format( 'Y-m-d' ),
+                    'start'      => $date_time->format( 'h:i a' ),
+                ]
+            );
 
-        if ( $entries ) {
-            $entry = $booking_entry->first();
+            if ( $entries ) {
+                $entry = $booking_entry->first();
 
-            if ( 'cancel' === $status ) {
-                $booked = intval( $entry->get_booked() ) - 1;
+                $booked      = intval( $entry->get_booked() ) + 1;
+                $booked_data = apply_filters( 'timetics_booking_update_schedule', $entry, ['booked' => $booked], $data, $booking );
+
+                $entry->update( $this->normalize_schedule_update( $booked_data, $booked ) );
             } else {
-                $booked = intval( $entry->get_booked() ) + 1;
+                $book_entry_data = [
+                    'meeting_id'  => $meeting->get_id(),
+                    'staff_id'    => $staff->get_id(),
+                    'customer_id' => $customer->get_id(),
+                    'booking_id'  => $booking->get_id(),
+                    'booked'      => 1,
+                    'date'        => $date_time->format( 'Y-m-d' ),
+                    'start'       => $date_time->format( 'h:i a' ),
+                    'end'         => $end_time->format( 'h:i a' ),
+                ];
+
+                $book_entry_data = apply_filters( 'timetics_booking_schedule', $book_entry_data, $data );
+                $booking_entry->create( $book_entry_data );
             }
-
-            $booked_data = apply_filters( 'timetics_booking_update_schedule', $entry, ['booked' => $booked], $data, $booking );
-
-            if ( 'cancel' === $status && 'one-to-one' == strtolower( $meeting->get_type() ) ) {
-                $entry->delete();
-            } else {
-                $entry->update( $booked_data );
-            }
-
-        } else {
-            $book_entry_data = [
-                'meeting_id'  => $meeting->get_id(),
-                'staff_id'    => $staff->get_id(),
-                'customer_id' => $customer->get_id(),
-                'booking_id'  => $booking->get_id(),
-                'booked'      => 1,
-                'date'        => $date_time->format( 'Y-m-d' ),
-                'start'       => $date_time->format( 'h:i a' ),
-                'end'         => $end_time->format( 'h:i a' ),
-            ];
-
-            $book_entry_data = apply_filters( 'timetics_booking_schedule', $book_entry_data, $data );
-            $booking_entry->create( $book_entry_data );
         }
 
         // For newly created bookings, create the calendar event now that the
@@ -1253,7 +1280,7 @@ class Api_Booking extends Api {
      *
      * @return array
      */
-    public function prepare_item( $booking_id ) {
+    public function prepare_item( $booking_id, $expose_token = true ) {
         $booking          = new Booking( $booking_id );
         $appointment      = new Appointment( $booking->get_appointment() );
         $staff            = new Staff( $booking->get_staff_id() );
@@ -1288,7 +1315,10 @@ class Api_Booking extends Api {
             'location_type'   => $booking->get_location_type(),
             'description'     => $booking->get_description(),
             'cancel_reason'   => $booking->get_cancel_reason(),
-            'security_token'  => $booking->get_security_token(),
+            // Listing endpoints (get_items / get_booking_list) pass $expose_token = false —
+            // a viewer browsing many bookings at once has no legitimate need for every
+            // one's bearer token; single-booking reads (create/get/update) keep it.
+            'security_token'  => $expose_token ? $booking->get_security_token() : '',
             'payment_method'  => $booking->get_payment_method(),
             'payment_status'  => $booking->get_payment_status(),
             'payment_details' => $payment_details,
@@ -1430,6 +1460,24 @@ class Api_Booking extends Api {
     }
 
     /**
+     * Resolve what `timetics_booking_update_schedule` returned into an update payload.
+     *
+     * The filter passes the entry as its filtered value and the payload only as
+     * an extra argument, so with nothing hooked it hands back the entry object.
+     * Booking_Entry::update() then matches none of its keys and silently writes
+     * nothing, leaving group counters frozen. Keep the published signature and
+     * fall back to the payload whenever the result is not usable.
+     *
+     * @param   mixed    $filtered  Whatever the filter returned.
+     * @param   integer  $booked    Counter this call meant to store.
+     *
+     * @return  array
+     */
+    private function normalize_schedule_update( $filtered, $booked ) {
+        return is_array( $filtered ) ? $filtered : [ 'booked' => $booked ];
+    }
+
+    /**
      * Validates a booking.
      *
      * @param int $appointment_id The ID of the appointment.
@@ -1548,8 +1596,14 @@ class Api_Booking extends Api {
             return false;
         }
 
-        // Allow booking owner or admins/managers.
-        if ( (int) $booking->get_customer_id() === get_current_user_id() || current_user_can( 'manage_timetics' )) {
+        // manage_timetics is not admin-only — every staff account holds it — so it
+        // cannot stand in for an ownership check. Real admins, the booking's own
+        // customer, or staff this specific booking is actually visible to.
+        if (
+            ( get_current_user_id() > 0 && (int) $booking->get_customer_id() === get_current_user_id() )
+            || timetics_can_view_all_data()
+            || in_array( $booking_id, timetics_get_visible_booking_ids(), true )
+        ) {
             return true;
         }
 
@@ -1580,9 +1634,18 @@ class Api_Booking extends Api {
             }
         }
 
-        if (wp_verify_nonce($nonce, 'wp_rest') && current_user_can( 'manage_timetics' ) ) {
+        if ( ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
+            return false;
+        }
+
+        if (
+            ( get_current_user_id() > 0 && (int) $booking->get_customer_id() === get_current_user_id() )
+            || timetics_can_view_all_data()
+            || in_array( $booking_id, timetics_get_visible_booking_ids(), true )
+        ) {
             return true;
         }
+
         return false;
     }
 
@@ -1598,8 +1661,8 @@ class Api_Booking extends Api {
      * @return string|WP_Error Returns the validated email on success, WP_Error on failure.
      */
     private function validate_email_change_permission( $booking_id, $new_email ) {
-        // Admin users have full permission to change email addresses
-        if ( current_user_can( 'manage_timetics' ) ) {
+        // manage_timetics is not admin-only — every staff account holds it.
+        if ( timetics_can_view_all_data() ) {
             return $new_email;
         }
 

@@ -7,6 +7,8 @@
 
 namespace Timetics\Core\Reports;
 
+defined( 'ABSPATH' ) || exit;
+
 use Timetics\Base\Api;
 use Timetics\Utils\Singleton;
 
@@ -87,7 +89,19 @@ class Api_Report extends Api {
      */
     public function generate_reports( $input_data = [] ) {
         $reports = [];
-        $default_booking_status = timetics_get_option( 'default_booking_status', 'approved' );
+
+        // Statuses that count as a real, confirmed booking for reporting.
+        // Deliberately NOT tied to the "default_booking_status" setting —
+        // that option controls what status a brand-new booking starts in,
+        // not which bookings count as revenue. Reusing it here made a
+        // booking silently drop out of totals the moment an admin approved
+        // it on a site where new bookings default to "pending".
+        $counted_statuses = apply_filters( 'timetics/report/counted_statuses', [ 'approved', 'completed' ] );
+
+        // Staff only see their own numbers, administrators see the whole site.
+        $booking_scope  = $this->get_booking_scope_args();
+        $customer_scope = $this->get_customer_scope_args();
+
         if ( $input_data ) {
             foreach ( $input_data as $data ) {
                 if ( empty( $data['report'] ) || empty( $data['start_date'] ) || empty( $data['end_date'] ) ) {
@@ -101,30 +115,30 @@ class Api_Report extends Api {
 
                 switch ( $data['report'] ) {
                 case 'total_booking':
-                    $total_booking = timetics_count_posts( [
+                    $total_booking = timetics_count_posts( array_merge( [
                         'post_type'   => 'timetics-booking',
-                        'post_status' => $default_booking_status,
+                        'post_status' => $counted_statuses,
                         'date_range'  => $date_range,
-                    ] );
+                    ], $booking_scope ) );
 
                     $reports['total_booking'] = $total_booking;
                     break;
 
                 case 'total_earning':
-                    $total_earning = number_format( timetics_get_total_sale( [
+                    $total_earning = number_format( timetics_get_total_sale( array_merge( [
                         'post_type'   => 'timetics-booking',
-                        'post_status' => $default_booking_status,
+                        'post_status' => $counted_statuses,
                         'date_range'  => $date_range,
-                    ] ), 2 );
+                    ], $booking_scope ) ), 2 );
 
                     $reports['total_earning'] = $total_earning;
                     break;
 
                 case 'total_customer':
-                    $total_customer = timetics_count_users( [
+                    $total_customer = timetics_count_users( array_merge( [
                         'role'       => 'timetics-customer',
                         'date_range' => $date_range,
-                    ] );
+                    ], $customer_scope ) );
 
                     $reports['total_customer'] = $total_customer;
                     break;
@@ -150,8 +164,11 @@ class Api_Report extends Api {
 
         $current_date  = strtotime( $start_date );
         $end_timestamp = strtotime( $end_date );
-        $default_booking_status = timetics_get_option( 'default_booking_status', 'approved' );
+        $counted_statuses = apply_filters( 'timetics/report/counted_statuses', [ 'approved', 'completed' ] );
         $reports = [];
+
+        // Staff only see their own numbers, administrators see the whole site.
+        $booking_scope = $this->get_booking_scope_args();
 
         while ( $current_date <= $end_timestamp ) {
             $current_report_date = gmdate( 'Y-m-d', $current_date );
@@ -162,16 +179,16 @@ class Api_Report extends Api {
             ];
 
             $booking_report = [
-                'cancel'    => timetics_count_posts( [
+                'cancel'    => timetics_count_posts( array_merge( [
                     'post_type'   => 'timetics-booking',
                     'post_status' => 'cancel',
                     'date_range'  => $date_range,
-                ] ),
-                'completed' => timetics_count_posts( [
+                ], $booking_scope ) ),
+                'completed' => timetics_count_posts( array_merge( [
                     'post_type'   => 'timetics-booking',
-                    'post_status' => $default_booking_status,
+                    'post_status' => $counted_statuses,
                     'date_range'  => $date_range,
-                ] ),
+                ], $booking_scope ) ),
             ];
 
             $reports[$current_report_date] = $booking_report;
@@ -180,5 +197,31 @@ class Api_Report extends Api {
         }
 
         return $reports;
+    }
+
+    /**
+     * Get the booking query args that limit a report to what the current user may see
+     *
+     * @return  array Empty for administrators, who see every booking.
+     */
+    protected function get_booking_scope_args() {
+        if ( timetics_can_view_all_data() ) {
+            return [];
+        }
+
+        return ['post__in' => timetics_get_visible_booking_ids( get_current_user_id() )];
+    }
+
+    /**
+     * Get the user query args that limit a report to what the current user may see
+     *
+     * @return  array Empty for administrators, who see every customer.
+     */
+    protected function get_customer_scope_args() {
+        if ( timetics_can_view_all_data() ) {
+            return [];
+        }
+
+        return ['include' => timetics_get_visible_customer_ids( get_current_user_id() )];
     }
 }

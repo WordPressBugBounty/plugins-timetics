@@ -7,6 +7,8 @@
 
 namespace Timetics\Core\Bookings;
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Class Booking Entry
  */

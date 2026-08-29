@@ -220,6 +220,8 @@ class Hooks {
      * @return void
      */
     public function timetics_staff_onboard_skip() {
+        check_ajax_referer( 'timetics_staff_onboard_skip', 'nonce' );
+
         update_user_meta( get_current_user_id(), 'timetics_staff_onboard_skip', true );
 
         wp_send_json_success( __( 'Staff onboard skipped successfully.', 'timetics' ) );

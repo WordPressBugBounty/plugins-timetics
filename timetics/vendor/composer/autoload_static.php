@@ -60,7 +60,6 @@ class ComposerStaticInitb20117cddd741a51e3bb6f90a34768e1
         'Ens\\Whatsapp\\WhatsappSender' => __DIR__ . '/..' . '/themewinter/email-notification-sdk/src/Whatsapp/WhatsappSender.php',
         'UninstallerForm\\Api\\FeedbackController' => __DIR__ . '/..' . '/themewinter/uninstaller_form/src/Api/FeedbackController.php',
         'UninstallerForm\\HookRegistrar' => __DIR__ . '/..' . '/themewinter/uninstaller_form/src/HookRegistrar.php',
-        'UninstallerForm\\Support\\GoogleSheetClient' => __DIR__ . '/..' . '/themewinter/uninstaller_form/src/Support/GoogleSheetClient.php',
         'UninstallerForm\\Support\\Localizer' => __DIR__ . '/..' . '/themewinter/uninstaller_form/src/Support/Localizer.php',
         'UninstallerForm\\UninstallerForm' => __DIR__ . '/..' . '/themewinter/uninstaller_form/src/UninstallerForm.php',
     );

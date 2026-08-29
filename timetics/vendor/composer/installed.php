@@ -3,7 +3,7 @@
         'name' => 'arraytics/timetics',
         'pretty_version' => 'dev-develop',
         'version' => 'dev-develop',
-        'reference' => 'ffaf7e60d7530098c068421f38fd8802bd5b4d69',
+        'reference' => 'ce2938f6e485d41e444ceb5fa6be4ac273602943',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'arraytics/timetics' => array(
             'pretty_version' => 'dev-develop',
             'version' => 'dev-develop',
-            'reference' => 'ffaf7e60d7530098c068421f38fd8802bd5b4d69',
+            'reference' => 'ce2938f6e485d41e444ceb5fa6be4ac273602943',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -22,7 +22,7 @@
         'arraytics/tools-sdk' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '0348b54d386cd0a3a590762f4ac0f0d7419ae7e9',
+            'reference' => 'eab2a5e27370483fd970e4c526adf2799b28ba5b',
             'type' => 'library',
             'install_path' => __DIR__ . '/../arraytics/tools-sdk',
             'aliases' => array(
@@ -33,7 +33,7 @@
         'themewinter/email-notification-sdk' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'cd56595844787809949d2e838c636064c6436807',
+            'reference' => '5f34554ed734ded8badc9bacd615a6648f16bd32',
             'type' => 'library',
             'install_path' => __DIR__ . '/../themewinter/email-notification-sdk',
             'aliases' => array(
@@ -44,7 +44,7 @@
         'themewinter/uninstaller_form' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '84c2190a03d30c0661a88a4090905eb785570c4c',
+            'reference' => 'e69c128bc8809322d60d2227f31349d6b86ad7f2',
             'type' => 'library',
             'install_path' => __DIR__ . '/../themewinter/uninstaller_form',
             'aliases' => array(

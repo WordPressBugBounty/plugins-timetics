@@ -8,6 +8,8 @@
  */
 namespace Timetics\Core\Appointments;
 
+defined( 'ABSPATH' ) || exit;
+
 use Timetics\Base\Api;
 use Timetics\Core\Appointments\Appointment;
 use Timetics\Core\Staffs\Staff;
@@ -108,7 +110,9 @@ class Api_Appointment extends Api {
                 'methods'             => \WP_REST_Server::READABLE,
                 'callback'            => [$this, 'search_items'],
                 'permission_callback' => function () {
-                    return current_user_can( 'edit_posts' );
+                    // edit_meeting is admin-only in this plugin (see get_items()) —
+                    // staff need manage_timetics to search their own meetings at all.
+                    return current_user_can( 'manage_timetics' ) || current_user_can( 'manage_options' );
                 },
             ],
         ] );
@@ -147,21 +151,62 @@ class Api_Appointment extends Api {
         $paged    = ! empty( $request['paged'] ) ? intval( $request['paged'] ) : 1;
         $type     = ! empty( $request['type'] ) ? sanitize_text_field( $request['type'] ) : '';
 
-        $args = [
-            'posts_per_page' => $per_page,
-            'paged'          => $paged,
-            'type'           => $type,
-        ];
+        $restrict_to_own  = ! current_user_can( 'edit_meeting' );
+        $current_user_id  = get_current_user_id();
 
-        if ( ! current_user_can( 'edit_meeting' ) ) {
-            $args['staff'] = get_current_user_id();
+        if ( $restrict_to_own && ! $current_user_id ) {
+            return rest_ensure_response(
+                [
+                    'success'     => 1,
+                    'status_code' => 200,
+                    'data'        => [
+                        'total' => 0,
+                        'items' => [],
+                    ],
+                ]
+            );
+        }
+
+        $args = [ 'type' => $type ];
+
+        if ( $restrict_to_own ) {
+            // The staff meta_query is a LIKE match against a serialized array
+            // and isn't safe as the access boundary (staff id 5 also matches
+            // a meeting assigned to staff 55) — fetch broadly and enforce
+            // real ownership below instead of filtering in SQL.
+            $args['posts_per_page'] = -1;
+        } else {
+            $args['posts_per_page'] = $per_page;
+            $args['paged']          = $paged;
         }
 
         $appoint = Appointment::all( $args );
+        $matched = $appoint['items'];
+        $total   = $appoint['total'];
+
+        if ( $restrict_to_own ) {
+            $matched = array_values(
+                array_filter(
+                    $matched,
+                    function ( $item ) use ( $current_user_id ) {
+                        return in_array( $current_user_id, ( new Appointment( $item->ID ) )->get_staff_ids(), true );
+                    }
+                )
+            );
+
+            $total = count( $matched );
+
+            // A per_page value of -1 means "all items". Passing it directly to
+            // array_slice() excludes the last item, which leaves a staff member
+            // with a single assigned meeting with an empty meeting list.
+            if ( -1 !== $per_page ) {
+                $matched = array_slice( $matched, ( $paged - 1 ) * $per_page, $per_page );
+            }
+        }
 
         $items = [];
 
-        foreach ( $appoint['items'] as $item ) {
+        foreach ( $matched as $item ) {
             $items[] = $this->prepare_item( $item->ID );
         }
 
@@ -169,7 +214,7 @@ class Api_Appointment extends Api {
             'success'     => 1,
             'status_code' => 200,
             'data'        => [
-                'total' => $appoint['total'],
+                'total' => $total,
                 'items' => $items,
             ],
         ];
@@ -187,19 +232,31 @@ class Api_Appointment extends Api {
     public function search_items( $request ) {
 
         // Prepare search args.
-        $per_page = ! empty( $request['per_page'] ) ? intval( $request['per_page'] ) : 20;
-        $paged    = ! empty( $request['paged'] ) ? intval( $request['paged'] ) : 1;
-        $search   = ! empty( $request['search'] ) ? sanitize_text_field( $request['search'] ) : '';
+        $per_page        = ! empty( $request['per_page'] ) ? intval( $request['per_page'] ) : 20;
+        $paged           = ! empty( $request['paged'] ) ? intval( $request['paged'] ) : 1;
+        $search          = ! empty( $request['search'] ) ? sanitize_text_field( $request['search'] ) : '';
+        $restrict_to_own = ! current_user_can( 'manage_options' );
+
+        $query_args = array(
+            'post_type' => 'timetics-appointment',
+            'orderby'   => 'ID',
+            'order'     => 'DESC',
+        );
+
+        if ( $restrict_to_own ) {
+            // Same LIKE-isn't-a-boundary caveat as get_items() — fetch broadly
+            // and enforce real ownership below instead of filtering in SQL.
+            $query_args['posts_per_page'] = -1;
+        } else {
+            $query_args['posts_per_page'] = $per_page;
+            $query_args['paged']          = $paged;
+        }
 
         // Get search.
         $appointments = new \WP_Query(
-            array(
-                'post_type'      => 'timetics-appointment',
-                'posts_per_page' => $per_page,
-                'paged'          => $paged,
-                'orderby'        => 'ID',
-                'order'          => 'DESC',
-
+            array_merge(
+                $query_args,
+                array(
                 // @codingStandardsIgnoreStart
                 'meta_query' => array(
                     'relation' => 'OR',
@@ -235,13 +292,36 @@ class Api_Appointment extends Api {
                     ),
                 ),
                 // @codingStandardsIgnoreEnd
+                )
             )
         );
+
+        $matched = $appointments->posts;
+        $total   = $appointments->found_posts;
+
+        if ( $restrict_to_own ) {
+            $current_user_id = get_current_user_id();
+
+            $matched = array_values(
+                array_filter(
+                    $matched,
+                    function ( $item ) use ( $current_user_id ) {
+                        return in_array( $current_user_id, ( new Appointment( $item->ID ) )->get_staff_ids(), true );
+                    }
+                )
+            );
+
+            $total = count( $matched );
+
+            if ( -1 !== $per_page ) {
+                $matched = array_slice( $matched, ( $paged - 1 ) * $per_page, $per_page );
+            }
+        }
 
         // Prepare items for response.
         $items = [];
 
-        foreach ( $appointments->posts as $item ) {
+        foreach ( $matched as $item ) {
             $items[] = $this->prepare_item( $item->ID );
         }
 
@@ -249,7 +329,7 @@ class Api_Appointment extends Api {
             'success' => 1,
             'status'  => 200,
             'data'    => [
-                'total' => $appointments->found_posts,
+                'total' => $total,
                 'items' => $items,
             ],
         ];
@@ -261,24 +341,47 @@ class Api_Appointment extends Api {
 
         $per_page   = ! empty( $request['per_page'] ) ? intval( $request['per_page'] ) : 20;
         $paged      = ! empty( $request['paged'] ) ? intval( $request['paged'] ) : 1;
-        $staff      = ! empty( $request['staff_id'] ) ? intval( $request['staff_id'] ) : 0;
+        $staff      = ! empty( $request['staff_id'] ) ? intval( $request['staff_id'] ) : '';
         $category   = ! empty( $request['category'] ) ? intval( $request['category'] ) : 0;
         $visibility = ! empty( $request['visibility'] ) ? sanitize_text_field( $request['visibility'] ) : '';
+
+        $restrict_to_enabled = ! current_user_can( 'edit_meeting' );
 
         $per_page = ! empty( $request['per_page'] ) ? intval( $request['per_page'] ) : 20;
         $paged    = ! empty( $request['paged'] ) ? intval( $request['paged'] ) : 1;
 
         $appoint = Appointment::all( [
-            'posts_per_page' => $per_page,
-            'paged'          => $paged,
+            'posts_per_page' => $restrict_to_enabled ? -1 : $per_page,
+            'paged'          => $restrict_to_enabled ? 1 : $paged,
             'visibility'     => $visibility,
             'staff'          => $staff,
             'category'       => $category,
         ] );
 
+        $matched = $appoint['items'];
+        $total   = $appoint['total'];
+
+        if ( $restrict_to_enabled ) {
+            // Public route — never show a disabled meeting type, regardless
+            // of what visibility was requested. A blank/missing visibility
+            // meta (legacy rows) is treated as visible, matching the default
+            // used when saving an appointment.
+            $matched = array_values(
+                array_filter(
+                    $matched,
+                    function ( $item ) {
+                        return 'disabled' !== strtolower( (string) ( new Appointment( $item->ID ) )->get_visibility() );
+                    }
+                )
+            );
+
+            $total   = count( $matched );
+            $matched = array_slice( $matched, ( $paged - 1 ) * $per_page, $per_page );
+        }
+
         $items = [];
 
-        foreach ( $appoint['items'] as $item ) {
+        foreach ( $matched as $item ) {
             $items[] = $this->prepare_item( $item->ID );
         }
 
@@ -286,7 +389,7 @@ class Api_Appointment extends Api {
             'success' => 1,
             'status'  => 200,
             'data'    => [
-                'total' => $appoint['total'],
+                'total' => $total,
                 'items' => $items,
             ],
         ];
@@ -373,6 +476,19 @@ class Api_Appointment extends Api {
         $appointment_id = (int) $request['appointment_id'];
         $appoint        = new Appointment( $appointment_id );
 
+        // Handler must not rely solely on permission_callback having run.
+        if ( ! $this->can_edit_appointment( $appointment_id ) ) {
+            return new WP_HTTP_Response(
+                [
+                    'success'     => 0,
+                    'status_code' => 403,
+                    'message'     => esc_html__( 'You are not allowed to edit this appointment.', 'timetics' ),
+                    'data'        => [],
+                ],
+                403
+            );
+        }
+
         $data = json_decode( $request->get_body(), true );
 
         /**
@@ -443,23 +559,55 @@ class Api_Appointment extends Api {
      * @return  bool
      */
     public function update_item_permissions_check( $request ) {
-        $appoinment_id = (int) $request['appointment_id'];
-        $appointment   = new Appointment( $appoinment_id );
+        return $this->can_edit_appointment( (int) $request['appointment_id'] );
+    }
 
-        $staff_ids       = $appointment->get_staff_ids();
-        $author          = $appointment->get_author();
-        $current_user_id = get_current_user_id();
-
-        if (
-            current_user_can( 'manage_options' )
-            || current_user_can( 'read_meeting' )
-            ||  in_array( $current_user_id, $staff_ids )
-            || $author == $current_user_id
-        ) {
+    /**
+     * Object-level authorization for editing an appointment. Called from
+     * both the route's permission_callback and update_item() itself, so
+     * the handler never relies solely on the callback having run.
+     *
+     * @param   int  $appointment_id
+     *
+     * @return  bool
+     */
+    private function can_edit_appointment( $appointment_id ) {
+        if ( current_user_can( 'manage_options' ) ) {
             return true;
         }
 
-        return false;
+        $current_user_id = get_current_user_id();
+
+        if ( $current_user_id <= 0 ) {
+            return false;
+        }
+
+        $appointment = new Appointment( $appointment_id );
+
+        if ( ! $appointment->is_appointment() ) {
+            return false;
+        }
+
+        $staff_ids = array_map( 'intval', $appointment->get_staff_ids() );
+        $author    = $appointment->get_author();
+
+        // read_meeting only proves "is staff," not ownership — must not bypass the checks below.
+        return in_array( $current_user_id, $staff_ids, true )
+            || $author === $current_user_id;
+    }
+
+    /**
+     * True only for the meeting's owner (author) or an administrator.
+     * Used to gate fields an assigned-but-non-owning staff member must
+     * not be able to change (staff list, visibility, webhooks).
+     *
+     * @param   Appointment  $appointment
+     *
+     * @return  bool
+     */
+    private function is_appointment_owner( $appointment ) {
+        return current_user_can( 'manage_options' )
+            || (int) $appointment->get_author() === get_current_user_id();
     }
 
     /**
@@ -475,6 +623,23 @@ class Api_Appointment extends Api {
 
         if ( ! $appoint->is_appointment() ) {
 
+            $data = [
+                'status_code' => 404,
+                'message'     => esc_html__( 'Invalid appointment id.', 'timetics' ),
+                'data'        => [],
+            ];
+
+            return new WP_HTTP_Response( $data, 404 );
+        }
+
+        $current_user_id = get_current_user_id();
+        $is_privileged    = current_user_can( 'edit_meeting' )
+            || $current_user_id == $appoint->get_author()
+            || in_array( $current_user_id, $appoint->get_staff_ids(), true );
+
+        // This route is public — a disabled meeting type isn't meant to be
+        // reachable by guessing its id, only owner/staff/admin can still see it.
+        if ( ! $is_privileged && 'disabled' === strtolower( (string) $appoint->get_visibility() ) ) {
             $data = [
                 'status_code' => 404,
                 'message'     => esc_html__( 'Invalid appointment id.', 'timetics' ),
@@ -545,21 +710,7 @@ class Api_Appointment extends Api {
      * @return  bool
      */
     public function delete_item_permissions_check( $request ) {
-        $appoinment_id = (int) $request['appointment_id'];
-        $appointment   = new Appointment( $appoinment_id );
-
-        $staff_ids       = $appointment->get_staff_ids();
-        $author          = $appointment->get_author();
-        $current_user_id = get_current_user_id();
-
-        if (
-            current_user_can( 'manage_options' )
-            || $author == $current_user_id
-        ) {
-            return true;
-        }
-
-        return false;
+        return $this->can_edit_appointment( (int) $request['appointment_id'] );
     }
 
     /**
@@ -572,9 +723,18 @@ class Api_Appointment extends Api {
     public function bulk_delete( $request ) {
 
         $appointments = json_decode( $request->get_body(), true );
+        $appointments = is_array( $appointments ) ? $appointments : [];
 
-        foreach ( $appointments as $appoint ) {
-            $appoint = new Appointment( $appoint );
+        $current_user_id = get_current_user_id();
+        $is_admin         = current_user_can( 'manage_options' );
+
+        $to_delete = [];
+
+        // Validate every id — existence and ownership — before deleting any
+        // of them. The route only checks read_meeting, which every staff
+        // account has, so ownership has to be enforced here per appointment.
+        foreach ( $appointments as $appoint_id ) {
+            $appoint = new Appointment( $appoint_id );
 
             if ( ! $appoint->is_appointment() ) {
                 $data = [
@@ -587,6 +747,21 @@ class Api_Appointment extends Api {
                 return new WP_HTTP_Response( $data, 404 );
             }
 
+            if ( ! $is_admin && $appoint->get_author() != $current_user_id ) {
+                $data = [
+                    'success' => 0,
+                    'status'  => 403,
+                    'message' => esc_html__( 'You are not allowed to delete one or more of the selected appointments.', 'timetics' ),
+                    'data'    => [],
+                ];
+
+                return new WP_HTTP_Response( $data, 403 );
+            }
+
+            $to_delete[] = $appoint;
+        }
+
+        foreach ( $to_delete as $appoint ) {
             $appoint->delete();
         }
 
@@ -711,6 +886,22 @@ class Api_Appointment extends Api {
         $buffer_time_after_value  = ! empty( $data['buffer_time_after_value'] ) ? $data['buffer_time_after_value'] : 0;
         $buffer_time_after_unit   = ! empty( $data['buffer_time_after_unit'] ) ? $data['buffer_time_after_unit'] : 'min';
 
+        // Assigned-but-non-owning staff may edit their meeting's schedule/details,
+        // but must not rename it, reassign staff, change visibility, or touch webhook integrations.
+        if ( $id && ! $this->is_appointment_owner( $appoint ) ) {
+            $name                  = $appoint->get_name();
+            $description           = $appoint->get_description();
+            $staff                 = $appoint->get_staff();
+            $visibility            = $appoint->get_visibility();
+            $notifications         = $appoint->get_notifications();
+            $fleunt_crm_webhook    = $appoint->get_fleunt_crm_webhook();
+            $fluent_hook_overwrite = $appoint->get_fluent_hook_overwrite();
+            $pabbly_hook_overwrite = $appoint->get_pabbly_hook_overwrite();
+            $zapier_hook_overwrite = $appoint->get_zapier_hook_overwrite();
+            $pabbly_webook         = $appoint->get_pabbly_webook();
+            $zapier_webook         = $appoint->get_zapier_webook();
+        }
+
         if ( $id ) {
             $dulicate = $appoint->get_duplicate_nuber();
             if ( $dulicate && strpos( $name, '-Duplicate' ) == 0 ) {
@@ -815,7 +1006,10 @@ class Api_Appointment extends Api {
 
         ];
 
-        $appointment_data = apply_filters( 'timetics_meeting_insert_data', $data, $appointment_data );
+        // The sanitised array is the filterable value; $data (raw body) is only
+        // a reference arg. Getting this order backwards silently discards every
+        // sanitizer/intval() above and lets the caller write arbitrary post meta.
+        $appointment_data = apply_filters( 'timetics_meeting_insert_data', $appointment_data, $data );
 
         $appoint->set_props( $appointment_data );
         $appoint->save();
@@ -889,6 +1083,33 @@ class Api_Appointment extends Api {
             'buffer_time_after_value' => $appointment->get_buffer_time_after_value(),
             'buffer_time_after_unit' => $appointment->get_buffer_time_after_unit(),
         ];
+
+        // Strip webhook URLs, notifications, and staff PII for non-privileged callers — several read routes here are public.
+        if ( ! current_user_can( 'edit_meeting' ) ) {
+            unset(
+                $data['notifications'],
+                $data['fluent_hook_overwrite'],
+                $data['fleunt_crm_webhook'],
+                $data['pabbly_hook_overwrite'],
+                $data['pabbly_webook'],
+                $data['zapier_hook_overwrite'],
+                $data['zapier_webook'],
+                $data['author']
+            );
+
+            if ( ! empty( $data['staff'] ) && is_array( $data['staff'] ) ) {
+                $data['staff'] = array_map(
+                    function ( $staff ) {
+                        return [
+                            'id'        => $staff['id'] ?? 0,
+                            'full_name' => $staff['full_name'] ?? '',
+                            'image'     => $staff['image'] ?? '',
+                        ];
+                    },
+                    $data['staff']
+                );
+            }
+        }
 
         return apply_filters( 'timetics_meeting_json_data', $data, $appointment );
     }

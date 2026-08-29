@@ -6,6 +6,8 @@
  */
 namespace Timetics\Core\Integrations\Google;
 
+defined( 'ABSPATH' ) || exit;
+
 use Exception;
 use InvalidArgumentException;
 
@@ -166,7 +168,7 @@ class Client {
         $response = wp_remote_post( self::TIMETICS_TOKEN_URI, array( 'body' => $args ) );
 
         if ( is_wp_error( $response ) ) {
-            throw new Exception( $response->get_error_message() );
+            throw new Exception( esc_html( $response->get_error_message() ) );
         }
 
         $status_code = (int) wp_remote_retrieve_response_code( $response );
@@ -175,7 +177,7 @@ class Client {
 
         if ( 200 !== $status_code || empty( $data['access_token'] ) ) {
             $message = ! empty( $data['error_description'] ) ? $data['error_description'] : __( 'Failed to obtain Google access token.', 'timetics' );
-            throw new Exception( $message );
+            throw new Exception( esc_html( $message ) );
         }
 
         return $data;

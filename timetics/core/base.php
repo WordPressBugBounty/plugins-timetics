@@ -9,6 +9,8 @@
 
 namespace Timetics\Core;
 
+defined( 'ABSPATH' ) || exit;
+
 use Hooks;
 use Timetics;
 use Timetics\Core\Appointments\ApiAppointmentTaxonomy;

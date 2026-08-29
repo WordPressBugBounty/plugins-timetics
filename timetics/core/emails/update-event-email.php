@@ -6,6 +6,8 @@
  */
 namespace Timetics\Core\Emails;
 
+defined( 'ABSPATH' ) || exit;
+
 use Timetics\Core\Appointments\Appointment;
 use Timetics\Core\Bookings\Booking;
 use Timetics\Core\Customers\Customer;

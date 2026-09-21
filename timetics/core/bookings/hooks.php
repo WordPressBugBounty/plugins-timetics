@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 use Timetics\Core\Appointments\Appointment;
 use Timetics\Core\Emails\Customer_Booking_Reminder_Email;
 use Timetics\Core\Emails\Staff_Booking_Reminder_Email;
+use Timetics\Core\Integrations\Stripe\StripePayment;
 use Timetics\Utils\Singleton;
 
 /**
@@ -35,11 +36,45 @@ class Hooks {
         add_action( 'init', [$this, 'register_booking_status'] );
         add_action( 'init', [$this, 'maybe_migrate_reminder_schedules'], 99 );
 
+        // Covers sites active before this cron existed; no-op once scheduled.
+        add_action( 'init', [$this, 'maybe_schedule_cleanup_cron'] );
+
         add_action('woocommerce_before_calculate_totals', [ $this, 'timetics_variation_ticket_total_price' ] );
 
         add_filter( 'woocommerce_add_cart_item_data', [ $this, 'timetics_add_cart_item_data' ], 10, 2 );
 
-        add_action( 'admin_init', [$this, 'delete_booking_before_paid'] );
+        add_filter( 'cron_schedules', [$this, 'register_cron_schedules'] );
+
+        // Was admin_init-triggered, so unpaid bookings only got cleaned up when
+        // someone loaded wp-admin. Now runs on a real WP-Cron schedule.
+        add_action( 'timetics_cleanup_unpaid_bookings', [$this, 'delete_booking_before_paid'] );
+    }
+
+    /**
+     * Add a 5-minute WP-Cron interval for the unpaid-booking cleanup sweep.
+     *
+     * @param   array  $schedules
+     *
+     * @return  array
+     */
+    public function register_cron_schedules( $schedules ) {
+        $schedules['timetics_five_minutes'] = [
+            'interval' => 5 * MINUTE_IN_SECONDS,
+            'display'  => __( 'Every 5 Minutes (Timetics)', 'timetics' ),
+        ];
+
+        return $schedules;
+    }
+
+    /**
+     * Schedule the unpaid-booking cleanup cron if it isn't already scheduled.
+     *
+     * @return  void
+     */
+    public function maybe_schedule_cleanup_cron() {
+        if ( ! wp_next_scheduled( 'timetics_cleanup_unpaid_bookings' ) ) {
+            wp_schedule_event( time(), 'timetics_five_minutes', 'timetics_cleanup_unpaid_bookings' );
+        }
     }
 
     /**
@@ -491,13 +526,20 @@ class Hooks {
     }
 
     /**
-     * Delete bookings if unpaid before 30 mins
+     * Delete bookings if unpaid before the configured expiry window
+     * ('unpaid_booking_expiry_minutes' setting, default 5 mins)
      *
      * @return void
      */
     public function delete_booking_before_paid() {
         $args = [
             'post_type'   => 'timetics-booking',
+            // Must be explicit: get_posts() defaults to 'publish', which
+            // bookings never use (custom statuses only), so omitting this
+            // matched nothing. Must NOT be 'any' either — a paid booking sits
+            // at 'approved' (default_booking_status), not 'completed', so
+            // restricting to pending/failed keeps paid bookings out for good.
+            'post_status' => [ 'pending', 'failed' ],
             'numberposts' => -1,
             // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Meta query is necessary for filtering bookings by payment method
             'meta_query'  => array(
@@ -512,6 +554,12 @@ class Hooks {
                     'value'   => 'paypal',
                     'compare' => '=',
                 ),
+                array(
+                    // Abandoned WooCommerce checkout — previously not covered.
+                    'key'     => '_tt_booking_payment_method',
+                    'value'   => 'woocommerce',
+                    'compare' => '=',
+                ),
             ),
         ];
 
@@ -520,7 +568,16 @@ class Hooks {
         foreach ( $bookings as $booking ) {
             $booking = new Booking( $booking->ID );
 
-            if ( 'completed' != $booking->get_status() && $this->is_booking_payment_expire( $booking ) ) {
+            // Free ($0) bookings still get payment_method meta set from
+            // whichever gateway is globally active, so they'd otherwise look
+            // like an abandoned checkout. A free booking never needed payment
+            // — skip regardless of that meta.
+            if ( $booking->get_total() <= 0 ) {
+                continue;
+            }
+
+            // Re-check status: may have changed since the query ran above.
+            if ( in_array( $booking->get_status(), [ 'pending', 'failed' ], true ) && $this->is_booking_payment_expire( $booking ) ) {
                 $this->update_booking_entry( $booking->get_id() );
             }
         }
@@ -534,21 +591,25 @@ class Hooks {
      * @return  bool
      */
     public function is_booking_payment_expire( $booking ) {
-        // Booking date and time
+        // post_date is site-local time (e.g. Asia/Dhaka), not UTC. Parsing it
+        // with no timezone made PHP treat it as UTC already, pushing expiry
+        // out by the site's UTC offset. post_date_gmt + explicit UTC fixes it.
         $post             = get_post( $booking->get_id() );
-        $booking_datetime = $post->post_date;
+        $booking_datetime = $post->post_date_gmt;
 
-        // Convert the booking date and time to a DateTime object
-        $booking_datetime_object = new \DateTime( $booking_datetime );
+        $booking_datetime_object = new \DateTime( $booking_datetime, new \DateTimeZone( 'UTC' ) );
 
-        // Calculate 30 minutes from the booking date and time
+        // Admin-configurable via Settings > General; defaults to 5 minutes.
+        // Clamped to >= 5: the cleanup cron itself only runs every 5 minutes,
+        // so a lower value can't actually be honored, and 0/negative would
+        // expire bookings instantly.
+        $expiry_minutes = max( 5, (int) timetics_get_option( 'unpaid_booking_expiry_minutes', 5 ) );
         $target_datetime = clone $booking_datetime_object;
-        $target_datetime->modify( '+30 minutes' );
+        $target_datetime->modify( "+{$expiry_minutes} minutes" );
 
-        // Get the current date and time
-        $current_datetime = new \DateTime();
+        $current_datetime = new \DateTime( 'now', new \DateTimeZone( 'UTC' ) );
 
-        // Check if 30 minutes have passed
+        // Check if the expiry window has passed
         if ( $current_datetime > $target_datetime ) {
             return true;
         }
@@ -565,34 +626,53 @@ class Hooks {
      */
     public function update_booking_entry( $booking_id ) {
         $booking = new Booking( $booking_id );
-        $meeting = new Appointment( $booking->get_appointment() );
 
         if ( ! $booking->is_booking() ) {
             return false;
         }
 
-        $current_user_id = get_current_user_id();
+        // Stripe: a customer may still be completing checkout when this
+        // expires. Cancel the PaymentIntent first so a late confirm can't
+        // charge the card after we release the slot. If Stripe refuses
+        // because it already succeeded, the money is real — leave the
+        // booking pending instead of cancelling a paid customer.
+        if ( 'stripe' === strtolower( (string) $booking->get_payment_method() ) ) {
+            $intent_id = $booking->get_stripe_payment_intent_id();
 
-        if (
-            $meeting->is_appointment()
-            && ! user_can( $current_user_id, 'manage_options' )
-            && $meeting->get_author() != $current_user_id
-        ) {
-            $data = [
-                'success' => 0,
-                'message' => __( 'You are not allowed to delete this booking.', 'timetics' ),
-            ];
+            if ( '' !== $intent_id ) {
+                $stripe = new StripePayment();
+                $intent = $stripe->retrieve_payment_intent( $intent_id );
 
-            return new \WP_HTTP_Response( $data, 403 );
+                if ( is_array( $intent ) && isset( $intent['status'] ) && 'succeeded' === $intent['status'] ) {
+                    return false;
+                }
+
+                $stripe->cancel_payment_intent( $intent_id );
+            }
         }
 
-        // Delegate to the booking so the shared _tt_booking_slot_released flag
-        // applies: a booking already freed by make_payment() / WooCommerce sync
-        // becomes a no-op here, so this cleanup can never decrement the counter a
-        // second time. ( This runs inline on every admin_init, not via wp-cron;
-        // the previous inline decrement here re-ran each time and could drive
-        // group-meeting counters negative. )
+        // No permission check: only caller is the WP-Cron sweep, which has no
+        // current user (get_current_user_id() = 0) — the old manage_options
+        // check silently blocked this on every cron run.
+        //
+        // release_slot() is idempotent (_tt_booking_slot_released flag), so a
+        // slot already freed by a real payment is never double-released.
         $booking->release_slot();
+
+        // PayPal still creates the calendar event before payment confirms
+        // (see api-booking.php $is_awaiting_online_payment). delete_event()
+        // no-ops if no event exists, so safe to call unconditionally.
+        $booking->delete_event();
+
+        // Flip to 'cancel' so the admin list stops showing this as "Pending"
+        // forever. update() directly, not the REST cancel action, so this
+        // stays silent — no cancellation email, no automation hook.
+        $booking->update(
+            [
+                'post_status'    => 'cancel',
+                'cancel_reason'  => __( 'Automatically cancelled — payment was not completed within the allowed time.', 'timetics' ),
+            ]
+        );
     }
 
     	/**

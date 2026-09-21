@@ -3,7 +3,7 @@ Contributors: arraytics, ehsanriyadh
 Tags: appointment booking, booking calendar, appointment scheduler, online booking, online scheduling, reservation system, elearning, booking system
 Requires at least: 5.2
 Tested up to: 7.1
-Stable tag: 1.0.62
+Stable tag: 1.0.63
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -316,6 +316,15 @@ Handles secure online payment transactions for appointment bookings made through
 **Note:** Optional integration, only active if you configure Stripe payment settings.
 
 == Changelog ==
+
+= 1.0.63 (September 21, 2026) =
+New: Added an Ask AI page with one-click Aisentic Plugin setup.
+Fix: WooCommerce orders, thankyou page and emails now show full meeting details.
+Fix: Retrying a failed Stripe payment no longer drops your slot.
+Fix: Calendar events and emails now wait for payment to be confirmed.
+Fix: Unpaid bookings are cleaned up automatically and slots are freed.
+Fix: A booking retried after a failed payment no longer stays stuck as Failed.
+Fix: Failed requests now show a clear error instead of a blank one.
 
 = 1.0.62 (August 27, 2026) =
 

@@ -24,9 +24,14 @@ if ( !function_exists( 'ens_verify_nonce' ) ) {
      * @return  array
      */
     function ens_verify_nonce( $nonce, $identifier ) {
-        $is_local = isset( $_SERVER['REMOTE_ADDR'] ) && in_array( $_SERVER['REMOTE_ADDR'], ['127.0.0.1', '::1'] );
+        if ( ! empty( $nonce ) && wp_verify_nonce( $nonce, 'ens_' . $identifier . '_flow' ) ) {
+            return true;
+        }
 
-        if ( ( isset( $nonce ) && wp_verify_nonce( $nonce, 'wp_rest' ) ) || $is_local ) {
+        // Backward compatibility: plugins bundling an older SDK still send a
+        // 'wp_rest' nonce. This is only a CSRF check; authorization is enforced
+        // by the capability check in each route's permission_callback.
+        if ( ! empty( $nonce ) && wp_verify_nonce( $nonce, 'wp_rest' ) ) {
             return true;
         }
 

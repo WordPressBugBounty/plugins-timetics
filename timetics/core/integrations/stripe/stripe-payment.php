@@ -191,4 +191,54 @@ class StripePayment {
 
         return $body;
     }
+
+    /**
+     * Cancel a Stripe PaymentIntent. Used by the unpaid-booking cleanup sweep
+     * so a card can't be charged after we've already released the slot.
+     * Stripe refuses this if the intent already succeeded — that failure is
+     * the caller's signal to leave the booking alone instead of cancelling it.
+     *
+     * @param string $intent_id PaymentIntent id (pi_...).
+     *
+     * @return array|\WP_Error Decoded Stripe response, or WP_Error on failure.
+     */
+    public function cancel_payment_intent( $intent_id ) {
+        $intent_id = is_string( $intent_id ) ? trim( $intent_id ) : '';
+
+        if ( '' === $intent_id || strpos( $intent_id, 'pi_' ) !== 0 ) {
+            return new \WP_Error( 'timetics_stripe_invalid_intent', __( 'Invalid Stripe payment intent id.', 'timetics' ) );
+        }
+
+        $secret = timetics_get_option( 'stripe_secret_key' );
+
+        if ( empty( $secret ) ) {
+            return new \WP_Error( 'timetics_stripe_missing_secret', __( 'Stripe secret key is not configured.', 'timetics' ) );
+        }
+
+        $response = wp_remote_post(
+            $this->payment_intent_url . '/' . rawurlencode( $intent_id ) . '/cancel',
+            [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $secret,
+                ],
+                'timeout' => 15,
+            ]
+        );
+
+        if ( is_wp_error( $response ) ) {
+            return $response;
+        }
+
+        $code = (int) wp_remote_retrieve_response_code( $response );
+        $body = json_decode( wp_remote_retrieve_body( $response ), true );
+
+        if ( $code < 200 || $code >= 300 ) {
+            $message = is_array( $body ) && ! empty( $body['error']['message'] )
+                ? $body['error']['message']
+                : __( 'Stripe payment intent cancellation failed.', 'timetics' );
+            return new \WP_Error( 'timetics_stripe_cancel_failed', $message, [ 'status' => $code ] );
+        }
+
+        return is_array( $body ) ? $body : [];
+    }
 }

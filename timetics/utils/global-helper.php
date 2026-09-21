@@ -512,6 +512,7 @@ if ( ! function_exists( 'timetics_update_default_settings' ) ) {
             'currency'                 => 'USD',
             'primary_color'            => '#3161F1',
             'secondary_color'          => '#6188ff',
+            'unpaid_booking_expiry_minutes' => 5,
         ];
 
         $settings = apply_filters( 'timetics_default_settings', $settings );
@@ -615,6 +616,12 @@ if ( ! function_exists( 'timetics_register_cron' ) ) {
      */
     function timetics_register_cron() {
         wp_schedule_event( time(), 'daily', 'timetics_booking_clear_schedule' );
+
+        // Guarded: Hooks::maybe_schedule_cleanup_cron() also calls this on
+        // every 'init', so without the guard it'd stack duplicate events.
+        if ( ! wp_next_scheduled( 'timetics_cleanup_unpaid_bookings' ) ) {
+            wp_schedule_event( time(), 'timetics_five_minutes', 'timetics_cleanup_unpaid_bookings' );
+        }
     }
 }
 
@@ -946,6 +953,23 @@ if ( ! function_exists( 'timetics_modules_list' ) ) {
                 'settings_link' => '',
                 'doc_link'      => 'https://support.themewinter.com/docs/plugins/docs/aisentic/',
             ],
+            'optiontics' => [
+                'name'          => 'optiontics',
+                'slug'          => 'optiontics',
+                'type'          => 'plugin',
+                'upgrade'       => false,
+                'upgrade_link'  => '',
+                'status'        => 'on',
+                'is_pro'        => false,
+                'title'         => __( 'Optiontics', 'timetics' ),
+                'description'   => __( 'Offer paid add-ons and extra options with every booking — services, extras, packages or custom upgrades that customers can pick during checkout.', 'timetics' ),
+                'icon'          => \Timetics\Core\Addon\Extension_Icon::get( 'optiontics' ),
+                'notice'        => '',
+                'demo_link'     => '',
+                'settings_link' => '',
+                'doc_link'      => 'https://support.themewinter.com/docs/plugins/plugin-docs/optiontics/how-to-create-product-options/',
+                'download_url'  => 'https://github.com/themewinter/optiontics-public/releases/download/release/optiontics.zip',
+            ],
         ];
     }
 }
@@ -1070,14 +1094,17 @@ if ( ! function_exists( 'timetics_aisentic_identity' ) ) {
      * so the connect request must read them from here too. Showing one email
      * and sending another would break the consent.
      *
-     * Timetics has no business name/email setting of its own, so the site name
-     * and administrator email are the only sources.
+     * The account belongs to the person who opts in, so it is the logged-in
+     * user's name and email. The Ask AI setup dialog lets them edit the email,
+     * which arrives here as $email. The site admin email is the last fallback.
      *
+     * @param string $email Optional email the user typed in the consent UI.
      * @return array{name:string,email:string,site_url:string}
      */
-    function timetics_aisentic_identity() {
-        $name  = sanitize_text_field( (string) get_bloginfo( 'name' ) );
-        $email = sanitize_email( (string) get_option( 'admin_email', '' ) );
+    function timetics_aisentic_identity( $email = '' ) {
+        $user  = wp_get_current_user();
+        $name  = sanitize_text_field( (string) $user->display_name );
+        $email = sanitize_email( (string) ( $email ?: $user->user_email ?: get_option( 'admin_email', '' ) ) );
 
         return [
             'name'     => $name,

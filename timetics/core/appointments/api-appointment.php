@@ -874,6 +874,8 @@ class Api_Appointment extends Api {
         $zapier_hook_overwrite = ! empty( $data['zapier_hook_overwrite'] ) ? (bool) $data['zapier_hook_overwrite'] : false;
         $pabbly_webook         = ! empty( $data['pabbly_webook'] ) ? $data['pabbly_webook'] : '';
         $zapier_webook         = ! empty( $data['zapier_webook'] ) ? $data['zapier_webook'] : '';
+        $flowmattic_hook_overwrite = ! empty( $data['flowmattic_hook_overwrite'] ) ? (bool) $data['flowmattic_hook_overwrite'] : false;
+        $flowmattic_webhook    = ! empty( $data['flowmattic_webhook'] ) ? esc_url_raw( $data['flowmattic_webhook'] ) : '';
         $min_notice_time       = ! empty( $data['min_notice_time'] ) ? $data['min_notice_time'] : '';
         $custom_fields         = ! empty( $data['custom_fields'] ) ? $data['custom_fields'] : [];
         $guest_enabled         = ! empty( $data['guest_enabled'] ) ? intval( $data['guest_enabled'] ) : false;
@@ -995,6 +997,8 @@ class Api_Appointment extends Api {
             'zapier_hook_overwrite' => $zapier_hook_overwrite,
             'pabbly_webook'         => $pabbly_webook,
             'zapier_webook'         => $zapier_webook,
+            'flowmattic_hook_overwrite' => $flowmattic_hook_overwrite,
+            'flowmattic_webhook'    => $flowmattic_webhook,
             'min_notice_time'       => $min_notice_time,
             'custom_fields'         => $custom_fields,
             'guest_enabled'         => $guest_enabled,
@@ -1072,6 +1076,8 @@ class Api_Appointment extends Api {
             'pabbly_webook'         => $appointment->get_pabbly_webook(),
             'zapier_hook_overwrite' => $appointment->get_zapier_hook_overwrite(),
             'zapier_webook'         => $appointment->get_zapier_webook(),
+            'flowmattic_hook_overwrite' => $appointment->get_flowmattic_hook_overwrite(),
+            'flowmattic_webhook'    => $appointment->get_flowmattic_webhook(),
             'min_notice_time'       => $appointment->get_min_notice_time(),
             'custom_fields'         => $custom_fields ?: [],
             'permalink'             => get_permalink( $appointment->get_id() ),

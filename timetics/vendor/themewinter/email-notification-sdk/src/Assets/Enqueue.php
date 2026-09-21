@@ -47,6 +47,9 @@ class Enqueue {
         $general_prefix = Helpers::get_config_data( $this->identifier,'general_prefix' );
 
         wp_localize_script( $admin_script_handler, $general_prefix . '_ens_data', [
+            // Must stay the 'wp_rest' action: this value is sent as the
+            // X-WP-Nonce header, and WordPress core rejects the whole request
+            // with rest_cookie_invalid_nonce if that header is anything else.
             'nonce'       => wp_create_nonce( 'wp_rest' ),
             'api_version' => 'v1',
             'plugin_slug' => $plugin_slug,

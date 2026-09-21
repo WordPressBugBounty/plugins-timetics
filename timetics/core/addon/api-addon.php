@@ -157,6 +157,16 @@ class Api_Addon extends Api {
             );
         }
 
+        // The Ask AI setup dialog lets the user edit the account email. Reject a bad one before anything is installed.
+        $email = isset( $params['email'] ) ? sanitize_email( $params['email'] ) : '';
+
+        if ( isset( $params['email'] ) && ! is_email( $email ) ) {
+            return $this->send_error(
+                __( 'Enter a valid email address.', 'timetics' ),
+                [ 'status' => 422 ]
+            );
+        }
+
         $extension = timetics_extension()->find( $name );
 
         if ( ! $extension ) {
@@ -184,6 +194,16 @@ class Api_Addon extends Api {
         // Our-Plugins download_url wins over the wordpress.org slug lookup, so a
         // non-wordpress.org URL (e.g. GitHub release zip) is not shadowed.
         $download_url = ! empty( $extension['download_url'] ) ? $extension['download_url'] : '';
+
+        // PluginManager checks no capabilities, so require what doing this by hand in Plugins needs.
+        $needs_install = 'install' === $status || ( 'activate' === $status && ! PluginManager::is_installed( $slug ) );
+
+        if ( ! current_user_can( $needs_install ? 'install_plugins' : 'activate_plugins' ) ) {
+            return $this->send_error(
+                __( 'Sorry, you are not allowed to manage plugins on this site.', 'timetics' ),
+                [ 'status' => 403 ]
+            );
+        }
 
         switch ( $status ) {
             case 'install':
@@ -242,17 +262,18 @@ class Api_Addon extends Api {
 
         /*
          * Registration only runs when the caller sent explicit consent, which
-         * today means the onboarding checkbox or the dashboard banner button.
-         * Activating from About Us installs the plugin and stops there, so no
-         * identity leaves the site without the user opting in.
+         * today means the onboarding checkbox, the dashboard banner button or
+         * the Ask AI setup dialog. Activating from About Us installs the plugin
+         * and stops there, so no identity leaves the site without the user
+         * opting in. Strict: a "1" or "true" string never counts as agreement.
          */
-        if ( 'aisentic' === $name && 'activate' === $status && ! empty( $params['consent'] ) && PluginManager::is_activated( $slug ) ) {
+        if ( 'aisentic' === $name && 'activate' === $status && true === ( $params['consent'] ?? null ) && PluginManager::is_activated( $slug ) ) {
             // Snapshot before the handshake so the caller can tell a fresh
             // registration (tokens just granted) from re-activating a site that
             // was already connected (no new tokens).
             $was_registered = timetics_aisentic_is_registered();
 
-            $this->register_aisentic_site();
+            $this->register_aisentic_site( $email );
 
             $is_registered = timetics_aisentic_is_registered();
 
@@ -283,9 +304,10 @@ class Api_Addon extends Api {
      * when it already has an api key, so this never affects the activation
      * response.
      *
+     * @param string $email Email the user typed, empty to use their account email.
      * @return void
      */
-    private function register_aisentic_site() {
+    private function register_aisentic_site( $email = '' ) {
         // Older Aisentic builds have no listener for the action below, so the
         // handshake would go nowhere. Skip instead of storing consent for a
         // registration that cannot happen.
@@ -293,7 +315,7 @@ class Api_Addon extends Api {
             return;
         }
 
-        $identity = timetics_aisentic_identity();
+        $identity = timetics_aisentic_identity( $email );
 
         // No email means nothing to register with, and Aisentic would reject
         // the call anyway. Fail closed rather than inventing a value.

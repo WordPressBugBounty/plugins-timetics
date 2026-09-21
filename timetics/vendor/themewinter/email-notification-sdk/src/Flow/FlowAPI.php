@@ -63,26 +63,17 @@ class FlowAPI extends WP_REST_Controller {
                 [ // Create
                     'methods'             => \WP_REST_Server::CREATABLE,
                     'callback'            => [$this, 'create_item'],
-                    'permission_callback' => function () {
-                        // return current_user_can( 'manage_options' );
-                        return true;
-                    },
+                    'permission_callback' => [ $this, 'permissions_check' ],
                 ],
                 [ // Bulk delete
                     'methods'             => \WP_REST_Server::DELETABLE,
                     'callback'            => [$this, 'bulk_delete'],
-                    'permission_callback' => function () {
-                        // return current_user_can( 'manage_options' );
-                        return true;
-                    },
+                    'permission_callback' => [ $this, 'permissions_check' ],
                 ],
                 [ // show list
                     'methods'             => \WP_REST_Server::READABLE,
                     'callback'            => [$this, 'get_items'],
-                    'permission_callback' => function () {
-                        // return current_user_can( 'manage_options' );
-                        return true;
-                    },
+                    'permission_callback' => [ $this, 'permissions_check' ],
                 ],
             ]
         );
@@ -91,26 +82,17 @@ class FlowAPI extends WP_REST_Controller {
             [ // Get single flow
                 'methods'             => \WP_REST_Server::READABLE,
                 'callback'            => [$this, 'get_item'],
-                'permission_callback' => function () {
-                    // return current_user_can( 'manage_options' );
-                    return true;
-                },
+                'permission_callback' => [ $this, 'permissions_check' ],
             ],
             [ // Update single flow
                 'methods'             => \WP_REST_Server::EDITABLE,
                 'callback'            => [$this, 'update_item'],
-                'permission_callback' => function () {
-                    // return current_user_can( 'manage_options' );
-                    return true;
-                },
+                'permission_callback' => [ $this, 'permissions_check' ],
             ],
             [ // Delete single flow
                 'methods'             => \WP_REST_Server::DELETABLE,
                 'callback'            => [$this, 'delete_item'],
-                'permission_callback' => function () {
-                    // return current_user_can( 'manage_options' );
-                    return true;
-                },
+                'permission_callback' => [ $this, 'permissions_check' ],
             ],
         ] );
 
@@ -118,12 +100,32 @@ class FlowAPI extends WP_REST_Controller {
             [ // Clone flow
                 'methods'             => \WP_REST_Server::CREATABLE,
                 'callback'            => [$this, 'clone_item'],
-                'permission_callback' => function () {
-                    // return current_user_can( 'manage_options' );
-                    return true;
-                },
+                'permission_callback' => [ $this, 'permissions_check' ],
             ],
         ] );
+    }
+
+    /**
+     * Check that the current user is allowed to manage notification flows.
+     *
+     * Every flow route is administrative: flows control the content and
+     * recipients of the emails the site sends out. They must never be
+     * reachable by unauthenticated visitors.
+     *
+     * @since 1.0.0
+     *
+     * @param   \WP_REST_Request  $request
+     *
+     * @return  bool
+     */
+    public function permissions_check( $request ) {
+        $can = current_user_can( 'manage_options' );
+
+        return (bool) apply_filters(
+            Helpers::get_hook_name( $this->identifier, 'ens_flow_permission' ),
+            $can,
+            $request
+        );
     }
 
     /**

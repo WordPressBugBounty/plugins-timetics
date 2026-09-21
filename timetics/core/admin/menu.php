@@ -52,6 +52,14 @@ class Menu
                 'position'   => apply_filters('timetics_menu_position_overview', 1),
             ],
             [
+                'id'         => 'ask-ai',
+                'title'      => esc_html__('Ask AI', 'timetics'),
+                'link'       => '/ask-ai',
+                // Staff cannot set Aisentic up, so they only get the page once the assistant is ready.
+                'capability' => apply_filters('timetics_menu_permission_ask_ai', class_exists('Aisentic\Init') && timetics_aisentic_is_registered() ? $capability : 'manage_options'),
+                'position'   => apply_filters('timetics_menu_position_ask_ai', 1.2),
+            ],
+            [
                 'id'         => 'meeting',
                 'title'      => esc_html__('Meetings', 'timetics'),
                 'link'       => '/meetings',

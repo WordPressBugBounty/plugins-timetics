@@ -157,6 +157,22 @@ class Api_Stripe extends Api {
             return new WP_HTTP_Response( $response, 403 );
         }
 
+        if ( is_array( $payment ) && ! empty( $payment['error'] ) ) {
+            if ( defined( 'WP_DEBUG' ) && WP_DEBUG && defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG ) {
+                // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Debug logging is guarded by WP_DEBUG checks.
+                error_log( 'Timetics Stripe payment intent failed: ' . wp_json_encode( $payment['error'] ) );
+            }
+
+            return new WP_HTTP_Response(
+                [
+                    'success'     => 0,
+                    'status_code' => 402,
+                    'message'     => __( 'We could not start the payment. Please try again.', 'timetics' ),
+                ],
+                402
+            );
+        }
+
         return rest_ensure_response( $payment );
     }
 

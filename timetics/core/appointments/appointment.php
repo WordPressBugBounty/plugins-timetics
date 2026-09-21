@@ -86,6 +86,8 @@ class Appointment extends PostModel {
         'zapier_hook_overwrite'   => '',
         'pabbly_webook'           => '',
         'zapier_webook'           => '',
+        'flowmattic_hook_overwrite' => '',
+        'flowmattic_webhook'      => '',
         'min_notice_time'         => '',
         'notifications'           => [
             'booking_created_email_form'     => '',
@@ -426,6 +428,12 @@ class Appointment extends PostModel {
     }
     public function get_zapier_hook_overwrite() {
         return $this->get_prop( 'zapier_hook_overwrite' );
+    }
+    public function get_flowmattic_webhook() {
+        return $this->get_prop( 'flowmattic_webhook' );
+    }
+    public function get_flowmattic_hook_overwrite() {
+        return $this->get_prop( 'flowmattic_hook_overwrite' );
     }
     public function get_min_notice_time() {
         return $this->get_prop( 'min_notice_time' );
@@ -839,6 +847,8 @@ class Appointment extends PostModel {
             'pabbly_hook_overwrite' => $this->get_pabbly_hook_overwrite(),
             'pabbly_webook'         => $this->get_pabbly_webook(),
             'zapier_webook'         => $this->get_zapier_webook(),
+            'flowmattic_webhook'    => $this->get_flowmattic_webhook(),
+            'flowmattic_hook_overwrite' => $this->get_flowmattic_hook_overwrite(),
             'min_notice_time'       => $this->get_min_notice_time(),
             'zapier_hook_overwrite' => $this->get_zapier_hook_overwrite(),
             'guest_enabled'         => $this->get_guest_enabled(),

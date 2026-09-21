@@ -118,22 +118,46 @@ class Status_Mapper {
     /**
      * Get the booking ID from WooCommerce order meta
      *
+     * Reads through the order object so it works with HPOS ( orders stored in their
+     * own tables ), falling back to post meta for orders written before that.
+     *
      * @param  int $order_id The WooCommerce order ID
      * @return int|false The booking ID or false if not found
      */
     public static function get_booking_id_from_order( $order_id ) {
-        return get_post_meta( $order_id, '_tt_booking_id', true );
+        $order = function_exists( 'wc_get_order' ) ? wc_get_order( $order_id ) : false;
+
+        if ( ! $order ) {
+            return get_post_meta( $order_id, '_tt_booking_id', true );
+        }
+
+        $booking_id = $order->get_meta( '_tt_booking_id' );
+
+        return $booking_id ? $booking_id : get_post_meta( $order_id, '_tt_booking_id', true );
     }
 
     /**
      * Store the booking ID in WooCommerce order meta
+     *
+     * Writes through the order object. With HPOS enabled and post syncing off,
+     * update_post_meta() would leave the value in a wp_postmeta row that WooCommerce
+     * itself cannot see.
      *
      * @param  int  $order_id The WooCommerce order ID
      * @param  int  $booking_id The booking ID
      * @return bool Whether the meta was updated
      */
     public static function set_booking_id_for_order( $order_id, $booking_id ) {
-        return update_post_meta( $order_id, '_tt_booking_id', $booking_id );
+        $order = function_exists( 'wc_get_order' ) ? wc_get_order( $order_id ) : false;
+
+        if ( ! $order ) {
+            return update_post_meta( $order_id, '_tt_booking_id', $booking_id );
+        }
+
+        $order->update_meta_data( '_tt_booking_id', $booking_id );
+        $order->save();
+
+        return true;
     }
 
     /**

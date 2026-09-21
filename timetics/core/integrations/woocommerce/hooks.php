@@ -68,8 +68,11 @@ class Hooks {
 
         add_action( 'wp_head', [ $this, 'hide_regular_price_checkout_css' ] );
 
-        // Display meeting details on checkout page
-        add_action( 'woocommerce_review_order_before_payment', [ $this, 'display_meeting_details_on_checkout' ] );
+        // Show meeting details under the product in the cart and on checkout
+        add_filter( 'woocommerce_get_item_data', [ $this, 'add_meeting_details_to_cart_item' ], 10, 2 );
+
+        // Store meeting details on the order line item ( thank you page, emails, my account, admin )
+        add_action( 'woocommerce_checkout_create_order_line_item', [ $this, 'add_meeting_details_to_order_item' ], 10, 4 );
 
         // Sync order status when booking status changes (bidirectional sync)
         add_action( 'transition_post_status', [ $this, 'sync_order_status_from_booking' ], 10, 3 );
@@ -118,7 +121,6 @@ class Hooks {
             // Mark booking as failed if payment was not completed
             $session_data = WC()->session->get( 'timetics_data' );
             if ( $session_data ) {
-                $booking = new Booking( $session_data['booking_id'] );
                 Status_Mapper::set_order_id_for_booking( $session_data['booking_id'], $order_id );
             }
             WC()->session->set( 'timetics_data', null );
@@ -623,30 +625,125 @@ class Hooks {
     }
 
     /**
-     * Display meeting details on checkout page
+     * Meeting details as label => value pairs, ready to display.
+     *
+     * Shared by the cart / checkout item data and the order line item meta so the
+     * customer sees the same details before and after paying.
+     *
+     * @param   array  $session_data
+     *
+     * @return  array
+     */
+    private function get_meeting_detail_pairs( $session_data ) {
+        $details = $this->prepare_meeting_details( $session_data );
+
+        if ( ! $details ) {
+            return [];
+        }
+
+        $time = $details['formatted_time'];
+
+        if ( $time && $details['display_timezone'] ) {
+            $time .= ' (' . $details['display_timezone'] . ')';
+        }
+
+        return array_filter( [
+            __( 'Date', 'timetics' )     => $details['formatted_date'],
+            __( 'Time', 'timetics' )     => $time,
+            __( 'Duration', 'timetics' ) => $details['duration'],
+            __( 'Location', 'timetics' ) => $details['location_label'],
+            __( 'Timezone', 'timetics' ) => $details['timezone'],
+        ] );
+    }
+
+    /**
+     * Whether the given product is the meeting product this session booked.
+     *
+     * The cart can hold other products, so the details must only be attached to
+     * the meeting line.
+     *
+     * @param   array    $session_data
+     * @param   integer  $product_id
+     *
+     * @return  bool
+     */
+    private function is_meeting_product( $session_data, $product_id ) {
+        if ( empty( $session_data['meeting_id'] ) ) {
+            return false;
+        }
+
+        $meeting = new Appointment( $session_data['meeting_id'] );
+
+        return (int) $meeting->get_wc_product_id() === (int) $product_id;
+    }
+
+    /**
+     * Show meeting details under the product in the cart and on checkout.
+     *
+     * WooCommerce runs this filter for both the classic templates and the Store API,
+     * so one filter covers the classic and the block based cart / checkout. The block
+     * checkout is the default since WooCommerce 8.3, and the old
+     * woocommerce_review_order_before_payment hook this replaced never ran there.
+     *
+     * @param   array  $item_data
+     * @param   array  $cart_item
+     *
+     * @return  array
+     */
+    public function add_meeting_details_to_cart_item( $item_data, $cart_item ) {
+        $session_data = WC()->session ? WC()->session->get( 'timetics_data' ) : null;
+
+        if ( ! $session_data || ! $this->is_meeting_product( $session_data, $cart_item['product_id'] ) ) {
+            return $item_data;
+        }
+
+        foreach ( $this->get_meeting_detail_pairs( $session_data ) as $label => $value ) {
+            $item_data[] = [
+                'key'   => $label,
+                'value' => $value,
+            ];
+        }
+
+        return $item_data;
+    }
+
+    /**
+     * Store meeting details as order line item meta.
+     *
+     * The booking details only live in the WooCommerce session, which is cleared
+     * once the order is placed. Copying them onto the line item makes WooCommerce
+     * render them everywhere an order is shown: the thank you page, the customer
+     * and admin order emails, My Account -> View order, and the admin order screen.
+     *
+     * @param   \WC_Order_Item_Product  $item
+     * @param   string                  $cart_item_key
+     * @param   array                   $values
+     * @param   \WC_Order               $order
      *
      * @return  void
      */
-    public function display_meeting_details_on_checkout() {
-        if ( ! is_checkout() ) {
+    public function add_meeting_details_to_order_item( $item, $cart_item_key, $values, $order ) {
+        $session_data = WC()->session ? WC()->session->get( 'timetics_data' ) : null;
+
+        if ( ! $session_data || ! $this->is_meeting_product( $session_data, $item->get_product_id() ) ) {
             return;
         }
 
-        $session_data = WC()->session->get( 'timetics_data' );
-        $details      = $this->prepare_meeting_details( $session_data );
-
-        if ( ! $details ) {
-            return;
+        foreach ( $this->get_meeting_detail_pairs( $session_data ) as $label => $value ) {
+            $item->add_meta_data( $label, $value, true );
         }
 
-        $timetics_formatted_date  = $details['formatted_date'];
-        $timetics_formatted_time  = $details['formatted_time'];
-        $timetics_duration        = $details['duration'];
-        $timetics_location_label  = $details['location_label'];
-        $timetics_timezone        = $details['timezone'];
-        $timetics_display_timezone = $details['display_timezone'];
-
-        include TIMETICS_PLUGIN_DIR . '/templates/woocommerce/meeting-details-checkout.php';
+        // Link the order back to the booking here rather than on woocommerce_thankyou.
+        // The thank you page only runs for a customer who actually lands on it and, for
+        // an unpaid order, only stored the booking -> order half of the link. Without the
+        // order -> booking half, sync_booking_status_from_order() finds no booking and an
+        // admin later marking the order paid or cancelled silently does nothing.
+        //
+        // The order is not saved here on purpose: in the classic checkout the order has no
+        // ID yet at this point. WooCommerce saves it right after building the line items.
+        if ( ! empty( $session_data['booking_id'] ) ) {
+            $order->update_meta_data( '_tt_booking_id', $session_data['booking_id'] );
+        }
     }
 
     /**

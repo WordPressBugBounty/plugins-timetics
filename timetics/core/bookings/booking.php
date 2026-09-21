@@ -717,6 +717,76 @@ class Booking {
     }
 
     /**
+     * Take back the slot this booking released.
+     *
+     * A declined payment marks the booking failed and releases its slot, so an
+     * attempt the customer walks away from does not block the time forever. When
+     * the customer retries on that same booking the slot has to be taken back
+     * before any money moves, otherwise the booking finalizes while the slot still
+     * reads as free and the next customer can book straight over it.
+     *
+     * @return  bool  True when the slot is held, false when it is no longer free.
+     */
+    public function reserve_slot() {
+        if ( ! $this->is_booking() ) {
+            return false;
+        }
+
+        // Nothing was released, so the slot is still held from booking creation.
+        if ( ! $this->get_prop( 'slot_released' ) ) {
+            return true;
+        }
+
+        $meeting = new Appointment( $this->get_appointment() );
+        $entry   = $this->find_slot_entry( $meeting );
+        $seats   = ! empty( $this->get_seat() ) ? (array) $this->get_seat() : [];
+        $taking  = max( 1, count( $seats ) );
+
+        if ( $entry ) {
+            $booked = intval( $entry->get_booked() ) + $taking;
+
+            // Someone else took the time while this booking was in the failed state.
+            if ( $booked > $meeting->get_effective_capacity() ) {
+                return false;
+            }
+
+            $existing = ! empty( $entry->get_seats() ) ? (array) $entry->get_seats() : [];
+
+            $entry->update(
+                [
+                    'booked' => $booked,
+                    'seats'  => array_values( array_unique( array_merge( $existing, $seats ) ) ),
+                ]
+            );
+        } else {
+            // A one-to-one release deletes the entry outright, so recreate it. Entries
+            // are stored in the meeting's timezone, the booking's in the customer's.
+            $start = timetics_convert_timezone( $this->get_start_date() . ' ' . $this->get_start_time(), $this->get_timezone(), $meeting->get_timezone() );
+            $end   = timetics_convert_timezone( $this->get_start_date() . ' ' . $this->get_end_time(), $this->get_timezone(), $meeting->get_timezone() );
+
+            $booking_entry = new Booking_Entry();
+
+            $booking_entry->create(
+                [
+                    'meeting_id'  => $meeting->get_id(),
+                    'staff_id'    => $this->get_staff_id(),
+                    'customer_id' => $this->get_customer(),
+                    'booking_id'  => $this->id,
+                    'booked'      => $taking,
+                    'date'        => $start->format( 'Y-m-d' ),
+                    'start'       => $start->format( 'h:i a' ),
+                    'end'         => $end->format( 'h:i a' ),
+                    'seats'       => $seats,
+                ]
+            );
+        }
+
+        delete_post_meta( $this->id, $this->meta_prefix . 'slot_released' );
+
+        return true;
+    }
+
+    /**
      * Release the entry for one named slot of this booking.
      *
      * Rescheduling saves the new time first, so the old slot has to be named

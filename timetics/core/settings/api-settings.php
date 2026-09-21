@@ -154,6 +154,30 @@ class Api_Settings extends Api {
     public function update_settings( $request ) {
         $options = json_decode( $request->get_body(), true );
 
+        if ( ! is_array( $options ) ) {
+            return new \WP_Error(
+                'timetics_invalid_settings',
+                __( 'Settings must be sent as a JSON object.', 'timetics' ),
+                [ 'status' => 400 ]
+            );
+        }
+
+        /**
+         * Filter the settings payload before any of it is checked or saved.
+         *
+         * Runs before the checks below, so a listener's result passes through
+         * them like the raw request does. Add-ons use it to clean their own
+         * keys. It is an extension point, not the sanitization for core keys.
+         *
+         * @since 1.0.63
+         *
+         * @param array $options Settings payload from the request body.
+         */
+        $filtered = apply_filters( 'timetics_settings_update_params', $options );
+
+        // A listener returning a non-array must not make the save below write nothing.
+        $options = is_array( $filtered ) ? $filtered : $options;
+
         /**
          * Added temporary for leagacy sass. It will remove in future.
          */
@@ -206,6 +230,10 @@ class Api_Settings extends Api {
             return rest_ensure_response( apply_filters( 'timetics/admin/settings/error_data', $data, 'zapier', timetics_get_settings() ) );
         }
 
+        if ( ! empty( $options['flowmattic_webhook'] ) && $options['flowmattic_webhook'] && apply_filters( 'timetics/admin/settings/flowmattic_webhook', false ) ) {
+            return rest_ensure_response( apply_filters( 'timetics/admin/settings/error_data', $data, 'flowmattic', timetics_get_settings() ) );
+        }
+
         if (!empty($options['google_app_client_id']) && $options['google_app_client_id'] && apply_filters('timetics/admin/settings/google_calendar', false)) {
             return rest_ensure_response(apply_filters('timetics/admin/settings/error_data', $data, 'google-calendar', timetics_get_settings()));
         }
@@ -222,12 +250,36 @@ class Api_Settings extends Api {
             return rest_ensure_response( apply_filters( 'timetics/admin/settings/error_data', $data, 'paypal', timetics_get_settings() ) );
         }
 
+        if ( ! empty( $options['uncanny_automator'] ) && $options['uncanny_automator'] && apply_filters( 'timetics/admin/settings/uncanny_automator', false ) ) {
+            return rest_ensure_response( apply_filters( 'timetics/admin/settings/error_data', $data, 'uncanny_automator', timetics_get_settings() ) );
+        }
+
         if (!empty($options['twillo_message']) && $options['twillo_message'] && apply_filters('timetics/admin/settings/twillo_messaging', false)) {
             return rest_ensure_response(apply_filters('timetics/admin/settings/error_data', $data, 'twillo_messaging', timetics_get_settings()));
         }
 
         if ( $options ) {
             foreach ( $options as $key => $value ) {
+                // Webhook URLs are pasted from FlowMattic, so keep them a URL.
+                if ( 'flowmattic_webhook' === $key ) {
+                    $value = esc_url_raw( $value );
+                }
+
+                // Stored as the strings `yes`/`no`: this
+                // option defaults to on, and timetics_get_option() treats an
+                // empty value as "unset" and hands back the default, so a
+                // boolean false could never switch it off.
+                if ( 'uncanny_automator' === $key ) {
+                    $value = $value && 'no' !== $value ? 'yes' : 'no';
+                }
+
+                // Clamp: the cleanup cron only runs every 5 minutes, so a
+                // lower value would silently do nothing and 0/negative would
+                // expire bookings instantly.
+                if ( 'unpaid_booking_expiry_minutes' === $key ) {
+                    $value = max( 5, absint( $value ) );
+                }
+
                 timetics_update_option( $key, $value );
             }
         }

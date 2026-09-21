@@ -99,12 +99,21 @@ class Cart_Api extends Api {
         $meeting_id = (int) $booking->get_appointment();
         $price      = (int) $booking->get_total();
 
+        // Hooks::add_product_to_cart() already ran on timetics_after_booking_create and
+        // stored the meeting details ( date, time, duration, timezone, location ) in this
+        // session. Keep them - overwriting the whole array would drop them before checkout.
+        $session_data = WC()->session->get( 'timetics_data' );
+
+        if ( ! is_array( $session_data ) || empty( $session_data['booking_id'] ) || (int) $session_data['booking_id'] !== $booking_id ) {
+            $session_data = [];
+        }
+
         // Set session for timetics data for woocommerce.
-        WC()->session->set( 'timetics_data', [
+        WC()->session->set( 'timetics_data', array_merge( $session_data, [
             'booking_id' => $booking_id,
             'meeting_id' => $meeting_id,
             'price'      => $price,
-        ] );
+        ] ) );
 
         // Remove all items from cart.
         WC()->cart->empty_cart();

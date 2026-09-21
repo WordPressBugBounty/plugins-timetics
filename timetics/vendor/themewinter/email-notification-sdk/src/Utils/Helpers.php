@@ -13,14 +13,36 @@ class Helpers {
     }
 
     /**
+     * Build the private nonce action for a plugin using this SDK.
+     *
+     * The public 'wp_rest' action must not be used on its own: WordPress hands
+     * the same 'wp_rest' nonce to every logged out visitor, and plugins print
+     * it on public pages, so it proves nothing about who is calling.
+     *
+     * @since 1.0.0
+     *
+     * @param   string  $identifier
+     *
+     * @return  string
+     */
+    public static function get_nonce_action( $identifier ) {
+        return 'ens_' . $identifier . '_flow';
+    }
+
+    /**
      * will verify nonce
      *
      * @return  array
      */
     public static function ens_verify_nonce( $nonce, $identifier ) {
-        $is_local = isset( $_SERVER['REMOTE_ADDR'] ) && in_array( $_SERVER['REMOTE_ADDR'], ['127.0.0.1', '::1'] );
+        if ( ! empty( $nonce ) && wp_verify_nonce( $nonce, self::get_nonce_action( $identifier ) ) ) {
+            return true;
+        }
 
-        if ( ( isset( $nonce ) && wp_verify_nonce( $nonce, 'wp_rest' ) ) || $is_local ) {
+        // Backward compatibility: plugins bundling an older SDK still send a
+        // 'wp_rest' nonce. This is only a CSRF check; authorization is enforced
+        // by the capability check in each route's permission_callback.
+        if ( ! empty( $nonce ) && wp_verify_nonce( $nonce, 'wp_rest' ) ) {
             return true;
         }
 

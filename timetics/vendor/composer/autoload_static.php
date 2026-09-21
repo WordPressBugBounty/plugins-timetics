@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitb20117cddd741a51e3bb6f90a34768e1
+class ComposerStaticInitcb772dab4f3fb52c4dc75cd9e30c021b
 {
     public static $files = array (
         '65bd208c04f25e98cf12b5c37b014f1e' => __DIR__ . '/..' . '/themewinter/email-notification-sdk/src/Utils/global-helpers.php',
@@ -67,9 +67,9 @@ class ComposerStaticInitb20117cddd741a51e3bb6f90a34768e1
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitb20117cddd741a51e3bb6f90a34768e1::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitb20117cddd741a51e3bb6f90a34768e1::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInitb20117cddd741a51e3bb6f90a34768e1::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitcb772dab4f3fb52c4dc75cd9e30c021b::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitcb772dab4f3fb52c4dc75cd9e30c021b::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInitcb772dab4f3fb52c4dc75cd9e30c021b::$classMap;
 
         }, null, ClassLoader::class);
     }

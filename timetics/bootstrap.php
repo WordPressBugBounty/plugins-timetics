@@ -458,6 +458,8 @@ final class Bootstrap {
              */
             'supports_registration' => class_exists( 'Aisentic\Api\Services\Registration_Service' ),
             'terms_url'  => 'https://arraytics.com/terms-of-service/',
+            // Only people who could install Aisentic by hand get the setup dialog.
+            'can_setup'  => current_user_can( 'manage_options' ) && current_user_can( 'install_plugins' ),
         ];
     }
 

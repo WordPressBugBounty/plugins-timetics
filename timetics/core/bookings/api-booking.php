@@ -617,8 +617,10 @@ class Api_Booking extends Api {
         }
 
         // Idempotency: refuse re-approval of a booking that already finalized.
+        // 'failed' is deliberately not in this list — a declined card is a failed
+        // attempt, not a finished booking, and the customer retries on the same one.
         $current_status     = (string) $booking->get_status();
-        $finalized_statuses = [ 'approved', 'completed', 'failed', 'cancelled', 'cancel' ];
+        $finalized_statuses = [ 'approved', 'completed', 'cancelled', 'cancel' ];
         if ( in_array( $current_status, $finalized_statuses, true ) ) {
             return new WP_HTTP_Response(
                 [
@@ -718,6 +720,16 @@ class Api_Booking extends Api {
         } elseif ( 'failed' === $client_status ) {
             // Marking the user's own attempt as failed never grants access; safe to honor.
             $verified_status = 'failed';
+        } else {
+            // Gateways that live outside this plugin ( PayPal ) check the payment
+            // against their own API and answer with the status they trust. The
+            // default stays 'pending', so a client that sends nothing verifiable
+            // cannot talk its way to 'succeeded'.
+            $verified_status = (string) apply_filters( 'timetics_verify_payment', $verified_status, $payment_method, $data, $booking );
+
+            if ( ! in_array( $verified_status, ['pending', 'failed', 'succeeded'], true ) ) {
+                $verified_status = 'pending';
+            }
         }
         // Other payment methods (cash, on-site, etc.) stay pending here. They
         // are approved through their own authenticated/admin paths.
@@ -728,9 +740,12 @@ class Api_Booking extends Api {
         $finalizing = 'succeeded' === $verified_status && '' !== $stored_intent_id;
 
         if ( $finalizing ) {
-            $claimed = add_post_meta( $booking_id, '_tt_stripe_payment_intent_id', $stored_intent_id, true );
+            // Separate key from _tt_stripe_payment_intent_id: that one is written at
+            // bind time (before payment) so the cleanup sweep can see it, so it can't
+            // double as a "not yet finalized" marker here — it always already exists.
+            $claimed = add_post_meta( $booking_id, '_tt_stripe_payment_finalized_intent_id', $stored_intent_id, true );
             if ( false === $claimed ) {
-                $existing = (string) get_post_meta( $booking_id, '_tt_stripe_payment_intent_id', true );
+                $existing = (string) get_post_meta( $booking_id, '_tt_stripe_payment_finalized_intent_id', true );
                 if ( $existing !== $stored_intent_id ) {
                     return new WP_HTTP_Response(
                         [
@@ -767,7 +782,7 @@ class Api_Booking extends Api {
         if ( is_wp_error( $update ) ) {
             // Roll back the claim so a retry can finalize cleanly.
             if ( $finalizing ) {
-                delete_post_meta( $booking_id, '_tt_stripe_payment_intent_id', $stored_intent_id );
+                delete_post_meta( $booking_id, '_tt_stripe_payment_finalized_intent_id', $stored_intent_id );
             }
             return new WP_HTTP_Response(
                 [
@@ -786,7 +801,12 @@ class Api_Booking extends Api {
             $booking->release_slot();
         }
 
-        if ( $default_booking_status === $post_status ) {
+        // Approve, notify and burn the token only when the payment actually
+        // cleared. This used to compare $post_status against the site default,
+        // which is the very same string on a site whose default booking status
+        // is 'pending' - so an unverified attempt still sent the "meeting
+        // scheduled" emails and rotated the token without a penny being paid.
+        if ( 'succeeded' === $verified_status ) {
             // Rotate the security token so the same one cannot drive a second
             // approval after this booking has finalized.
             $booking->rotate_security_token();
@@ -1089,6 +1109,10 @@ class Api_Booking extends Api {
             'cancel_reason'       => $cancel_reason,
         ];
 
+        if ( 'created' === $action && '' !== $payment_method ) {
+            $booking_props['payment_method'] = $payment_method;
+        }
+
         $old_meeting_timestamp = 0;
 
         if ( $id ) {
@@ -1144,6 +1168,19 @@ class Api_Booking extends Api {
                  * Added temporary for leagacy sass. It will remove in future.
                  */
                 do_action( 'timetics/admin/booking/after_delete_item', $booking );
+
+                /**
+                 * Fired when an existing booking is cancelled.
+                 *
+                 * Cancel had no dedicated hook before, so integrations could
+                 * only react to create/reschedule/delete.
+                 *
+                 * @param int      $booking_id  Booking ID.
+                 * @param int      $customer_id Customer ID.
+                 * @param int      $meeting_id  Meeting (appointment) ID.
+                 * @param array    $data        Request data.
+                 */
+                do_action( 'timetics_after_booking_cancel', $booking->get_id(), $customer->get_id(), $meeting->get_id(), $data );
             } else {
                 // Check if the booking date/time was actually changed
                 $date_time_changed = (
@@ -1183,6 +1220,20 @@ class Api_Booking extends Api {
                     }
 
                     do_action( 'timetics_gln_hook', 'booking_rescheduled', $reschedule_hook_data );
+
+                    /**
+                     * Fired when a booking's date or time actually changed.
+                     *
+                     * `timetics_after_booking_schedule` runs on every save, so
+                     * it cannot tell a reschedule from an edit of the phone
+                     * number. This one only fires on a real time change.
+                     *
+                     * @param int   $booking_id  Booking ID.
+                     * @param int   $customer_id Customer ID.
+                     * @param int   $meeting_id  Meeting (appointment) ID.
+                     * @param array $data        Request data.
+                     */
+                    do_action( 'timetics_after_booking_reschedule', $booking->get_id(), $customer->get_id(), $meeting->get_id(), $data );
                 }
             }
         }
@@ -1233,7 +1284,18 @@ class Api_Booking extends Api {
         // booking schedule entry exists. This generates the Google Meet link
         // (stored in booking meta) so it can be shown on the success page and
         // included in the notification emails sent below.
-        if ( 'created' === $action && 'cancel' !== $status ) {
+        //
+        // Skipped while an online gateway payment is still outstanding — the
+        // real event gets created once payment confirms, in make_payment() and
+        // Hooks::update_booking_payment_status(). Based on payment_method and
+        // amount alone, NOT $status: a privileged (logged-in admin/staff) user
+        // gets $default_status regardless of gateway, which can be 'approved'
+        // even though no payment happened yet — checking $status here would
+        // miss that and create the event before the customer actually pays.
+        $is_awaiting_online_payment = 'created' === $action && $server_total > 0
+            && in_array( $payment_method_l, [ 'stripe', 'woocommerce', 'paypal' ], true );
+
+        if ( 'created' === $action && 'cancel' !== $status && ! $is_awaiting_online_payment ) {
             $booking->create_event();
         }
 
@@ -1392,6 +1454,21 @@ class Api_Booking extends Api {
         $booking->release_slot();
 
         $recurrences = $booking->get_recurrence();
+
+        /**
+         * Fired before a booking is deleted, while its data can still be read.
+         *
+         * `timetics_after_booking_delete` runs after the post has already gone
+         * and only receives the recurrence data, so an integration that needs
+         * the booking, customer or meeting has to listen here instead.
+         *
+         * @param int   $booking_id  Booking ID.
+         * @param int   $customer_id Customer ID.
+         * @param int   $meeting_id  Meeting (appointment) ID.
+         * @param array $data        Request data.
+         */
+        do_action( 'timetics_before_booking_delete', $booking->get_id(), $booking->get_customer_id(), $meeting->get_id(), [] );
+
         $booking->delete_event();
         $booking->delete();
 
@@ -1781,6 +1858,21 @@ class Api_Booking extends Api {
             );
         }
 
+        // A previous decline released this booking's slot. Bind runs before the card
+        // is charged, so it is the last safe point to take the slot back — refusing
+        // here costs the customer nothing, refusing after payment would take their
+        // money for a time somebody else now holds.
+        if ( ! $booking->reserve_slot() ) {
+            return new WP_HTTP_Response(
+                [
+                    'success'     => 0,
+                    'status_code' => 409,
+                    'message'     => esc_html__( 'This time slot is no longer available. Please pick another time.', 'timetics' ),
+                ],
+                409
+            );
+        }
+
         $result = $stripe->update_payment_intent(
             $intent_id,
             [
@@ -1799,6 +1891,10 @@ class Api_Booking extends Api {
                 502
             );
         }
+
+        // Record the intent id now (not just at make_payment finalize) so the
+        // unpaid-booking cleanup sweep can check Stripe before cancelling.
+        $booking->set_stripe_payment_intent_id( $intent_id );
 
         return new WP_HTTP_Response(
             [
@@ -1835,7 +1931,10 @@ class Api_Booking extends Api {
         if ( ! hash_equals( $stored_token, $appointment_token ) ) {
             return false;
         }
-        if ( 'pending' !== (string) $booking->get_status() ) {
+        // A declined card leaves the booking 'failed' and the customer retries on that
+        // same booking, so 'failed' has to pass too. Anything further along
+        // ( approved / completed / cancelled ) is finished and must never be payable.
+        if ( ! in_array( (string) $booking->get_status(), [ 'pending', 'failed' ], true ) ) {
             return false;
         }
 

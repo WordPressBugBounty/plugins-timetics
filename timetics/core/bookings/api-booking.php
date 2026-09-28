@@ -936,7 +936,21 @@ class Api_Booking extends Api {
                 $status = $default_status;
             }
         } else {
-            $current_status = ( new Booking( $id ) )->get_status();
+            $current_booking = new Booking( $id );
+
+            // Reschedule only moves time.
+            if ( (int) $current_booking->get_appointment() !== $appointment ) {
+                return new WP_HTTP_Response(
+                    [
+                        'status_code' => 403,
+                        'success'     => 0,
+                        'message'     => esc_html__( 'You can not change the appointment of a booking.', 'timetics' ),
+                    ],
+                    403
+                );
+            }
+
+            $current_status = $current_booking->get_status();
             if ( 'cancel' === $client_status ) {
                 $status = 'cancel';
             } else {
@@ -1101,7 +1115,7 @@ class Api_Booking extends Api {
             'end_date'            => $end_date,
             'start_time'          => $start_time,
             'end_time'            => $end_time,
-            'order_total'         => $this->calculate_order_total( $data ),
+            'order_total'         => ( $id && ! $is_privileged ) ? $booking->get_total() : $this->calculate_order_total( $data ),
             'post_status'         => $status,
             'location'            => $location,
             'location_type'       => $location_type,

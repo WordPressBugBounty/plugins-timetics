@@ -427,6 +427,8 @@ final class Bootstrap {
             'demo_url'            =>  $this->demo_url(),
             'current_user'        => timetics_get_current_user(),
             'aisentic'            => $this->get_aisentic_state(),
+            'theme_mode'          => Core\Admin\Theme_Mode::get_for_localize(),
+            'dark_mode_enabled'   => Core\Admin\Theme_Mode::is_enabled(),
 		);
 
         $localize_obj = apply_filters( 'timetics_admin_localize_data', $localize_obj );

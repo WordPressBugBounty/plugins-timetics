@@ -65,6 +65,7 @@ class Base {
         Api_Addon::instance();
         add_action( 'init', array( Admin\Notification::instance(), 'init' ), 15 );
         Admin\Notification_Flow_Guard::instance()->init();
+        Admin\Theme_Mode::instance()->init();
     }
 }
 

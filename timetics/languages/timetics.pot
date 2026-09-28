@@ -2,14 +2,14 @@
 # This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Timetics - Appointment Booking Calendar & Scheduling System 1.0.63\n"
+"Project-Id-Version: Timetics - Appointment Booking Calendar & Scheduling System 1.0.64\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/timetics\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-21T04:22:38+00:00\n"
+"POT-Creation-Date: 2026-09-28T11:36:05+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: timetics\n"
@@ -587,7 +587,7 @@ msgstr ""
 #: core/bookings/api-booking.php:325
 #: core/bookings/api-booking.php:395
 #: core/bookings/api-booking.php:613
-#: core/bookings/api-booking.php:1785
+#: core/bookings/api-booking.php:1799
 #: core/integrations/stripe/api-stripe.php:102
 msgid "Invalid booking id."
 msgstr ""
@@ -640,7 +640,7 @@ msgstr ""
 
 #: core/bookings/api-booking.php:710
 #: core/bookings/api-booking.php:754
-#: core/bookings/api-booking.php:1844
+#: core/bookings/api-booking.php:1858
 msgid "Payment intent does not match this booking."
 msgstr ""
 
@@ -654,79 +654,83 @@ msgstr ""
 msgid "Payment %s"
 msgstr ""
 
+#: core/bookings/api-booking.php:947
+msgid "You can not change the appointment of a booking."
+msgstr ""
+
 #. translators: %s: Time slot
-#: core/bookings/api-booking.php:1016
+#: core/bookings/api-booking.php:1030
 #, php-format
 msgid "%s time slot is not available"
 msgstr ""
 
-#: core/bookings/api-booking.php:1026
+#: core/bookings/api-booking.php:1040
 msgid "Couldn't possible to book. Plese try another time."
 msgstr ""
 
-#: core/bookings/api-booking.php:1079
+#: core/bookings/api-booking.php:1093
 msgid "This booking alreay canceled"
 msgstr ""
 
 #. translators: Action
-#: core/bookings/api-booking.php:1331
+#: core/bookings/api-booking.php:1345
 #, php-format
 msgid "Successfully %s booking"
 msgstr ""
 
-#: core/bookings/api-booking.php:1447
+#: core/bookings/api-booking.php:1461
 msgid "You are not allowed to delete this booking."
 msgstr ""
 
-#: core/bookings/api-booking.php:1584
+#: core/bookings/api-booking.php:1598
 msgid "Invalid meeting."
 msgstr ""
 
-#: core/bookings/api-booking.php:1589
+#: core/bookings/api-booking.php:1603
 msgid "Invalid timeslot."
 msgstr ""
 
-#: core/bookings/api-booking.php:1594
+#: core/bookings/api-booking.php:1608
 msgid "Team member not matched"
 msgstr ""
 
-#: core/bookings/api-booking.php:1599
+#: core/bookings/api-booking.php:1613
 msgid "Location type not matched"
 msgstr ""
 
-#: core/bookings/api-booking.php:1749
+#: core/bookings/api-booking.php:1763
 msgid "Booking not found."
 msgstr ""
 
-#: core/bookings/api-booking.php:1757
+#: core/bookings/api-booking.php:1771
 msgid "Unable to verify booking ownership."
 msgstr ""
 
-#: core/bookings/api-booking.php:1764
+#: core/bookings/api-booking.php:1778
 msgid "You are not allowed to change the email address for this booking."
 msgstr ""
 
-#: core/bookings/api-booking.php:1800
+#: core/bookings/api-booking.php:1814
 msgid "Invalid payment intent id."
 msgstr ""
 
-#: core/bookings/api-booking.php:1814
+#: core/bookings/api-booking.php:1828
 msgid "Booking already bound to another payment intent."
 msgstr ""
 
-#: core/bookings/api-booking.php:1827
+#: core/bookings/api-booking.php:1841
 msgid "Cannot verify payment intent with Stripe."
 msgstr ""
 
-#: core/bookings/api-booking.php:1855
+#: core/bookings/api-booking.php:1869
 msgid "Payment intent is bound to another booking."
 msgstr ""
 
-#: core/bookings/api-booking.php:1870
+#: core/bookings/api-booking.php:1884
 msgid "This time slot is no longer available. Please pick another time."
 msgstr ""
 
-#: core/bookings/api-booking.php:1903
+#: core/bookings/api-booking.php:1917
 msgid "Payment intent bound."
 msgstr ""
 
@@ -2887,20 +2891,20 @@ msgstr ""
 
 #: assets/src/admin/pages/bookings/FormField.js:278
 #: assets/src/admin/pages/calendar/CalendarSearchActions.js:70
-#: assets/src/admin/pages/settings/General.js:192
+#: assets/src/admin/pages/settings/General.js:207
 #: assets/src/admin/pages/staff/TableHeader.js:88
 msgid "Pending"
 msgstr ""
 
 #: assets/src/admin/pages/bookings/FormField.js:283
 #: assets/src/admin/pages/calendar/CalendarSearchActions.js:66
-#: assets/src/admin/pages/settings/General.js:188
+#: assets/src/admin/pages/settings/General.js:203
 msgid "Approved"
 msgstr ""
 
 #: assets/src/admin/pages/bookings/FormField.js:289
 #: assets/src/admin/pages/calendar/CalendarSearchActions.js:74
-#: assets/src/admin/pages/settings/General.js:196
+#: assets/src/admin/pages/settings/General.js:211
 msgid "Canceled"
 msgstr ""
 
@@ -3142,8 +3146,8 @@ msgid "Select View"
 msgstr ""
 
 #: assets/src/admin/pages/calendar/EventPopOverContent.js:105
-#: assets/src/admin/pages/settings/General.js:184
-#: assets/src/admin/pages/settings/General.js:200
+#: assets/src/admin/pages/settings/General.js:199
+#: assets/src/admin/pages/settings/General.js:215
 msgid "Select Booking Status"
 msgstr ""
 
@@ -3410,8 +3414,8 @@ msgstr ""
 #: assets/src/admin/pages/meeting/steps/CreateStep.js:587
 #: assets/src/admin/pages/meeting/steps/Integrations.js:300
 #: assets/src/admin/pages/meeting/steps/TimeAvailability.js:525
-#: assets/src/admin/pages/settings/availability/Availability.js:83
-#: assets/src/admin/pages/settings/General.js:428
+#: assets/src/admin/pages/settings/availability/Availability.js:80
+#: assets/src/admin/pages/settings/General.js:443
 msgid "Save Updates"
 msgstr ""
 
@@ -3693,11 +3697,11 @@ msgstr ""
 msgid "Preview Meeting"
 msgstr ""
 
-#: assets/src/admin/pages/notification-flow/EditNotificationFlow.js:20
+#: assets/src/admin/pages/notification-flow/EditNotificationFlow.js:22
 msgid "Edit Notification Flow"
 msgstr ""
 
-#: assets/src/admin/pages/notification-flow/ListNotificationFlow.js:19
+#: assets/src/admin/pages/notification-flow/ListNotificationFlow.js:21
 msgid "Notification Flows"
 msgstr ""
 
@@ -3769,11 +3773,28 @@ msgstr ""
 msgid "Reports"
 msgstr ""
 
-#: assets/src/admin/pages/settings/availability/Availability.js:27
+#: assets/src/admin/pages/settings/Appearance.js:9
+msgid "Light"
+msgstr ""
+
+#: assets/src/admin/pages/settings/Appearance.js:10
+msgid "Dark"
+msgstr ""
+
+#: assets/src/admin/pages/settings/Appearance.js:13
+msgid "System"
+msgstr ""
+
+#: assets/src/admin/pages/settings/Appearance.js:33
+#: assets/src/admin/pages/settings/General.js:81
+msgid "Appearance"
+msgstr ""
+
+#: assets/src/admin/pages/settings/availability/Availability.js:26
 msgid "Weekly Hours"
 msgstr ""
 
-#: assets/src/admin/pages/settings/availability/Availability.js:32
+#: assets/src/admin/pages/settings/availability/Availability.js:31
 msgid "Blocked Dates"
 msgstr ""
 
@@ -3814,121 +3835,125 @@ msgstr ""
 msgid " Unavailable"
 msgstr ""
 
-#: assets/src/admin/pages/settings/General.js:77
+#: assets/src/admin/pages/settings/General.js:82
+msgid "Only changes how Timetics looks for you."
+msgstr ""
+
+#: assets/src/admin/pages/settings/General.js:92
 msgid "Date & Time Format"
 msgstr ""
 
-#: assets/src/admin/pages/settings/General.js:78
+#: assets/src/admin/pages/settings/General.js:93
 msgid "Change the date and time format to your likings"
 msgstr ""
 
-#: assets/src/admin/pages/settings/General.js:111
+#: assets/src/admin/pages/settings/General.js:126
 msgid "Update date & time format"
 msgstr ""
 
-#: assets/src/admin/pages/settings/General.js:116
+#: assets/src/admin/pages/settings/General.js:131
 msgid "Default format:"
 msgstr ""
 
-#: assets/src/admin/pages/settings/General.js:126
+#: assets/src/admin/pages/settings/General.js:141
 msgid "First Day of The Week"
 msgstr ""
 
-#: assets/src/admin/pages/settings/General.js:127
+#: assets/src/admin/pages/settings/General.js:142
 msgid "Choose the day your week starts with"
 msgstr ""
 
-#: assets/src/admin/pages/settings/General.js:144
+#: assets/src/admin/pages/settings/General.js:159
 msgid "Update Week starts on"
 msgstr ""
 
-#: assets/src/admin/pages/settings/General.js:147
+#: assets/src/admin/pages/settings/General.js:162
 msgid "Week starts on"
 msgstr ""
 
-#: assets/src/admin/pages/settings/General.js:151
+#: assets/src/admin/pages/settings/General.js:166
 msgid "Selected Day "
 msgstr ""
 
-#: assets/src/admin/pages/settings/General.js:173
+#: assets/src/admin/pages/settings/General.js:188
 msgid "Approval Status"
 msgstr ""
 
-#: assets/src/admin/pages/settings/General.js:174
+#: assets/src/admin/pages/settings/General.js:189
 msgid "Change the approval status to Approved or Pending or Cancelled"
 msgstr ""
 
-#: assets/src/admin/pages/settings/General.js:206
+#: assets/src/admin/pages/settings/General.js:221
 msgid "Select Currency"
 msgstr ""
 
-#: assets/src/admin/pages/settings/General.js:207
+#: assets/src/admin/pages/settings/General.js:222
 msgid "Select your preferred currency"
 msgstr ""
 
-#: assets/src/admin/pages/settings/General.js:212
+#: assets/src/admin/pages/settings/General.js:227
 msgid "You are not allowed to change currency here because WooCommerce payment is currently enabled."
 msgstr ""
 
-#: assets/src/admin/pages/settings/General.js:223
+#: assets/src/admin/pages/settings/General.js:238
 msgid "Select currency"
 msgstr ""
 
-#: assets/src/admin/pages/settings/General.js:230
+#: assets/src/admin/pages/settings/General.js:245
 msgid "Search currency by the country name"
 msgstr ""
 
-#: assets/src/admin/pages/settings/General.js:277
+#: assets/src/admin/pages/settings/General.js:292
 msgid "Set primary color"
 msgstr ""
 
-#: assets/src/admin/pages/settings/General.js:278
+#: assets/src/admin/pages/settings/General.js:293
 msgid "Set your primary color"
 msgstr ""
 
-#: assets/src/admin/pages/settings/General.js:291
+#: assets/src/admin/pages/settings/General.js:306
 msgid "Set secondary color"
 msgstr ""
 
-#: assets/src/admin/pages/settings/General.js:292
+#: assets/src/admin/pages/settings/General.js:307
 msgid "Set your secondary color"
 msgstr ""
 
-#: assets/src/admin/pages/settings/General.js:305
+#: assets/src/admin/pages/settings/General.js:320
 msgid "Calendar translator"
 msgstr ""
 
-#: assets/src/admin/pages/settings/General.js:306
+#: assets/src/admin/pages/settings/General.js:321
 msgid "Select the language for your user"
 msgstr ""
 
-#: assets/src/admin/pages/settings/General.js:315
-#: assets/src/admin/pages/settings/General.js:321
+#: assets/src/admin/pages/settings/General.js:330
+#: assets/src/admin/pages/settings/General.js:336
 msgid "Select Locale"
 msgstr ""
 
-#: assets/src/admin/pages/settings/General.js:327
+#: assets/src/admin/pages/settings/General.js:342
 msgid "Set Timezone"
 msgstr ""
 
-#: assets/src/admin/pages/settings/General.js:328
+#: assets/src/admin/pages/settings/General.js:343
 msgid "Select the timezone of timetics"
 msgstr ""
 
-#: assets/src/admin/pages/settings/General.js:340
-#: assets/src/admin/pages/settings/General.js:365
+#: assets/src/admin/pages/settings/General.js:355
+#: assets/src/admin/pages/settings/General.js:380
 msgid "Select Timezone"
 msgstr ""
 
-#: assets/src/admin/pages/settings/General.js:371
+#: assets/src/admin/pages/settings/General.js:386
 msgid "Unpaid Booking Expiry (Minutes)"
 msgstr ""
 
-#: assets/src/admin/pages/settings/General.js:372
+#: assets/src/admin/pages/settings/General.js:387
 msgid "Automatically release the slot and cancel an unpaid Stripe/WooCommerce/PayPal booking after this many minutes. The cleanup check runs every 5 minutes, so values below 5 are treated as 5."
 msgstr ""
 
-#: assets/src/admin/pages/settings/General.js:383
+#: assets/src/admin/pages/settings/General.js:398
 msgid "5"
 msgstr ""
 
@@ -4212,11 +4237,11 @@ msgstr ""
 msgid "Enter  secret key"
 msgstr ""
 
-#: assets/src/admin/pages/settings/WeeklyHours.js:27
+#: assets/src/admin/pages/settings/WeeklyHours.js:25
 msgid "Set default schedule for all staffs"
 msgstr ""
 
-#: assets/src/admin/pages/settings/WeeklyHours.js:33
+#: assets/src/admin/pages/settings/WeeklyHours.js:31
 msgid "This schedule will be the default one for all the staffs, staffs can customize them through profile"
 msgstr ""
 

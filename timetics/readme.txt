@@ -3,7 +3,7 @@ Contributors: arraytics, ehsanriyadh
 Tags: appointment booking, booking calendar, appointment scheduler, online booking, online scheduling, reservation system, elearning, booking system
 Requires at least: 5.2
 Tested up to: 7.1
-Stable tag: 1.0.63
+Stable tag: 1.0.64
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -316,6 +316,11 @@ Handles secure online payment transactions for appointment bookings made through
 **Note:** Optional integration, only active if you configure Stripe payment settings.
 
 == Changelog ==
+
+= 1.0.64 (September 28, 2026) =
+New: Added dark mode support in admin panel.
+Fix: Weekly schedule's blank or empty saving issue got fixed.
+Fix: Security - Guest booking changes are now checked more strictly.
 
 = 1.0.63 (September 21, 2026) =
 New: Added an Ask AI page with one-click Aisentic Plugin setup.

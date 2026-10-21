@@ -1333,13 +1333,41 @@ class Booking {
     }
 
     /**
+     * Reschedule or cancel link for this booking, on the meeting page.
+     *
+     * Built with add_query_arg so it also works with plain permalinks, where
+     * the meeting permalink already has a query string.
+     *
+     * @param string $action 'reschedule' or 'cancel'.
+     *
+     * @return string Empty for any other action.
+     */
+    public function get_manage_url( $action ) {
+        if ( ! in_array( $action, [ 'reschedule', 'cancel' ], true ) ) {
+            return '';
+        }
+
+        $meeting = new Appointment( $this->get_appointment() );
+
+        return add_query_arg(
+            [
+                'id'                => $this->get_id(),
+                'meeting_id'        => $meeting->get_id(),
+                'booking_action'    => $action,
+                'appointment_token' => $this->get_security_token(),
+            ],
+            $meeting->get_appointment_permalink()
+        );
+    }
+
+    /**
      * Generate and store a secure reschedule token for a booking
      *
      * @param int $booking_id
      * @return string The generated token
      */
     public function generate_security_token() {
-        $token = bin2hex(random_bytes(4)); // 8 hex chars
+        $token = bin2hex( random_bytes( 16 ) ); // 32 hex chars
         return $token;
     }
 

@@ -17,6 +17,11 @@ class Notification_Seeder {
     const SEEDED_VERSION = '2.0';
 
     /**
+     * Set once the draft booking-links flow has been added.
+     */
+    const MANAGE_LINKS_OPTION = 'timetics_manage_links_flow_seeded';
+
+    /**
      * Seed the 8 default flows as drafts.
      *
      * The legacy email system in Settings remains the active sender; these
@@ -45,6 +50,53 @@ class Notification_Seeder {
         }
 
         update_option( self::SEEDED_OPTION, self::SEEDED_VERSION, false );
+    }
+
+    /**
+     * Add the draft "Booking Links – Customer" flow once.
+     *
+     * Kept apart from maybe_seed() on purpose: bumping SEEDED_VERSION would
+     * move owners' published default flows back to draft. add_option() only
+     * succeeds for one request, so two admin page loads cannot add it twice.
+     * Autoloaded: it is checked on every admin page load, and an autoloaded
+     * option is read without its own database query.
+     */
+    public static function maybe_seed_manage_links() {
+        if ( ! add_option( self::MANAGE_LINKS_OPTION, 1, '', true ) ) {
+            return;
+        }
+
+        $existing = get_posts( array(
+            'post_type'      => 'tt-flow',
+            'post_status'    => 'any',
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
+            'meta_key'       => '_tt_notification_flow_trigger', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+            'meta_value'     => 'manage_links_requested', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+        ) );
+
+        if ( $existing ) {
+            return;
+        }
+
+        $flow_id = self::create_flow( array(
+            'name'        => __( 'Booking Links – Customer', 'timetics' ),
+            'trigger'     => 'manage_links_requested',
+            'flow_config' => self::simple_flow(
+                'manage_links_requested',
+                'Booking Links Requested',
+                'customer_email',
+                'Customer Email',
+                __( 'Your upcoming bookings', 'timetics' ),
+                /* translators: Keep the {%customer_name%} and {%upcoming_bookings%} tags as they are. */
+                __( '<p>Hi {%customer_name%},</p><p>Here are your upcoming bookings. Use the buttons to reschedule or cancel.</p>{%upcoming_bookings%}', 'timetics' ) // phpcs:ignore WordPress.WP.I18n.UnorderedPlaceholdersText -- {%tags%}, not printf placeholders.
+            ),
+        ) );
+
+        // Not saved: drop the flag so the next admin page load tries again.
+        if ( ! $flow_id || is_wp_error( $flow_id ) ) {
+            delete_option( self::MANAGE_LINKS_OPTION );
+        }
     }
 
     /**
@@ -143,7 +195,7 @@ class Notification_Seeder {
             'flow_config' => $def['flow_config'],
             'status'      => 'draft',
         ) );
-        $flow->save();
+        return $flow->save();
     }
 
     /** Edge with correct UI format. */

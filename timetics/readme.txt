@@ -1,9 +1,9 @@
 === Timetics – Appointment Booking Calendar & Scheduling ===
 Contributors: arraytics, ehsanriyadh
 Tags: appointment booking, booking calendar, appointment scheduler, online booking, online scheduling, reservation system, elearning, booking system
-Requires at least: 5.2
+Requires at least: 5.3
 Tested up to: 7.1
-Stable tag: 1.0.64
+Stable tag: 1.0.65
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -316,6 +316,12 @@ Handles secure online payment transactions for appointment bookings made through
 **Note:** Optional integration, only active if you configure Stripe payment settings.
 
 == Changelog ==
+
+= 1.0.65 (October 22, 2026) =
+Fix: Free bookings now always send their confirmation emails, even when WooCommerce is the payment method.
+Fix: Booking slots now show on the correct date for visitors in a different timezone.
+Fix: Adding a second team member to a meeting now saves and stays after a reload.
+
 
 = 1.0.64 (September 28, 2026) =
 New: Added dark mode support in admin panel.

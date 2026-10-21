@@ -1316,9 +1316,11 @@ class Api_Booking extends Api {
         // Send booking creation emails for new bookings not processed through
         // a separate payment flow. Online gateways (stripe/paypal/woocommerce)
         // send this email themselves once payment is finalized, so excluding
-        // them here avoids a duplicate email for the same booking. Sent here
-        // (after create_event) so the Google Meet link is present in the email.
-        if ( 'created' === $action && 'failed' !== $status && ! in_array( $payment_method_l, ['stripe', 'paypal', 'woocommerce'], true ) ) {
+        // them here avoids a duplicate email for the same booking. A free
+        // booking never reaches the gateway, whatever method the form sent, so
+        // only a payment still to come skips it. Sent here (after
+        // create_event) so the Google Meet link is present in the email.
+        if ( 'created' === $action && 'failed' !== $status && ! $is_awaiting_online_payment ) {
             $is_email_to_customer = timetics_get_option( 'booking_created_customer');
             $is_email_to_host     = timetics_get_option( 'booking_created_host');
 

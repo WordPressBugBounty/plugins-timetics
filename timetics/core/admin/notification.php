@@ -60,6 +60,7 @@ class Notification {
         add_filter( 'timetics_notification_sdk_to_emails', array( $this, 'expand_custom_email' ), 10, 2 );
 
         add_action( 'admin_init', array( 'Timetics\Core\Admin\Notification_Seeder', 'maybe_seed' ), 20 );
+        add_action( 'admin_init', array( 'Timetics\Core\Admin\Notification_Seeder', 'maybe_seed_manage_links' ), 21 );
     }
 
     /**
@@ -213,6 +214,37 @@ class Notification {
                 'trigger_data'       => $trigger_data,
                 'delay_dependencies' => $delay_dependencies,
                 'email_receivers'    => $email_receivers,
+            ),
+            array(
+                'trigger_label'      => __( 'Booking Links Requested', 'timetics' ),
+                'trigger_value'      => 'manage_links_requested',
+                // Fired when a customer asks the AI chat for their reschedule
+                // and cancel links. Not tied to one booking, so no meeting tags;
+                // a delay counts from the request.
+                'trigger_data'       => array(
+                    array(
+                        'label' => __( 'Customer Name', 'timetics' ),
+                        'value' => 'customer_name',
+                        'type'  => 'string',
+                    ),
+                    array(
+                        'label' => __( 'Customer Email', 'timetics' ),
+                        'value' => 'customer_email',
+                        'type'  => 'string',
+                    ),
+                    array(
+                        'label' => __( 'Upcoming Bookings', 'timetics' ),
+                        'value' => 'upcoming_bookings',
+                        'type'  => 'string',
+                    ),
+                ),
+                'delay_dependencies' => array(
+                    array(
+                        'label' => __( 'Request Time', 'timetics' ),
+                        'value' => 'requested_at',
+                    ),
+                ),
+                'email_receivers'    => array_values( wp_list_filter( $email_receivers, array( 'value' => 'customer_email' ) ) ),
             ),
         );
 

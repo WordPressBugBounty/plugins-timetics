@@ -535,7 +535,7 @@ class Appointment extends PostModel {
      * @return string
      */
     public function get_image( $size = 'post-thumbnail' ) {
-        return get_the_post_thumbnail_url( $size );
+        return get_the_post_thumbnail_url( $this->get_id(), $size );
     }
 
     /**
@@ -869,13 +869,31 @@ class Appointment extends PostModel {
      * @return  array
      */
     public function prepare_schedule( $start, $end, $staff_id, $timze_zone = '' ) {
-        $start    = new \DateTime( $start );
-        $end      = new \DateTime( $end );
-        $schedule = [];
+        $timze_zone = $timze_zone ? $timze_zone : $this->get_timezone();
+        $by_date    = [];
 
-        // Prepare schedule for the current meeting
-        for ( $date = $start; $date <= $end; $date->modify( '+1 day' ) ) {
-            $schedule[] = $this->get_schedule_by_date( $date->format( 'Y-m-d' ), $staff_id, $timze_zone );
+        // Dates are the visitor's: booking reads date and time in their timezone.
+        // Far from the meeting's timezone a slot falls on the day before or
+        // after, so build the meeting's days around the range and regroup.
+        $from = ( new \DateTime( $start ) )->modify( '-1 day' );
+        $to   = ( new \DateTime( $end ) )->modify( '+1 day' );
+
+        for ( $date = $from; $date <= $to; $date->modify( '+1 day' ) ) {
+            $day = $this->get_schedule_by_date( $date->format( 'Y-m-d' ), $staff_id, $timze_zone );
+
+            foreach ( $day['slots'] as $slot ) {
+                $by_date[ $slot['date'] ?? $day['date'] ][] = $slot;
+            }
+        }
+
+        $schedule = [];
+        for ( $date = new \DateTime( $start ), $last = new \DateTime( $end ); $date <= $last; $date->modify( '+1 day' ) ) {
+            $slots      = $by_date[ $date->format( 'Y-m-d' ) ] ?? [];
+            $schedule[] = [
+                'date'   => $date->format( 'Y-m-d' ),
+                'status' => empty( $slots ) ? 'unavailable' : 'available',
+                'slots'  => $slots,
+            ];
         }
 
         return $schedule;
@@ -899,7 +917,7 @@ class Appointment extends PostModel {
         $slots = [];
 
         if ( ! empty( $schedule[$staff_id] ) ) {
-            $target_schedule = $schedule[$staff_id][$day_name];
+            $target_schedule = $schedule[$staff_id][$day_name] ?? [];
         }
 
         foreach ( $target_schedule as $day ) {
@@ -938,6 +956,8 @@ class Appointment extends PostModel {
                     'status'     => $status,
                     'start_time' => $datetime->format( 'g:ia' ),
                     'booked'     => $booked,
+                    // The visitor's date, which can differ from $date.
+                    'date'       => $datetime->format( 'Y-m-d' ),
                 ];
 
                 $slot = apply_filters( 'timetics_booking_slot', $slot, $this, $booked_entry );
@@ -1078,26 +1098,33 @@ class Appointment extends PostModel {
      * @return  array   Available timeslots
      */
     public function get_avilable_timeslots( $date, $staff_id, $time_zone = '' ) {
-        $day_name = ucfirst( gmdate( 'D', strtotime( $date ) ) );
-        $schedule = $this->get_schedule();
-        $interval         = $this->get_interval();
-        $tartget_schedule = [];
+        $time_zone = $time_zone ? $time_zone : $this->get_timezone();
+        $schedule  = $this->get_schedule();
+        $interval  = $this->get_interval();
+        $slots     = [];
 
-        $slots = [];
-
-        if ( isset($schedule[$staff_id]) && ! empty(array_filter($schedule[$staff_id])) ) {
-            $tartget_schedule = $schedule[$staff_id][$day_name];
+        if ( ! isset( $schedule[ $staff_id ] ) || empty( array_filter( $schedule[ $staff_id ] ) ) ) {
+            return $slots;
         }
 
-        foreach ( $tartget_schedule as $day ) {
-            $start = strtotime( $day['start'] );
-            $end   = strtotime( $day['end'] );
+        // $date is the visitor's, as in prepare_schedule(): the meeting's day
+        // before or after can hold its times.
+        foreach ( [ '-1 day', '+0 day', '+1 day' ] as $shift ) {
+            $meeting_date = gmdate( 'Y-m-d', strtotime( $date . ' ' . $shift ) );
+            $day_name     = ucfirst( gmdate( 'D', strtotime( $meeting_date ) ) );
 
-            for ( $time = $start; $time <= $end; $time += $interval ) {
-                // Slot's own date, see get_schedule_by_date().
-                $datetime = $this->convert_timezone( $date . ' ' . gmdate( 'g:ia', $time ), $time_zone );
-                $slot     = $datetime->format( 'g:ia' );
-                $slots[]  = $slot;
+            foreach ( $schedule[ $staff_id ][ $day_name ] ?? [] as $day ) {
+                $start = strtotime( $day['start'] );
+                $end   = strtotime( $day['end'] );
+
+                for ( $time = $start; $time <= $end; $time += $interval ) {
+                    // Slot's own date, see get_schedule_by_date().
+                    $datetime = $this->convert_timezone( $meeting_date . ' ' . gmdate( 'g:ia', $time ), $time_zone );
+
+                    if ( $datetime->format( 'Y-m-d' ) === $date ) {
+                        $slots[] = $datetime->format( 'g:ia' );
+                    }
+                }
             }
         }
 

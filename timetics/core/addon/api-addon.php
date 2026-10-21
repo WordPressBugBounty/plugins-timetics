@@ -282,7 +282,7 @@ class Api_Addon extends Api {
             $data['aisentic_registered'] = $is_registered;
 
             // True only when this request is what connected the site, so the
-            // "150K tokens added" message never fires on a plain re-activation.
+            // "free AI credits added" message never fires on a plain re-activation.
             $data['aisentic_newly_registered'] = $is_registered && ! $was_registered;
         }
 

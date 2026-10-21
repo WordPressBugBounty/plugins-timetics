@@ -37,6 +37,9 @@ class Hooks {
 
         add_action( 'woocommerce_thankyou', [$this, 'update_booking_payment_status'] );
 
+        // After the status update, so a just-paid booking is already final.
+        add_action( 'woocommerce_thankyou', [$this, 'announce_booking'], 20 );
+
         // Sync booking status when WooCommerce order status changes
         add_action( 'woocommerce_order_status_changed', [$this, 'sync_booking_status_from_order'], 10, 3 );
 
@@ -104,6 +107,50 @@ class Hooks {
         $stores['product'] = 'Timetics\Core\Integrations\Woocommerce\Product_Data_Store';
 
         return $stores;
+    }
+
+    /**
+     * Tell the page which time this order booked, the way the success screen
+     * does (assets/src/frontend/helper/announceBookings.js), so the Aisentic
+     * chat marks its booking card as booked. A WooCommerce booking never shows
+     * the success screen: the visitor lands on this thank you page instead.
+     * Only ids, date and time, on the order's own thank you page.
+     *
+     * @param   integer  $order_id
+     *
+     * @return  void
+     */
+    public function announce_booking( $order_id ) {
+        $booking_id = (int) Status_Mapper::get_booking_id_from_order( $order_id );
+
+        if ( ! $booking_id || in_array( get_post_status( $booking_id ), [ false, 'cancel', 'failed', 'trash' ], true ) ) {
+            return;
+        }
+
+        $booking = new Booking( $booking_id );
+        $time    = strtotime( (string) $booking->get_start_time() );
+
+        if ( false === $time ) {
+            return;
+        }
+
+        $bookings = wp_json_encode(
+            [
+                [
+                    'id'         => $booking_id,
+                    'meeting_id' => (int) $booking->get_appointment(),
+                    'staff_id'   => (int) $booking->get_staff_id(),
+                    'date'       => (string) $booking->get_start_date(),
+                    'time'       => gmdate( 'H:i', $time ),
+                    'timezone'   => (string) $booking->get_timezone(),
+                ],
+            ]
+        );
+
+        printf(
+            '<script>window.timeticsBookings = ( window.timeticsBookings || [] ).concat( %1$s ); window.dispatchEvent( new CustomEvent( "timetics:bookings", { detail: %1$s } ) );</script>',
+            $bookings // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_json_encode() of ids, a date, a time and a timezone.
+        );
     }
 
     /**

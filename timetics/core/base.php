@@ -48,6 +48,7 @@ class Base {
         Services\Api_Service::instance();
         Bookings\Api_Booking::instance();
         Bookings\Hooks::instance()->init();
+        Bookings\Manage_Links_Sender::instance()->init();
         Customers\Api_Customer::instance();
         Staffs\Hooks::instance()->init();
         Settings\Api_Settings::instance();

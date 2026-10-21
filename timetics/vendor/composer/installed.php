@@ -3,7 +3,7 @@
         'name' => 'arraytics/timetics',
         'pretty_version' => 'dev-develop',
         'version' => 'dev-develop',
-        'reference' => '86e74bec1126801018035dd6a6bbcaab8f163e23',
+        'reference' => '36a27ef240cab7058e49f54612d9c0b917e097db',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'arraytics/timetics' => array(
             'pretty_version' => 'dev-develop',
             'version' => 'dev-develop',
-            'reference' => '86e74bec1126801018035dd6a6bbcaab8f163e23',
+            'reference' => '36a27ef240cab7058e49f54612d9c0b917e097db',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

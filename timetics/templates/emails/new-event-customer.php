@@ -29,8 +29,8 @@ defined( 'ABSPATH' ) || exit;
     $timetics_email_title = ! empty( $timetics_email_title ) ? $timetics_email_title : $this->get_title();
 
     $timetics_meeting_id     = $this->meeting->get_id();
-    $timetics_booking_cancel_url = $this->meeting->get_appointment_permalink() . '?id=' . $this->booking->get_id() . '&meeting_id=' . $this->meeting->get_id() .'&booking_action=cancel'. '&appointment_token=' . $this->booking->get_security_token();
-    $timetics_booking_reschedule_url = $this->meeting->get_appointment_permalink() . '?id=' . $this->booking->get_id() . '&meeting_id=' . $this->meeting->get_id() . '&booking_action=reschedule'. '&appointment_token='. $this->booking->get_security_token();
+    $timetics_booking_cancel_url = $this->booking->get_manage_url( 'cancel' );
+    $timetics_booking_reschedule_url = $this->booking->get_manage_url( 'reschedule' );
 
     $timetics_login_url        = wp_login_url();
     $timetics_login_username   = $timetics_customer_email;

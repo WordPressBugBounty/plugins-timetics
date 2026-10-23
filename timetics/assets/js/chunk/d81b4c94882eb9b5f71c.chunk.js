@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunktimetics=self.webpackChunktimetics||[]).push([[995],{2995(e,t,s){s.r(t),s.d(t,{default:()=>a});var c=s(7767);const a=function(){return React.createElement("div",{className:"tt-staff-list"},React.createElement(c.sv,null))}}}]);

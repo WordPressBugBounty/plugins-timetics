@@ -10,6 +10,7 @@ namespace Ens\Whatsapp;
  */
 class WhatsappSender {
 
+    protected $identifier;
     protected $to;
     protected $message;
     protected $action_data;
@@ -23,6 +24,7 @@ class WhatsappSender {
      * WhatsappSender constructor.
      *
      * Expected $args keys:
+     *   - identifier    string  Plugin that sends it (general_prefix), so only its provider handles it.
      *   - action_name   string
      *   - receiver_type string
      *   - to            string
@@ -40,6 +42,7 @@ class WhatsappSender {
      * @param array $args
      */
     public function __construct( array $args ) {
+        $this->identifier    = $args['identifier']    ?? '';
         $this->action_name   = $args['action_name']   ?? '';
         $this->receiver_type = $args['receiver_type'] ?? '';
         $this->to            = $args['to']            ?? '';
@@ -86,12 +89,16 @@ class WhatsappSender {
             $this->receiver_type,
             $this->count,
             $this->message_type,
-            $this->template
+            $this->template,
+            $this->identifier
         );
     }
 
     /**
      * Replace placeholders in a template.
+     *
+     * WhatsApp shows plain text, so HTML entities that WordPress stores in
+     * names and titles ("&amp;", "&#038;") are decoded back to "&".
      *
      * @since 1.0.0
      *
@@ -101,15 +108,14 @@ class WhatsappSender {
      * @return string
      */
     public function replace_placeholders( $template, $data ) {
-        if ( ! is_array( $data ) ) {
-            return $template;
-        }
-        foreach ( $data as $key => $value ) {
-            if ( ! is_array( $value ) ) {
-                $template = str_replace( '{{' . $key . '}}', $value, $template );
-                $template = str_replace( '{%' . $key . '%}', $value, $template );
+        if ( is_array( $data ) ) {
+            foreach ( $data as $key => $value ) {
+                if ( ! is_array( $value ) ) {
+                    $template = str_replace( '{{' . $key . '}}', $value, $template );
+                    $template = str_replace( '{%' . $key . '%}', $value, $template );
+                }
             }
         }
-        return $template;
+        return html_entity_decode( (string) $template, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
     }
 }

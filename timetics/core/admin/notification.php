@@ -12,6 +12,7 @@ use Ens\Core\SDK;
 use Timetics\Core\Appointments\Appointment;
 use Timetics\Core\Bookings\Booking;
 use Timetics\Core\Customers\Customer;
+use Timetics\Core\Bookings\Whatsapp_Consent;
 use Timetics\Core\Staffs\Staff;
 use Timetics\Utils\Singleton;
 
@@ -56,6 +57,7 @@ class Notification {
 
         add_filter( 'rest_pre_dispatch', array( $this, 'check_notification_flow_permission' ), 10, 3 );
         add_filter( 'ens_tt_available_actions', array( $this, 'register_triggers' ) );
+        add_filter( 'ens_tt_channels', array( $this, 'channels' ), 10 );
         add_filter( 'timetics_notification_sdk_email_body', array( $this, 'wrap_email_body' ), 10, 1 );
         add_filter( 'timetics_notification_sdk_to_emails', array( $this, 'expand_custom_email' ), 10, 2 );
 
@@ -251,6 +253,13 @@ class Notification {
         return $actions;
     }
 
+    public function channels( $channels ) {
+        $channels = is_array( $channels ) ? $channels : array();
+        $channels['whatsapp'] = false;
+        $channels['whatsapp_text'] = false;
+        return $channels;
+    }
+
     /**
      * Expand a comma-separated custom_email setting into an array of addresses.
      *
@@ -349,7 +358,7 @@ class Notification {
             }
         }
 
-        return array(
+        return apply_filters( 'timetics_notification_flow_data', array(
             // The booking id lets delayed flows be re-validated or re-scheduled
             // when the booking changes after the flow started. `post_id` is the
             // key the email-notification-sdk itself looks for; `booking_id` is
@@ -360,6 +369,8 @@ class Notification {
             // trigger after the post row is gone, where get_post() returns null.
             'booking_status'         => (string) get_post_status( $booking->get_id() ),
             'customer_email'         => $customer->get_email(),
+            'customer_number'        => Whatsapp_Consent::customer_number( $booking ),
+            'notification_plugin'    => 'timetics',
             'host_email'             => $staff->get_email(),
             'custom_email'           => apply_filters( 'timetics_custom_notification_email', timetics_get_option( 'custom_notification_email', get_option( 'admin_email' ) ) ),
             'meeting_title'          => $meeting->get_name(),
@@ -374,7 +385,7 @@ class Notification {
             'login_url'              => wp_login_url(),
             'login_username'         => $customer->get_email(),
             'set_password_url'       => $set_password_url,
-        );
+        ), $booking );
     }
 
     /**

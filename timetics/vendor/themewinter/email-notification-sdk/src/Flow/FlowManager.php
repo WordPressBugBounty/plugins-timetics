@@ -320,6 +320,13 @@ class FlowManager {
                     break;
                 }
 
+                // Hiding the action in the builder is not enough: a flow saved
+                // earlier still holds the node, so skip it here too.
+                if ( ! Helpers::channel_enabled( $this->identifier, 'whatsapp' ) ) {
+                    $current_node_id = $this->get_next_node_id( $edges, $node['id'] );
+                    break;
+                }
+
                 $receiverType = $node['data']['receiverType'] ?? null;
                 if ( $receiverType && isset( $hook_data[$receiverType] ) ) {
                     $user_number = $hook_data[$receiverType];
@@ -555,7 +562,9 @@ class FlowManager {
             return;
         }
 
-        $message_type = isset( $data['messageType'] ) && 'template' === $data['messageType'] ? 'template' : 'text';
+        // A plugin that turns text off still has flows saved as text before that, or with the type left at its default.
+        $text_allowed = Helpers::channel_enabled( $this->identifier, 'whatsapp_text' );
+        $message_type = ! $text_allowed || ( isset( $data['messageType'] ) && 'template' === $data['messageType'] ) ? 'template' : 'text';
 
         if ( 'template' === $message_type ) {
             $template_name = trim( (string) ( $data['templateName'] ?? '' ) );
@@ -573,6 +582,7 @@ class FlowManager {
             }
 
             $sender = new WhatsappSender( [
+                'identifier'    => $this->identifier,
                 'action_name'   => $action_name,
                 'receiver_type' => $receiverType,
                 'to'            => $number,
@@ -596,6 +606,7 @@ class FlowManager {
         }
 
         $sender = new WhatsappSender( [
+            'identifier'    => $this->identifier,
             'action_name'   => $action_name,
             'receiver_type' => $receiverType,
             'to'            => $number,

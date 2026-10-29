@@ -1134,3 +1134,34 @@ if ( ! function_exists( 'timetics_aisentic_is_registered' ) ) {
         return ! empty( $settings['llmProviders']['aisentic']['apiKey'] );
     }
 }
+
+if ( ! function_exists( 'timetics_phone_default_country' ) ) {
+    /**
+     * Country the phone picker opens on. Until the admin picks one, guess it
+     * from the site timezone, then the site language, so most sites need no setup.
+     *
+     * @return string Two-letter lowercase country code, e.g. "bd".
+     */
+    function timetics_phone_default_country() {
+        $saved = timetics_get_option( 'phone_default_country', '' );
+        if ( is_string( $saved ) && preg_match( '/^[a-z]{2}$/', $saved ) ) {
+            return $saved;
+        }
+
+        try {
+            $location = ( new \DateTimeZone( wp_timezone_string() ) )->getLocation();
+        } catch ( \Exception $e ) {
+            $location = false;
+        }
+        // UTC and "+06:00" style offsets have no country; PHP gives "??" or nothing.
+        if ( ! empty( $location['country_code'] ) && preg_match( '/^[A-Z]{2}$/', $location['country_code'] ) ) {
+            return strtolower( $location['country_code'] );
+        }
+
+        if ( preg_match( '/^[a-z]{2,3}_([A-Z]{2})/', get_locale(), $match ) ) {
+            return strtolower( $match[1] );
+        }
+
+        return 'us';
+    }
+}

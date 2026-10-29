@@ -78,6 +78,7 @@ class Appointment extends PostModel {
         'seat_plan'               => '',
         'duplicate'               => 0,
         'custom_fields'           => [],
+        'phone_field_mode'        => '',
         'wc_product_id'           => 0,
         'seat_plan_settings'      => '',
         'fleunt_crm_webhook'      => '',
@@ -452,6 +453,11 @@ class Appointment extends PostModel {
      */
     public function get_custom_fields() {
         return $this->get_prop( 'custom_fields' );
+    }
+
+    public function get_phone_field_mode() {
+        $mode = $this->get_prop( 'phone_field_mode' );
+        return in_array( $mode, [ 'off', 'optional', 'required' ], true ) ? $mode : 'optional';
     }
 
     /**

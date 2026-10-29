@@ -138,6 +138,15 @@ class Notification_Flow_Guard {
 
         if ( ! self::is_deliverable( $booking_id, $checkpoint['hook_data'] ) ) {
             delete_transient( $key );
+            return;
+        }
+
+        // The stored payload may predate a consent or phone edit. Refresh
+        // recipients immediately before the SDK resumes a delayed action.
+        $fresh = Notification::get_hook_data( new Booking( $booking_id ) );
+        if ( is_array( $fresh ) ) {
+            $checkpoint['hook_data'] = array_merge( $checkpoint['hook_data'], $fresh );
+            self::save_checkpoint( $flow_id, $resume_time, $checkpoint );
         }
     }
 
@@ -362,10 +371,7 @@ class Notification_Flow_Guard {
      * @return void
      */
     private static function save_checkpoint( $flow_id, $resume_time, $checkpoint ) {
-        $expiration = max(
-            HOUR_IN_SECONDS,
-            min( $resume_time - time() + DAY_IN_SECONDS, 30 * DAY_IN_SECONDS )
-        );
+        $expiration = max( HOUR_IN_SECONDS, $resume_time - time() + DAY_IN_SECONDS );
 
         set_transient( self::checkpoint_key( $flow_id, $resume_time ), $checkpoint, $expiration );
     }

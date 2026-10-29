@@ -92,7 +92,12 @@ class Booking {
         'parent'                => 0,
         'cancel_reason'         => '',
         'custom_location_url'   => '',
-        'security_token'        => ''
+        'security_token'        => '',
+        'whatsapp_number'       => '',
+        'whatsapp_opt_in'       => 0,
+        'whatsapp_opt_in_at'    => '',
+        'whatsapp_opt_in_source' => '',
+        'whatsapp_opt_out_at'   => '',
     ];
 
     /**
@@ -281,6 +286,14 @@ class Booking {
      */
     public function get_billing_phone() {
         return $this->get_prop( 'phone' );
+    }
+
+    public function get_whatsapp_number() {
+        return (string) $this->get_prop( 'whatsapp_number' );
+    }
+
+    public function get_whatsapp_opt_in() {
+        return 1 === (int) $this->get_prop( 'whatsapp_opt_in' );
     }
 
     /**
@@ -587,7 +600,7 @@ class Booking {
             // Prepare meta key.
             $meta_key = $this->meta_prefix . $key;
 
-            if ( ! $value ) {
+            if ( ! $value && ! in_array( $key, [ 'whatsapp_number', 'whatsapp_opt_in' ], true ) ) {
                 $value = $this->get_prop( $key );
             }
 
@@ -706,14 +719,14 @@ class Booking {
             return;
         }
 
-        // Idempotency guard: never release the same booking's slot twice.
-        if ( $this->get_prop( 'slot_released' ) ) {
+        // Never free a place this booking no longer holds: it may be someone else's now.
+        if ( ! $this->holds_slot() ) {
             return;
         }
 
         $this->release_slot_at( $this->get_start_date(), $this->get_start_time() );
 
-        update_post_meta( $this->id, $this->meta_prefix . 'slot_released', 1 );
+        $this->mark_slot_released();
     }
 
     /**
@@ -781,9 +794,41 @@ class Booking {
             );
         }
 
-        delete_post_meta( $this->id, $this->meta_prefix . 'slot_released' );
+        $this->mark_slot_held();
 
         return true;
+    }
+
+    /**
+     * Whether this booking's place is still counted in its slot entry.
+     *
+     * The released flag is the answer. The status is checked as well because
+     * bookings cancelled by older versions have no flag. A status alone is not
+     * enough: a WooCommerce order can move a cancelled booking back to approved
+     * without taking its place again.
+     *
+     * @return  bool
+     */
+    public function holds_slot() {
+        return ! $this->get_prop( 'slot_released' ) && 'cancel' !== $this->get_status();
+    }
+
+    /**
+     * Record that this booking no longer counts in its slot entry.
+     *
+     * @return  void
+     */
+    public function mark_slot_released() {
+        update_post_meta( $this->id, $this->meta_prefix . 'slot_released', 1 );
+    }
+
+    /**
+     * Clear the released flag once the booking has taken a place again.
+     *
+     * @return  void
+     */
+    public function mark_slot_held() {
+        delete_post_meta( $this->id, $this->meta_prefix . 'slot_released' );
     }
 
     /**

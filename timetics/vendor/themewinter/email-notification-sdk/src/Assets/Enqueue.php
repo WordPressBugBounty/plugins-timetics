@@ -54,7 +54,8 @@ class Enqueue {
             'api_version' => 'v1',
             'plugin_slug' => $plugin_slug,
             'base_url'    => site_url(),
-            'triggers'    => apply_filters( 'ens_'.$this->identifier.'_available_actions', [] )
+            'triggers'    => apply_filters( 'ens_'.$this->identifier.'_available_actions', [] ),
+            'channels'    => Helpers::get_channels( $this->identifier ),
         ] );
     }
 }

@@ -849,9 +849,9 @@ class Hooks {
             // handling ( hold-stock timeout ), which maps to 'cancel' and releases
             // here.
             //
-            // This runs before the "status unchanged" short-circuit below so that a
-            // refund after an already-cancelled booking ( cancel -> cancel,
-            // unchanged ) still guarantees a release. release_slot() is idempotent.
+            // This runs before the "status unchanged" short-circuit below. A refund
+            // after a cancel ( cancel -> cancel ) frees nothing: release_slot() only
+            // frees a place the booking still holds.
             if ( 'cancel' === $booking_status ) {
                 $booking->release_slot();
             }

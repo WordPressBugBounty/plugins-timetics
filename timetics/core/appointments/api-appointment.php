@@ -447,7 +447,6 @@ class Api_Appointment extends Api {
         }
 
         $custom_fields         = ! empty( $data['custom_fields'] ) ? $data['custom_fields'] : [];
-
         if ( apply_filters( 'timetics/staff/appointment/custom_field_check', false, $custom_fields ) == true ) {
             return new WP_HTTP_Response( apply_filters( 'timetics/admin/appointment/error_data', $response, 'custom_field_check' ), 403 );
         }
@@ -878,6 +877,10 @@ class Api_Appointment extends Api {
         $flowmattic_webhook    = ! empty( $data['flowmattic_webhook'] ) ? esc_url_raw( $data['flowmattic_webhook'] ) : '';
         $min_notice_time       = ! empty( $data['min_notice_time'] ) ? $data['min_notice_time'] : '';
         $custom_fields         = ! empty( $data['custom_fields'] ) ? $data['custom_fields'] : [];
+        $phone_field_mode      = isset( $data['phone_field_mode'] ) ? sanitize_key( $data['phone_field_mode'] ) : ( $id ? $appoint->get_phone_field_mode() : 'optional' );
+        if ( ! in_array( $phone_field_mode, [ 'off', 'optional', 'required' ], true ) ) {
+            return new \WP_Error( 'invalid_phone_field_mode', __( 'Select a valid phone field setting.', 'timetics' ), [ 'status' => 422 ] );
+        }
         $guest_enabled         = ! empty( $data['guest_enabled'] ) ? intval( $data['guest_enabled'] ) : false;
         $guest_limit           = ! empty( $data['guest_limit'] ) ? intval( $data['guest_limit'] ) : 1;
         $capacity              = ! empty( $data['capacity'] ) ? intval( $data['capacity'] ) : 1;
@@ -896,6 +899,7 @@ class Api_Appointment extends Api {
             $staff                 = $appoint->get_staff();
             $visibility            = $appoint->get_visibility();
             $notifications         = $appoint->get_notifications();
+            $phone_field_mode      = $appoint->get_phone_field_mode();
             $fleunt_crm_webhook    = $appoint->get_fleunt_crm_webhook();
             $fluent_hook_overwrite = $appoint->get_fluent_hook_overwrite();
             $pabbly_hook_overwrite = $appoint->get_pabbly_hook_overwrite();
@@ -1001,6 +1005,7 @@ class Api_Appointment extends Api {
             'flowmattic_webhook'    => $flowmattic_webhook,
             'min_notice_time'       => $min_notice_time,
             'custom_fields'         => $custom_fields,
+            'phone_field_mode'      => $phone_field_mode,
             'guest_enabled'         => $guest_enabled,
             'guest_limit'           => $guest_limit,
             'buffer_time_before_value' => $buffer_time_before_value,
@@ -1080,6 +1085,7 @@ class Api_Appointment extends Api {
             'flowmattic_webhook'    => $appointment->get_flowmattic_webhook(),
             'min_notice_time'       => $appointment->get_min_notice_time(),
             'custom_fields'         => $custom_fields ?: [],
+            'phone_field_mode'      => $appointment->get_phone_field_mode(),
             'permalink'             => get_permalink( $appointment->get_id() ),
             'guest_enabled'         => $appointment->get_guest_enabled(),
             'guest_limit'           => $appointment->get_guest_limit(),

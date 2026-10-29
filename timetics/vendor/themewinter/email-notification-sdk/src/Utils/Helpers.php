@@ -141,4 +141,35 @@ class Helpers {
 
         return $prefix . '_' . $hook_suffix;
     }
+
+    /**
+     * Channels the consumer plugin has switched on.
+     *
+     * Every channel is on unless the plugin turns it off through the
+     * `ens_{identifier}_channels` filter, so plugins that never use the
+     * filter behave as before.
+     *
+     * @param string $identifier The consumer plugin identifier (general_prefix).
+     *
+     * @return array Channel name => bool, e.g. [ 'whatsapp' => true ].
+     */
+    public static function get_channels( $identifier ) {
+        $channels = apply_filters( 'ens_' . $identifier . '_channels', [ 'whatsapp' => true ] );
+
+        return is_array( $channels ) ? $channels : [ 'whatsapp' => true ];
+    }
+
+    /**
+     * Whether a channel is on for the consumer plugin.
+     *
+     * @param string $identifier The consumer plugin identifier (general_prefix).
+     * @param string $channel    Channel name, e.g. 'whatsapp'.
+     *
+     * @return bool
+     */
+    public static function channel_enabled( $identifier, $channel ) {
+        $channels = self::get_channels( $identifier );
+
+        return ! isset( $channels[ $channel ] ) || false !== $channels[ $channel ];
+    }
 }

@@ -30,7 +30,7 @@ class MetaCloudProvider {
      * @since 1.0.0
      */
     public function register() {
-        add_action( 'notification_sdk_send_whatsapp', [ $this, 'dispatch' ], 10, 8 );
+        add_action( 'notification_sdk_send_whatsapp', [ $this, 'dispatch' ], 10, 9 );
     }
 
     /**
@@ -52,8 +52,15 @@ class MetaCloudProvider {
      * @param int        $count         Iteration count.
      * @param string     $message_type  `text` (default) or `template`.
      * @param array|null $template      Template config when $message_type=template.
+     * @param string     $identifier    Plugin that sent it. Empty means any plugin (older callers).
      */
-    public function dispatch( $to, $message, $action_data, $action_name, $receiver_type, $count, $message_type = 'text', $template = null ) {
+    public function dispatch( $to, $message, $action_data, $action_name, $receiver_type, $count, $message_type = 'text', $template = null, $identifier = '' ) {
+        // Every plugin bundling the SDK registers a provider on this shared
+        // hook; without this check one message is sent once per plugin.
+        if ( '' !== (string) $identifier && $identifier !== $this->identifier ) {
+            return;
+        }
+
         $handled = apply_filters(
             'ens_whatsapp_provider',
             false,

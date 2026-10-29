@@ -129,6 +129,7 @@ class Api_Settings extends Api {
             'guest_limit',
             'google_calendar',
             'locale_timezone',
+            'phone_default_country',
             'paypal_status',
             'primary_color',
             'remainder_time',
@@ -278,6 +279,11 @@ class Api_Settings extends Api {
                 // expire bookings instantly.
                 if ( 'unpaid_booking_expiry_minutes' === $key ) {
                     $value = max( 5, absint( $value ) );
+                }
+
+                if ( 'phone_default_country' === $key ) {
+                    $value = strtolower( sanitize_text_field( (string) $value ) );
+                    $value = preg_match( '/^[a-z]{2}$/', $value ) ? $value : 'us';
                 }
 
                 timetics_update_option( $key, $value );

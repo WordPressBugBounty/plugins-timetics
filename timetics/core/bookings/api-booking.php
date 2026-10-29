@@ -15,6 +15,7 @@ use Timetics\Core\Appointments\Appointment;
 use Timetics\Core\Customers\Customer;
 use Timetics\Core\Admin\Notification;
 use Timetics\Core\Admin\Notification_Flow_Guard;
+use Timetics\Core\Bookings\Whatsapp_Consent;
 use Timetics\Core\Emails\Cancel_Event_Customer_Email;
 use Timetics\Core\Emails\Cancel_Event_Email;
 use Timetics\Core\Emails\New_Event_Customer_Email;
@@ -31,6 +32,13 @@ use WP_Query;
 
 class Api_Booking extends Api {
     use Singleton;
+
+    /**
+     * Fields every booking save needs, new or update.
+     *
+     * @var string[]
+     */
+    const REQUIRED_FIELDS = array( 'first_name', 'email', 'appointment', 'start_date', 'start_time', 'end_time' );
 
     /**
      * Store api namespace
@@ -116,6 +124,12 @@ class Api_Booking extends Api {
                 ],
             ]
         );
+
+        register_rest_route( $this->namespace, $this->rest_base . '/(?P<booking_id>[\d]+)/whatsapp-opt-out', [
+            'methods' => \WP_REST_Server::CREATABLE,
+            'callback' => [ $this, 'whatsapp_opt_out' ],
+            'permission_callback' => [ $this, 'update_item_permission_callback' ],
+        ] );
 
         register_rest_route(
             $this->namespace, '/' . $this->rest_base . '/(?P<booking_id>[\d]+)/payment', [
@@ -273,6 +287,9 @@ class Api_Booking extends Api {
      */
     public function create_item( $request ) {
 
+        $whatsapp_capped = false;
+        $rate_key        = $this->cap_whatsapp_opt_in( $request, $whatsapp_capped );
+
         $bookings_count = Booking::all();
 
         $response = [
@@ -304,7 +321,63 @@ class Api_Booking extends Api {
             return new WP_HTTP_Response( $response, 403 );
         } // End.
 
-        return $this->save_bookings( $request );
+        $result = $this->save_bookings( $request );
+        if ( $rate_key && $result instanceof WP_HTTP_Response && 200 === $result->get_status() && ! empty( $result->get_data()['success'] ) ) {
+            set_transient( $rate_key, (int) get_transient( $rate_key ) + 1, HOUR_IN_SECONDS );
+        }
+        if ( $whatsapp_capped && $result instanceof WP_HTTP_Response && ! empty( $result->get_data()['success'] ) ) {
+            $body                      = $result->get_data();
+            $body['whatsapp_disabled'] = true;
+            $result->set_data( $body );
+        }
+        return $result;
+    }
+
+    /**
+     * Cap paid WhatsApp sends from anonymous bookings per IP. Over the cap the
+     * booking still goes through; only its WhatsApp opt-in is dropped.
+     *
+     * @param WP_REST_Request $request Booking request, its body may be rewritten.
+     * @param bool            $capped  Set to true when the opt-in was dropped.
+     *
+     * @return string Rate key to count once the booking saves, or '' when it uses no quota.
+     */
+    public function cap_whatsapp_opt_in( $request, &$capped = false ) {
+        $limit = (int) apply_filters( 'timetics_whatsapp_public_booking_hourly_limit', 30 );
+        $ip    = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+        $data  = json_decode( (string) $request->get_body(), true );
+
+        if ( $limit <= 0 || ! is_array( $data ) || 1 !== Whatsapp_Consent::parse_opt_in( $data['whatsapp_opt_in'] ?? null )
+            || ! apply_filters( 'timetics_whatsapp_enabled', false ) || current_user_can( 'manage_timetics' ) || ! filter_var( $ip, FILTER_VALIDATE_IP ) ) {
+            return '';
+        }
+
+        // The hour is in the key, so the window ends on time even while bookings keep coming.
+        $rate_key = 'tt_wa_booking_' . hash( 'sha256', $ip ) . '_' . (int) floor( time() / HOUR_IN_SECONDS );
+        if ( (int) get_transient( $rate_key ) < $limit ) {
+            return $rate_key;
+        }
+
+        $data['whatsapp_opt_in'] = false;
+        $request->set_body( wp_json_encode( $data ) );
+        $capped = true;
+
+        return '';
+    }
+
+    /** Let the booking owner or a holder of its appointment token stop WhatsApp updates. */
+    public function whatsapp_opt_out( $request ) {
+        $booking_id = (int) $request->get_param( 'booking_id' );
+        $booking = new Booking( $booking_id );
+        if ( ! $booking->is_booking() ) {
+            return new WP_Error( 'booking_not_found', __( 'Booking not found.', 'timetics' ), [ 'status' => 404 ] );
+        }
+        if ( $booking->get_whatsapp_opt_in() ) {
+            update_post_meta( $booking_id, '_tt_booking_whatsapp_opt_in', 0 );
+            update_post_meta( $booking_id, '_tt_booking_whatsapp_number', '' );
+            update_post_meta( $booking_id, '_tt_booking_whatsapp_opt_out_at', current_time( 'mysql', true ) );
+        }
+        return rest_ensure_response( [ 'success' => true ] );
     }
 
     /**
@@ -355,7 +428,7 @@ class Api_Booking extends Api {
 
         if ( ! $delete ) {
             $data = [
-                'success'     => 1,
+                'success'     => 0,
                 'status_code' => 409,
                 'message'     => esc_html__( 'Something went wrong, Please try again.', 'timetics' ),
                 'data'        => [],
@@ -566,8 +639,36 @@ class Api_Booking extends Api {
             return new WP_Error( 'timezone_error', __( 'Your meeting timezone is invalid. Please update your meeting timezone with proper timezone.', 'timetics' ) );
         }
 
-        $days = $meeting->prepare_schedule( $start_date, $end_date, $staff_id, $timezone );
-        $days = apply_filters( 'timetics_schedule_data_for_selected_date', $days, $staff_id, $meeting_id,  $timezone );
+        // Clamp the date range so a public caller cannot multiply host queries unbounded.
+        if ( ! empty( $start_date ) && ! empty( $end_date ) ) {
+            $start_timestamp = strtotime( $start_date );
+            if ( $start_timestamp ) {
+                $max_end = gmdate( 'Y-m-d', strtotime( '+90 days', $start_timestamp ) );
+                if ( $end_date > $max_end ) {
+                    $end_date = $max_end;
+                }
+            }
+        }
+
+        /**
+         * Filters the days of a slot list before they are built for one host.
+         *
+         * Return an array of days, in the shape prepare_schedule() returns, to
+         * use it instead. Return null to build the list as usual.
+         *
+         * @param array|null  $days       Null.
+         * @param Appointment $meeting    The meeting.
+         * @param int         $staff_id   Requested host, 0 when none was sent.
+         * @param string      $start_date Y-m-d.
+         * @param string      $end_date   Y-m-d.
+         * @param string      $timezone   Visitor timezone.
+         */
+        $days = apply_filters( 'timetics_booking_entries_pre_days', null, $meeting, $staff_id, $start_date, $end_date, $timezone );
+
+        if ( ! is_array( $days ) ) {
+            $days = $meeting->prepare_schedule( $start_date, $end_date, $staff_id, $timezone );
+            $days = apply_filters( 'timetics_schedule_data_for_selected_date', $days, $staff_id, $meeting_id, $timezone );
+        }
 
         $data = [
             'today'                 => gmdate( 'Y-m-d' ),
@@ -862,10 +963,49 @@ class Api_Booking extends Api {
     public function save_bookings( $request, $id = 0 ) {
         $data = json_decode( $request->get_body(), true );
 
+        if ( ! is_array( $data ) ) {
+            return new WP_Error( 'invalid_booking_data', __( 'Invalid booking data.', 'timetics' ), array( 'status' => 400 ) );
+        }
+
         if( isset( $data['type'] ) &&  'timetics-event' == $data['type'] ) {
             $this->type = $data['type'];
            return apply_filters('timetics_booking_event', $data, $id );
         }else {
+            // Checked before the filter too: a listener may lock a host for this
+            // request, and a request missing these fails anyway.
+            $validate = $this->validate( $data, self::REQUIRED_FIELDS );
+
+            if ( is_wp_error( $validate ) ) {
+                return new WP_HTTP_Response(
+                    array(
+                        'status_code' => 403,
+                        'success'     => 0,
+                        'message'     => $validate->get_error_messages(),
+                    ),
+                    403
+                );
+            }
+
+            /**
+             * Filters a booking request before any check reads it.
+             *
+             * Runs before validation, so a listener may change `staff` and the
+             * checks then test that host. The request data is unvalidated input.
+             * Return a WP_Error to stop the booking.
+             *
+             * @param array $data Decoded request body.
+             * @param int   $id   Booking ID, 0 for a new booking.
+             */
+            $data = apply_filters( 'timetics_booking_appointment_data', $data, $id );
+
+            if ( is_wp_error( $data ) ) {
+                return $data;
+            }
+
+            if ( ! is_array( $data ) ) {
+                return new WP_Error( 'invalid_booking_data', __( 'Invalid booking data.', 'timetics' ), array( 'status' => 400 ) );
+            }
+
             return  $this->booking_appointment($data, $id);
         }
     }
@@ -976,14 +1116,7 @@ class Api_Booking extends Api {
             $email = $email_validation;
         }
 
-        $required_fields = [
-            'first_name',
-            'email',
-            'appointment',
-            'start_date',
-            'start_time',
-            'end_time',
-        ];
+        $required_fields = self::REQUIRED_FIELDS;
 
         // Payment method is only chosen once, at booking creation. Later
         // updates (status change, reschedule, staff swap, ...) shouldn't have
@@ -1011,6 +1144,11 @@ class Api_Booking extends Api {
         $booking            = new Booking( $id );
         $booking_entry      = new Booking_Entry();
 
+        // Refuse before any write: a repeated cancel must not touch the slot entry.
+        if ( $id && 'cancel' === $booking->get_status() && 'cancel' === $status ) {
+            return new WP_Error( 'booking_cancel_error', __( 'This booking is already canceled', 'timetics' ), array( 'status' => 409 ) );
+        }
+
         // Validate booking
 
          $validation =  $this->validate_booking( $appointment, $data );
@@ -1018,16 +1156,44 @@ class Api_Booking extends Api {
             return $validation;
          }
 
+        $whatsapp = Whatsapp_Consent::prepare( $data, $booking, $meeting->get_phone_field_mode() );
+        if ( is_wp_error( $whatsapp ) ) {
+            return $whatsapp;
+        }
+        $was_opted_in = $booking->get_whatsapp_opt_in();
+        $opted_in = 1 === $whatsapp['whatsapp_opt_in'];
+        $whatsapp_opt_in_at = $id ? (string) get_post_meta( $id, '_tt_booking_whatsapp_opt_in_at', true ) : '';
+        $whatsapp_opt_in_source = $id ? (string) get_post_meta( $id, '_tt_booking_whatsapp_opt_in_source', true ) : '';
+        $whatsapp_opt_out_at = $id ? (string) get_post_meta( $id, '_tt_booking_whatsapp_opt_out_at', true ) : '';
+        if ( $opted_in && ! $was_opted_in ) {
+            $whatsapp_opt_in_at = current_time( 'mysql', true );
+            $whatsapp_opt_in_source = $is_privileged ? 'admin' : 'booking_form';
+        } elseif ( ! $opted_in && $was_opted_in ) {
+            $whatsapp_opt_out_at = current_time( 'mysql', true );
+        }
+
+        $phone_required = 'attendee-call' === $location_type || ( apply_filters( 'timetics_whatsapp_enabled', false ) && 'required' === $meeting->get_phone_field_mode() );
+        $submitted_phone = isset( $data['phone'] ) ? trim( (string) $data['phone'] ) : '';
+        // Updates skip an empty phone: the edit form can't change it, and old bookings may have none.
+        if ( ( ! $id || '' !== $submitted_phone ) && ( $phone_required || ( apply_filters( 'timetics_whatsapp_enabled', false ) && '' !== $submitted_phone ) ) && '' === Whatsapp_Consent::normalize_phone( $submitted_phone ) ) {
+            return new WP_Error( 'invalid_booking_phone', __( 'Enter a valid phone number.', 'timetics' ), [ 'status' => 422 ] );
+        }
 
 
-        if ( 'created' === $action && ! $this->is_available_slot( $meeting, [
+
+        $slot = array(
             'staff_id'   => $staff->get_id(),
             'start_date' => $start_date,
             'start_time' => $start_time,
             'timezone'   => $timezone,
-        ] ) ) {
+        );
+
+        // Checked before the old slot is released below, so a refused move keeps it.
+        $takes_new_slot = 'created' === $action || $this->is_moving_slot( $booking, $meeting, $slot, $status );
+
+        if ( $takes_new_slot && ! $this->is_available_slot( $meeting, $slot ) ) {
             /* translators: %s: Time slot */
-            return new WP_Error( 'time_slot_error', sprintf( __( '%s time slot is not available', 'timetics' ), $start_time ) );
+            return new WP_Error( 'time_slot_error', sprintf( __( '%s time slot is not available', 'timetics' ), $start_time ), array( 'status' => 409 ) );
         }
 
         if ( $meeting->is_recurring() ) {
@@ -1054,8 +1220,9 @@ class Api_Booking extends Api {
         );
 
         // Update booking schedule. Release the slot the booking currently holds;
-        // the new one is taken further below.
-        if ( $id ) {
+        // the new one is taken further below. A cancelled or failed booking holds
+        // none, and the entry at its old time may be another customer's.
+        if ( $id && $booking->holds_slot() ) {
             // Entries are stored in the meeting's timezone, so the booking's own
             // date/time has to be converted before the lookup. Without this the
             // entry is missed whenever the two timezones differ and it stays
@@ -1087,10 +1254,9 @@ class Api_Booking extends Api {
                     $entry->update( $this->normalize_schedule_update( $booked_data, $booked ) );
                 }
             }
-        }
 
-        if ( $id && $booking->get_status() == 'cancel' && $status == 'cancel' ) {
-            return new WP_Error( 'booking_cancel_error', __( 'This booking alreay canceled', 'timetics' ) );
+            // Cleared again below when the update takes a place, so only a cancel keeps it.
+            $booking->mark_slot_released();
         }
 
         $booking_props = [
@@ -1102,6 +1268,11 @@ class Api_Booking extends Api {
             'customer_lname'      => $customer->get_last_name(),
             'customer_email'      => $customer->get_email(),
             'customer_phone'      => $customer->get_phone(),
+            'whatsapp_number'    => $whatsapp['whatsapp_number'],
+            'whatsapp_opt_in'    => $whatsapp['whatsapp_opt_in'],
+            'whatsapp_opt_in_at' => $whatsapp_opt_in_at,
+            'whatsapp_opt_in_source' => $whatsapp_opt_in_source,
+            'whatsapp_opt_out_at' => $whatsapp_opt_out_at,
             'staff_fname'         => $staff->get_first_name(),
             'staff_lname'         => $staff->get_last_name(),
             'staff_email'         => $staff->get_email(),
@@ -1292,6 +1463,9 @@ class Api_Booking extends Api {
                 $book_entry_data = apply_filters( 'timetics_booking_schedule', $book_entry_data, $data );
                 $booking_entry->create( $book_entry_data );
             }
+
+            // A failed booking that was rescheduled holds a place again.
+            $booking->mark_slot_held();
         }
 
         // For newly created bookings, create the calendar event now that the
@@ -1397,6 +1571,8 @@ class Api_Booking extends Api {
             // a viewer browsing many bookings at once has no legitimate need for every
             // one's bearer token; single-booking reads (create/get/update) keep it.
             'security_token'  => $expose_token ? $booking->get_security_token() : '',
+            'whatsapp_number' => $booking->get_whatsapp_number(),
+            'whatsapp_opt_in' => $booking->get_whatsapp_opt_in(),
             'payment_method'  => $booking->get_payment_method(),
             'payment_status'  => $booking->get_payment_status(),
             'payment_details' => $payment_details,
@@ -1485,8 +1661,12 @@ class Api_Booking extends Api {
          */
         do_action( 'timetics_before_booking_delete', $booking->get_id(), $booking->get_customer_id(), $meeting->get_id(), [] );
 
+        $cancel_hook_data = Notification::get_hook_data( $booking );
         $booking->delete_event();
-        $booking->delete();
+        $deleted = $booking->delete();
+        if ( ! $deleted ) {
+            return false;
+        }
 
         $is_email_to_customer = timetics_get_option( 'booking_canceled_customer');
         $is_email_to_host     = timetics_get_option( 'booking_canceled_host');
@@ -1502,7 +1682,7 @@ class Api_Booking extends Api {
             $customer_cancel_event_email->send();
         }
 
-        do_action( 'timetics_gln_hook', 'booking_canceled', Notification::get_hook_data( $booking ) );
+        do_action( 'timetics_gln_hook', 'booking_canceled', $cancel_hook_data );
 
 
 
@@ -1550,6 +1730,40 @@ class Api_Booking extends Api {
          * @param array       $booking_data
          */
         return (bool) apply_filters( 'timetics_is_slot_available', true, $meeting, $booking_data );
+    }
+
+    /**
+     * Whether an update takes a slot the booking does not hold yet.
+     *
+     * The booking's own entry counts as booked, so checking an unchanged slot
+     * would refuse every edit of a full one-to-one booking. A cancelled or failed
+     * booking gave its place back, so it needs one again even at the same time.
+     *
+     * @param   Booking      $booking  Booking as stored, before this update.
+     * @param   Appointment  $meeting  Meeting the update books.
+     * @param   array        $slot     Requested staff_id, start_date, start_time, timezone.
+     * @param   string       $status   Status the update will save.
+     *
+     * @return  bool
+     */
+    private function is_moving_slot( $booking, $meeting, $slot, $status ) {
+        if ( 'cancel' === $status ) {
+            return false;
+        }
+
+        if (
+            ! $booking->holds_slot()
+            || (int) $booking->get_appointment() !== (int) $meeting->get_id()
+            || (int) $booking->get_staff_id() !== (int) $slot['staff_id']
+        ) {
+            return true;
+        }
+
+        // Compare in the meeting's timezone: the customer may resend the same time in another zone.
+        $old = timetics_convert_timezone( $booking->get_start_date() . ' ' . $booking->get_start_time(), $booking->get_timezone(), $meeting->get_timezone() );
+        $new = timetics_convert_timezone( $slot['start_date'] . ' ' . $slot['start_time'], $slot['timezone'], $meeting->get_timezone() );
+
+        return $old->format( 'Y-m-d H:i' ) !== $new->format( 'Y-m-d H:i' );
     }
 
     /**

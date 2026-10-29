@@ -409,6 +409,7 @@ final class Bootstrap {
         wp_set_script_translations( 'timetics-dashboard-scripts', 'timetics', TIMETICS_PLUGIN_DIR . 'languages/' );
 
         $localize_obj = array(
+            'assets_url'          => TIMETICS_ASSETS_URL,
             'site_url'            => site_url(),
             'admin_url'           => admin_url(),
             'nonce'               => wp_create_nonce( 'wp_rest' ),
@@ -429,6 +430,7 @@ final class Bootstrap {
             'aisentic'            => $this->get_aisentic_state(),
             'theme_mode'          => Core\Admin\Theme_Mode::get_for_localize(),
             'dark_mode_enabled'   => Core\Admin\Theme_Mode::is_enabled(),
+            'phone_default_country' => timetics_phone_default_country(),
 		);
 
         $localize_obj = apply_filters( 'timetics_admin_localize_data', $localize_obj );
@@ -522,7 +524,8 @@ final class Bootstrap {
             'current_user_id'     => get_current_user_id(),
             'start_of_week'       => get_option( 'start_of_week', 0 ),
             'currency_list'       => timetics_get_currencies(),
-            'locale_name'        => strtolower( str_replace( '_', '-', get_locale() ) )
+            'locale_name'        => strtolower( str_replace( '_', '-', get_locale() ) ),
+            'phone_default_country' => timetics_phone_default_country(),
 
         );
 

@@ -73,7 +73,7 @@ class TemplatesAPI extends WP_REST_Controller {
                     'permission_callback' => [ $this, 'get_items_permissions_check' ],
                     'args'                => [
                         'refresh' => [
-                            'description' => __( 'Bypass cache and fetch a fresh list from Meta.', 'wp-cafe' ),
+                            'description' => __( 'Bypass cache and fetch a fresh list from Meta.', Helpers::get_config_data( $this->identifier, 'text_domain' ) ),
                             'type'        => 'boolean',
                             'default'     => false,
                         ],
@@ -126,7 +126,7 @@ class TemplatesAPI extends WP_REST_Controller {
             return rest_ensure_response( [
                 'success'     => 0,
                 'status_code' => 400,
-                'message'     => __( 'WhatsApp credentials missing. Set Access Token and WhatsApp Business Account ID in integration settings.', 'wp-cafe' ),
+                'message'     => __( 'WhatsApp credentials missing. Set Access Token and WhatsApp Business Account ID in integration settings.', Helpers::get_config_data( $this->identifier, 'text_domain' ) ),
                 'data'        => [
                     'items'           => [],
                     'missing_fields'  => array_values( array_filter( [
@@ -144,7 +144,7 @@ class TemplatesAPI extends WP_REST_Controller {
                 return rest_ensure_response( [
                     'success'     => 1,
                     'status_code' => 200,
-                    'message'     => __( 'Templates loaded from cache.', 'wp-cafe' ),
+                    'message'     => __( 'Templates loaded from cache.', Helpers::get_config_data( $this->identifier, 'text_domain' ) ),
                     'data'        => [ 'items' => $cached, 'cached' => true ],
                 ] );
             }
@@ -180,7 +180,7 @@ class TemplatesAPI extends WP_REST_Controller {
         $json = json_decode( $body, true );
 
         if ( $code >= 400 ) {
-            $meta_error = isset( $json['error']['message'] ) ? $json['error']['message'] : __( 'Unknown error from Meta API.', 'wp-cafe' );
+            $meta_error = isset( $json['error']['message'] ) ? $json['error']['message'] : __( 'Unknown error from Meta API.', Helpers::get_config_data( $this->identifier, 'text_domain' ) );
             return rest_ensure_response( [
                 'success'     => 0,
                 'status_code' => $code,
@@ -197,7 +197,7 @@ class TemplatesAPI extends WP_REST_Controller {
         return rest_ensure_response( [
             'success'     => 1,
             'status_code' => 200,
-            'message'     => __( 'Templates loaded.', 'wp-cafe' ),
+            'message'     => __( 'Templates loaded.', Helpers::get_config_data( $this->identifier, 'text_domain' ) ),
             'data'        => [ 'items' => $parsed, 'cached' => false ],
         ] );
     }

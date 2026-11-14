@@ -173,12 +173,8 @@ class Notification_Flow_Guard {
 
     /**
      * Move every pending delayed flow of a booking to match its new meeting
-     * time, refreshing the frozen payload at the same time.
-     *
-     * The offset between the original meeting timestamp and the original resume
-     * time is preserved, so a "24 hours before" reminder stays 24 hours before
-     * the new date. A resume that would land in the past is dropped rather than
-     * fired immediately.
+     * time, refreshing the frozen payload. A "24 hours before" reminder stays
+     * 24 hours before the new date; one that would land in the past is dropped.
      *
      * @param  int   $booking_id
      * @param  array $fresh_hook_data New payload from Notification::get_hook_data().
@@ -189,52 +185,125 @@ class Notification_Flow_Guard {
             return 0;
         }
 
-        $new_meeting_ts = (int) $fresh_hook_data['meeting_date_timestamp'];
-        $moved          = 0;
+        $moved = 0;
 
         foreach ( self::find_pending_flows( $booking_id ) as $pending ) {
-            $checkpoint = $pending['checkpoint'];
-            $old_hook   = $checkpoint['hook_data'];
-            $old_meet   = isset( $old_hook['meeting_date_timestamp'] ) ? (int) $old_hook['meeting_date_timestamp'] : 0;
-
             // Always drop the stale event + checkpoint first.
             self::unschedule( $pending['args'] );
             delete_transient( self::checkpoint_key( $pending['flow_id'], $pending['resume_time'] ) );
 
-            if ( ! $old_meet ) {
-                continue;
+            if ( self::queue_for_meeting( $pending, $fresh_hook_data ) ) {
+                $moved++;
             }
-
-            $offset          = (int) $pending['resume_time'] - $old_meet;
-            $new_resume_time = $new_meeting_ts + $offset;
-
-            if ( $new_resume_time <= time() ) {
-                continue;
-            }
-
-            $new_flow_id = uniqid( 'flow_', true );
-
-            $checkpoint['hook_data']    = array_merge( $old_hook, $fresh_hook_data );
-            $checkpoint['resume_after'] = $new_resume_time;
-            $checkpoint['_flow_id']     = $new_flow_id;
-            $checkpoint['_resume_time'] = $new_resume_time;
-            $checkpoint['_saved_at']    = time();
-
-            self::save_checkpoint( $new_flow_id, $new_resume_time, $checkpoint );
-
-            wp_schedule_single_event(
-                $new_resume_time,
-                self::RESUME_HOOK,
-                array(
-                    'flow_id'     => $new_flow_id,
-                    'resume_time' => $new_resume_time,
-                )
-            );
-
-            $moved++;
         }
 
         return $moved;
+    }
+
+    /**
+     * Give another booking a copy of a booking's queued meeting reminders, at the
+     * same distance from its own meeting. Each session of a recurring series gets
+     * its reminders this way. Steps timed from the booking itself are not copied.
+     *
+     * @param  int   $from_id   Booking whose pending flows are copied.
+     * @param  array $hook_data Payload of the booking that gets the copies.
+     * @return int   Number of copies queued.
+     */
+    public static function copy_pending_flows( $from_id, $hook_data ) {
+        if ( empty( $hook_data['meeting_date_timestamp'] ) || empty( $hook_data['post_id'] ) ) {
+            return 0;
+        }
+
+        $has = array_map(
+            function ( $own ) {
+                return self::step_key( $own['checkpoint'] );
+            },
+            self::find_pending_flows( $hook_data['post_id'] )
+        );
+
+        $copied = 0;
+
+        foreach ( self::find_pending_flows( $from_id ) as $pending ) {
+            if ( ! self::waits_for_meeting( $pending['checkpoint'] ) || in_array( self::step_key( $pending['checkpoint'] ), $has, true ) ) {
+                continue;
+            }
+
+            if ( self::queue_for_meeting( $pending, $hook_data ) ) {
+                $has[] = self::step_key( $pending['checkpoint'] );
+                $copied++;
+            }
+        }
+
+        return $copied;
+    }
+
+    /**
+     * Queue a pending flow again for the meeting in $hook_data, keeping its offset.
+     *
+     * @param  array $pending   One entry from find_pending_flows().
+     * @param  array $hook_data Payload with the meeting to time it from.
+     * @return bool  False when there is no offset to keep or the new time has passed.
+     */
+    private static function queue_for_meeting( $pending, $hook_data ) {
+        $checkpoint = $pending['checkpoint'];
+        $old_hook   = $checkpoint['hook_data'];
+        $old_meet   = isset( $old_hook['meeting_date_timestamp'] ) ? (int) $old_hook['meeting_date_timestamp'] : 0;
+
+        if ( ! $old_meet ) {
+            return false;
+        }
+
+        $resume_time = (int) $hook_data['meeting_date_timestamp'] + ( (int) $pending['resume_time'] - $old_meet );
+
+        if ( $resume_time <= time() ) {
+            return false;
+        }
+
+        $flow_id = uniqid( 'flow_', true );
+
+        $checkpoint['hook_data']    = array_merge( $old_hook, $hook_data );
+        $checkpoint['resume_after'] = $resume_time;
+        $checkpoint['_flow_id']     = $flow_id;
+        $checkpoint['_resume_time'] = $resume_time;
+        $checkpoint['_saved_at']    = time();
+
+        self::save_checkpoint( $flow_id, $resume_time, $checkpoint );
+
+        wp_schedule_single_event(
+            $resume_time,
+            self::RESUME_HOOK,
+            array(
+                'flow_id'     => $flow_id,
+                'resume_time' => $resume_time,
+            )
+        );
+
+        return true;
+    }
+
+    /**
+     * Whether the delay before this step counts from the meeting, like "1 day before".
+     *
+     * @param  array $checkpoint
+     * @return bool
+     */
+    private static function waits_for_meeting( $checkpoint ) {
+        $flow = isset( $checkpoint['flow_snapshot'] ) ? (array) $checkpoint['flow_snapshot'] : array();
+        $edge = wp_list_filter( isset( $flow['edges'] ) ? (array) $flow['edges'] : array(), array( 'target' => $checkpoint['resume_node'] ?? '' ) );
+        $from = $edge ? array_values( $edge )[0]['source'] : '';
+        $node = wp_list_filter( isset( $flow['nodes'] ) ? (array) $flow['nodes'] : array(), array( 'id' => $from ) );
+
+        return $node && false !== strpos( (string) ( array_values( $node )[0]['data']['delayCondition'] ?? '' ), 'meeting' );
+    }
+
+    /**
+     * Same flow, same step: the SDK gives every queued copy a new id, so compare the content.
+     *
+     * @param  array $checkpoint
+     * @return string
+     */
+    private static function step_key( $checkpoint ) {
+        return md5( wp_json_encode( array( $checkpoint['flow_snapshot'] ?? null, $checkpoint['resume_node'] ?? null ) ) );
     }
 
     /**

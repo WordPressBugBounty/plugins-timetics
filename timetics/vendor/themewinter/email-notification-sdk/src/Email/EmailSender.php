@@ -18,6 +18,8 @@ class EmailSender {
     protected $action_data;
     protected $from;
     protected $identifier;
+    protected $action_name;
+    protected $receiver_type;
 
     /**
      * EmailSender constructor.
@@ -37,7 +39,9 @@ class EmailSender {
      * @param array $args
      */
     public function __construct( $identifier, $action_name, $receiverType, $to, $from, $subject, $message, $action_data, $count ) {
-        $this->identifier  = $identifier;
+        $this->identifier    = $identifier;
+        $this->action_name   = $action_name;
+        $this->receiver_type = $receiverType;
         $this->to          = $to;
         $this->from        = $from;
         $this->subject     = $this->replace_placeholders( $subject, $action_data );
@@ -62,7 +66,8 @@ class EmailSender {
         $headers = $this->get_headers();
 
         $this->message = apply_filters( Helpers::get_hook_name( $this->identifier, 'notification_sdk_email_header' ), $this->message );
-        $this->message = apply_filters( Helpers::get_hook_name( $this->identifier, 'notification_sdk_email_body' ), $this->message );
+        // The subject and event let a wrapper show a title and status; old one-arg callbacks still work.
+        $this->message = apply_filters( Helpers::get_hook_name( $this->identifier, 'notification_sdk_email_body' ), $this->message, $this->subject, $this->action_name, $this->receiver_type, $this->action_data );
         $this->message = apply_filters( Helpers::get_hook_name( $this->identifier, 'notification_sdk_email_footer' ), $this->message );
         
         wp_mail( $this->to, $this->subject, $this->message, $headers );

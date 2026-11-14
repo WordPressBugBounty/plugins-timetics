@@ -98,7 +98,7 @@ class Customer {
      * @return string
      */
     public function get_display_name() {
-        return $this->get_first_name() . ' ' . $this->get_last_name();
+        return trim( $this->get_first_name() . ' ' . $this->get_last_name() );
     }
 
     /**
@@ -362,7 +362,16 @@ class Customer {
         if ( email_exists( $args['email'] ) ) {
             $user = get_user_by( 'email', $args['email'] );
 
-            if ( $user && ! in_array( 'timetics-customer', $user->roles, true ) ) {
+            // The booking form is public: anyone can type any email. Only the
+            // owner or an admin may change that account, so a guest booking
+            // just links to it and leaves it alone.
+            if ( get_current_user_id() !== $user->ID && ! current_user_can( 'manage_timetics' ) ) {
+                $this->set_id( $user->ID );
+
+                return $user->ID;
+            }
+
+            if ( ! in_array( 'timetics-customer', $user->roles, true ) ) {
                 $user->add_role( 'timetics-customer' );
                 $this->set_id( $user->ID );
 

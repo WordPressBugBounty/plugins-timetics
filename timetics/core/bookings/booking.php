@@ -77,6 +77,9 @@ class Booking {
         'payment_status'        => '',
         'payment_details'       => '',
         'order_total'           => '',
+        'order_subtotal'        => '',
+        'coupon_code'           => '',
+        'coupon_discount'       => '',
         'start_date'            => '',
         'end_date'              => '',
         'start_time'            => '',
@@ -425,6 +428,33 @@ class Booking {
     }
 
     /**
+     * Price before any coupon. Empty on bookings made before coupons existed.
+     *
+     * @return  float|string
+     */
+    public function get_order_subtotal() {
+        return $this->get_prop( 'order_subtotal' );
+    }
+
+    /**
+     * Coupon code applied when the booking was made
+     *
+     * @return  string
+     */
+    public function get_coupon_code() {
+        return (string) $this->get_prop( 'coupon_code' );
+    }
+
+    /**
+     * Amount the coupon took off
+     *
+     * @return  float|string
+     */
+    public function get_coupon_discount() {
+        return $this->get_prop( 'coupon_discount' );
+    }
+
+    /**
      * Get start date
      *
      * @return  string
@@ -514,6 +544,56 @@ class Booking {
     }
 
     /**
+     * Where this booking sits in its recurring series, so the admin list and the emails agree
+     * on "Session 2 of 4". Sessions are saved in date order; deleted ones are skipped.
+     *
+     * @return  array|null  position, size and every session, or null outside a series.
+     */
+    public function get_series_place() {
+        $first = $this->get_parent() ? new Booking( $this->get_parent() ) : $this;
+        $ids   = array_map( 'intval', array_merge( [ $first->get_id() ], (array) $first->get_recurrence() ) );
+
+        // Booking lists call this per row; load every session's post and meta in two queries.
+        _prime_post_caches( $ids, false, true );
+
+        $ids   = array_values(
+            array_filter(
+                $ids,
+                function ( $id ) {
+                    return $id && get_post( $id );
+                }
+            )
+        );
+
+        $position = array_search( (int) $this->get_id(), $ids, true );
+
+        if ( count( $ids ) < 2 || false === $position ) {
+            return null;
+        }
+
+        $meeting_timezone = ( new Appointment( $first->get_appointment() ) )->get_timezone();
+        $sessions         = array();
+        foreach ( $ids as $i => $id ) {
+            $session = $id === (int) $this->get_id() ? $this : new Booking( $id );
+            // Shown in the meeting's timezone, like the booking's own date and time.
+            $start      = timetics_convert_timezone( $session->get_start_date() . ' ' . $session->get_start_time(), $session->get_timezone(), $meeting_timezone );
+            $sessions[] = [
+                'id'         => $id,
+                'n'          => $i + 1,
+                'date'       => $start->format( 'Y-m-d' ),
+                'start_time' => $start->format( 'h:i a' ),
+                'status'     => $session->get_status(),
+            ];
+        }
+
+        return [
+            'position' => $position + 1,
+            'size'     => count( $ids ),
+            'sessions' => $sessions,
+        ];
+    }
+
+    /**
      * Get booking cancel reason
      *
      * @return  integer
@@ -600,7 +680,10 @@ class Booking {
             // Prepare meta key.
             $meta_key = $this->meta_prefix . $key;
 
-            if ( ! $value && ! in_array( $key, [ 'whatsapp_number', 'whatsapp_opt_in' ], true ) ) {
+            // A real 0 price (free, or a 100% coupon) is kept; only an empty value falls back.
+            $is_zero_money = in_array( $key, array( 'order_total', 'order_subtotal', 'coupon_discount' ), true ) && ( 0 === $value || 0.0 === $value );
+
+            if ( ! $value && ! $is_zero_money && ! in_array( $key, array( 'whatsapp_number', 'whatsapp_opt_in' ), true ) ) {
                 $value = $this->get_prop( $key );
             }
 
@@ -741,6 +824,23 @@ class Booking {
      * @return  bool  True when the slot is held, false when it is no longer free.
      */
     public function reserve_slot() {
+        return true === Booking_Lock::run(
+            function () {
+                return $this->take_slot_back();
+            }
+        );
+    }
+
+    /**
+     * Take the released slot back.
+     *
+     * Does not take the booking lock itself. reserve_slot() does; call this
+     * directly only from code that already holds the lock, for example to change
+     * the booking's status in the same locked step.
+     *
+     * @return  bool  True when the slot is held, false when it is no longer free.
+     */
+    public function take_slot_back() {
         if ( ! $this->is_booking() ) {
             return false;
         }
@@ -755,6 +855,14 @@ class Booking {
         $seats   = ! empty( $this->get_seat() ) ? (array) $this->get_seat() : [];
         $taking  = max( 1, count( $seats ) );
 
+        // Entries are stored in the meeting's timezone, the booking's in the customer's.
+        $start = timetics_convert_timezone( $this->get_start_date() . ' ' . $this->get_start_time(), $this->get_timezone(), $meeting->get_timezone() );
+
+        // The staff member took another session while this booking was in the failed state.
+        if ( $meeting->is_staff_busy( $start->format( 'Y-m-d' ), $start->format( 'h:i a' ), $this->get_staff_id() ) ) {
+            return false;
+        }
+
         if ( $entry ) {
             $booked = intval( $entry->get_booked() ) + $taking;
 
@@ -765,6 +873,11 @@ class Booking {
 
             $existing = ! empty( $entry->get_seats() ) ? (array) $entry->get_seats() : [];
 
+            // A seat is one person's. If another booking holds it now, this one cannot have it back.
+            if ( array_intersect( $existing, $seats ) ) {
+                return false;
+            }
+
             $entry->update(
                 [
                     'booked' => $booked,
@@ -772,9 +885,7 @@ class Booking {
                 ]
             );
         } else {
-            // A one-to-one release deletes the entry outright, so recreate it. Entries
-            // are stored in the meeting's timezone, the booking's in the customer's.
-            $start = timetics_convert_timezone( $this->get_start_date() . ' ' . $this->get_start_time(), $this->get_timezone(), $meeting->get_timezone() );
+            // A one-to-one release deletes the entry outright, so recreate it.
             $end   = timetics_convert_timezone( $this->get_start_date() . ' ' . $this->get_end_time(), $this->get_timezone(), $meeting->get_timezone() );
 
             $booking_entry = new Booking_Entry();
@@ -797,6 +908,19 @@ class Booking {
         $this->mark_slot_held();
 
         return true;
+    }
+
+    /**
+     * The entry that empties when this booking leaves it, or 0.
+     *
+     * A group entry others stay in keeps the staff member busy, so it gives 0.
+     *
+     * @return  integer
+     */
+    public function sole_entry_id() {
+        $entry = $this->holds_slot() ? $this->find_slot_entry() : null;
+
+        return $entry && intval( $entry->get_booked() ) <= 1 ? (int) $entry->get_id() : 0;
     }
 
     /**

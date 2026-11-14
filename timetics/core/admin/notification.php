@@ -114,6 +114,21 @@ class Notification {
                 'type'  => 'string',
             ),
             array(
+                'label' => __( 'All Sessions', 'timetics' ),
+                'value' => 'meeting_sessions',
+                'type'  => 'string',
+            ),
+            array(
+                'label' => __( 'Session Number', 'timetics' ),
+                'value' => 'session_number',
+                'type'  => 'string',
+            ),
+            array(
+                'label' => __( 'Series Size', 'timetics' ),
+                'value' => 'series_size',
+                'type'  => 'string',
+            ),
+            array(
                 'label' => __( 'Meeting Location', 'timetics' ),
                 'value' => 'meeting_location',
                 'type'  => 'string',
@@ -340,6 +355,7 @@ class Notification {
         $formatted = timetics_format_email_datetime( $booking->get_start_date(), $booking->get_start_time() );
 
         $booking_timestamp = self::get_booking_timestamp( $booking );
+        $series            = $booking->get_series_place();
 
         /* Pull the Google Meet link from the stored calendar event so it can be inserted as the {%meeting_meet_link%} tag in automation emails.
         */
@@ -377,6 +393,11 @@ class Notification {
             'meeting_date'           => $formatted['date'],
             'meeting_date_timestamp' => $booking_timestamp,
             'meeting_time'           => $formatted['time'],
+            // A recurring series lists every session here (Timetics Pro).
+            'meeting_sessions'       => esc_html( $formatted['date'] . ', ' . $formatted['time'] ),
+            // "Session 2 of 4"; a normal booking is 1 of 1, so a "session 1" condition still sends.
+            'session_number'         => $series ? $series['position'] : 1,
+            'series_size'            => $series ? $series['size'] : 1,
             'meeting_location'       => $booking->get_location(),
             'meeting_meet_link'      => $meet_link,
             'meeting_duration'       => $meeting->get_duration(),

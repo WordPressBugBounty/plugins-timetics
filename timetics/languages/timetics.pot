@@ -2,14 +2,14 @@
 # This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Timetics - Appointment Booking Calendar & Scheduling System 1.0.66\n"
+"Project-Id-Version: Timetics - Appointment Booking Calendar & Scheduling System 1.0.67\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/timetics\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-26T11:02:19+00:00\n"
+"POT-Creation-Date: 2026-11-10T11:53:44+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: timetics\n"
@@ -220,7 +220,7 @@ msgid "Team Members"
 msgstr ""
 
 #: core/admin/menu.php:79
-#: assets/src/admin/pages/bookings/bookingLists.js:153
+#: assets/src/admin/pages/bookings/bookingLists.js:164
 msgid "Calendar"
 msgstr ""
 
@@ -287,7 +287,7 @@ msgid "Meeting Title"
 msgstr ""
 
 #: core/admin/notification.php:107
-#: core/admin/notification.php:187
+#: core/admin/notification.php:202
 msgid "Meeting Date"
 msgstr ""
 
@@ -296,82 +296,94 @@ msgid "Meeting Time"
 msgstr ""
 
 #: core/admin/notification.php:117
-msgid "Meeting Location"
+msgid "All Sessions"
 msgstr ""
 
 #: core/admin/notification.php:122
-msgid "Google Meet Link"
+msgid "Session Number"
 msgstr ""
 
 #: core/admin/notification.php:127
-msgid "Meeting Duration"
+msgid "Series Size"
 msgstr ""
 
 #: core/admin/notification.php:132
-msgid "Host Name"
+msgid "Meeting Location"
 msgstr ""
 
 #: core/admin/notification.php:137
-#: core/admin/notification.php:174
-msgid "Host Email"
+msgid "Google Meet Link"
 msgstr ""
 
 #: core/admin/notification.php:142
-#: core/admin/notification.php:228
-msgid "Customer Name"
+msgid "Meeting Duration"
 msgstr ""
 
 #: core/admin/notification.php:147
-#: core/admin/notification.php:170
-#: core/admin/notification.php:233
-msgid "Customer Email"
+msgid "Host Name"
 msgstr ""
 
 #: core/admin/notification.php:152
-msgid "Login URL"
+#: core/admin/notification.php:189
+msgid "Host Email"
 msgstr ""
 
 #: core/admin/notification.php:157
-msgid "Login Username"
+#: core/admin/notification.php:243
+msgid "Customer Name"
 msgstr ""
 
 #: core/admin/notification.php:162
+#: core/admin/notification.php:185
+#: core/admin/notification.php:248
+msgid "Customer Email"
+msgstr ""
+
+#: core/admin/notification.php:167
+msgid "Login URL"
+msgstr ""
+
+#: core/admin/notification.php:172
+msgid "Login Username"
+msgstr ""
+
+#: core/admin/notification.php:177
 msgid "Set Password URL"
 msgstr ""
 
-#: core/admin/notification.php:178
+#: core/admin/notification.php:193
 msgid "Custom Email"
 msgstr ""
 
-#: core/admin/notification.php:194
+#: core/admin/notification.php:209
 #: assets/src/admin/pages/settings/Notification.js:55
 msgid "After Booking Confirmation"
 msgstr ""
 
-#: core/admin/notification.php:201
+#: core/admin/notification.php:216
 #: assets/src/admin/pages/settings/Notification.js:79
 msgid "After Booking Cancellation"
 msgstr ""
 
-#: core/admin/notification.php:214
+#: core/admin/notification.php:229
 msgid "After Booking Rescheduled"
 msgstr ""
 
-#: core/admin/notification.php:221
+#: core/admin/notification.php:236
 msgid "Booking Links Requested"
 msgstr ""
 
-#: core/admin/notification.php:238
+#: core/admin/notification.php:253
 #: assets/src/admin/pages/calendar/CalendarSearchActions.js:27
 #: assets/src/admin/pages/overview/UpcommingBookings.js:15
 msgid "Upcoming Bookings"
 msgstr ""
 
-#: core/admin/notification.php:245
+#: core/admin/notification.php:260
 msgid "Request Time"
 msgstr ""
 
-#: core/admin/notification.php:314
+#: core/admin/notification.php:329
 msgid "Powered by Timetics"
 msgstr ""
 
@@ -456,29 +468,29 @@ msgstr ""
 msgid "Successfully duplicated appointment"
 msgstr ""
 
-#: core/appointments/api-appointment.php:882
+#: core/appointments/api-appointment.php:887
 msgid "Select a valid phone field setting."
 msgstr ""
 
-#: core/appointments/api-appointment.php:953
+#: core/appointments/api-appointment.php:958
 msgid "Your timezone is invaid."
 msgstr ""
 
 #. translators: %s: Action performed (created, updated, etc.)
-#: core/appointments/api-appointment.php:1038
+#: core/appointments/api-appointment.php:1043
 #, php-format
 msgid "Successfully %s meeting"
 msgstr ""
 
-#: core/appointments/api-appointment.php:1147
+#: core/appointments/api-appointment.php:1172
 msgid "is not connected to google meet. Please connect to google meet then try again"
 msgstr ""
 
-#: core/appointments/api-appointment.php:1153
+#: core/appointments/api-appointment.php:1178
 msgid "Zoom addon plugin is not active. Please activate the plugin then try again"
 msgstr ""
 
-#: core/appointments/api-appointment.php:1163
+#: core/appointments/api-appointment.php:1188
 msgid "is not connected to zoom. Please connect to zoom then try again"
 msgstr ""
 
@@ -501,7 +513,7 @@ msgstr ""
 
 #: core/appointments/hooks.php:87
 #: assets/src/admin/pages/bookings/TableHeader.js:42
-#: assets/src/admin/pages/meeting/MeetingCard.js:282
+#: assets/src/admin/pages/meeting/MeetingCard.js:278
 #: assets/src/admin/pages/meeting/steps/Integrations.js:168
 #: assets/src/admin/pages/meeting/steps/Integrations.js:208
 #: assets/src/admin/pages/meeting/steps/Integrations.js:246
@@ -620,166 +632,186 @@ msgid "Google"
 msgstr ""
 
 #: core/bookings/api-booking.php:262
-#: core/bookings/api-booking.php:398
-#: core/bookings/api-booking.php:468
-#: core/bookings/api-booking.php:714
-#: core/bookings/api-booking.php:2015
+#: core/bookings/api-booking.php:386
+#: core/bookings/api-booking.php:462
+#: core/bookings/api-booking.php:708
+#: core/bookings/api-booking.php:2254
 #: core/integrations/stripe/api-stripe.php:102
 msgid "Invalid booking id."
 msgstr ""
 
-#: core/bookings/api-booking.php:318
-msgid "Recurring booking limit exit"
-msgstr ""
-
-#: core/bookings/api-booking.php:373
-#: core/bookings/api-booking.php:1979
+#: core/bookings/api-booking.php:361
+#: core/bookings/api-booking.php:2218
 msgid "Booking not found."
 msgstr ""
 
-#: core/bookings/api-booking.php:407
+#: core/bookings/api-booking.php:395
 msgid "Custom Field Booking Restricted "
 msgstr ""
 
-#: core/bookings/api-booking.php:433
+#: core/bookings/api-booking.php:421
 #: assets/src/frontend/pages/bookings/BookingStatus.js:52
 msgid "Something went wrong, Please try again."
 msgstr ""
 
-#: core/bookings/api-booking.php:443
-#: core/bookings/api-booking.php:482
+#: core/bookings/api-booking.php:431
+#: core/bookings/api-booking.php:476
 msgid "Successfully deleted booking"
 msgstr ""
 
-#: core/bookings/api-booking.php:634
+#: core/bookings/api-booking.php:628
 msgid "Your booking timezone is invalid"
 msgstr ""
 
-#: core/bookings/api-booking.php:639
+#: core/bookings/api-booking.php:633
 msgid "Your meeting timezone is invalid. Please update your meeting timezone with proper timezone."
 msgstr ""
 
-#: core/bookings/api-booking.php:687
+#: core/bookings/api-booking.php:681
 msgid "Get all entries"
 msgstr ""
 
-#: core/bookings/api-booking.php:730
+#: core/bookings/api-booking.php:724
 msgid "Booking has already been finalized."
 msgstr ""
 
-#: core/bookings/api-booking.php:754
+#: core/bookings/api-booking.php:748
 msgid "Missing payment intent."
 msgstr ""
 
-#: core/bookings/api-booking.php:767
+#: core/bookings/api-booking.php:761
 msgid "Cannot verify payment with Stripe."
 msgstr ""
 
-#: core/bookings/api-booking.php:797
+#: core/bookings/api-booking.php:791
 msgid "Payment verification failed."
 msgstr ""
 
-#: core/bookings/api-booking.php:811
-#: core/bookings/api-booking.php:855
-#: core/bookings/api-booking.php:2074
+#: core/bookings/api-booking.php:805
+#: core/bookings/api-booking.php:849
+#: core/bookings/api-booking.php:2313
 msgid "Payment intent does not match this booking."
 msgstr ""
 
-#: core/bookings/api-booking.php:866
+#: core/bookings/api-booking.php:860
 msgid "Payment already finalized."
 msgstr ""
 
 #. translators: Action
-#: core/bookings/api-booking.php:949
+#: core/bookings/api-booking.php:943
 #, php-format
 msgid "Payment %s"
 msgstr ""
 
-#: core/bookings/api-booking.php:967
-#: core/bookings/api-booking.php:1006
+#: core/bookings/api-booking.php:961
+#: core/bookings/api-booking.php:1018
 msgid "Invalid booking data."
 msgstr ""
 
-#: core/bookings/api-booking.php:1087
+#: core/bookings/api-booking.php:1030
+msgid "Recurring booking limit exit"
+msgstr ""
+
+#: core/bookings/api-booking.php:1110
 msgid "You can not change the appointment of a booking."
 msgstr ""
 
-#: core/bookings/api-booking.php:1149
+#: core/bookings/api-booking.php:1172
 msgid "This booking is already canceled"
 msgstr ""
 
-#: core/bookings/api-booking.php:1179
+#: core/bookings/api-booking.php:1202
 #: assets/src/admin/pages/bookings/FormField.js:496
-#: assets/src/frontend/pages/bookings/ContactInfo.js:88
+#: assets/src/frontend/pages/bookings/ContactInfo.js:91
 msgid "Enter a valid phone number."
 msgstr ""
 
 #. translators: %s: Time slot
-#: core/bookings/api-booking.php:1196
+#: core/bookings/api-booking.php:1224
 #, php-format
 msgid "%s time slot is not available"
 msgstr ""
 
-#: core/bookings/api-booking.php:1206
+#: core/bookings/api-booking.php:1235
 msgid "Couldn't possible to book. Plese try another time."
 msgstr ""
 
+#: core/bookings/api-booking.php:1254
+msgid "The price changed. Please apply the coupon again."
+msgstr ""
+
+#: core/bookings/api-booking.php:1261
+msgid "Invalid payment method."
+msgstr ""
+
 #. translators: Action
-#: core/bookings/api-booking.php:1521
+#: core/bookings/api-booking.php:1603
 #, php-format
 msgid "Successfully %s booking"
 msgstr ""
 
-#: core/bookings/api-booking.php:1639
+#: core/bookings/api-booking.php:1763
 msgid "You are not allowed to delete this booking."
 msgstr ""
 
-#: core/bookings/api-booking.php:1814
+#: core/bookings/api-booking.php:1941
 msgid "Invalid meeting."
 msgstr ""
 
-#: core/bookings/api-booking.php:1819
+#: core/bookings/api-booking.php:1946
 msgid "Invalid timeslot."
 msgstr ""
 
-#: core/bookings/api-booking.php:1824
+#: core/bookings/api-booking.php:1951
 msgid "Team member not matched"
 msgstr ""
 
-#: core/bookings/api-booking.php:1829
+#: core/bookings/api-booking.php:1956
 msgid "Location type not matched"
 msgstr ""
 
-#: core/bookings/api-booking.php:1987
+#: core/bookings/api-booking.php:2070
+msgid "The booking price could not be worked out."
+msgstr ""
+
+#: core/bookings/api-booking.php:2226
 msgid "Unable to verify booking ownership."
 msgstr ""
 
-#: core/bookings/api-booking.php:1994
+#: core/bookings/api-booking.php:2233
 msgid "You are not allowed to change the email address for this booking."
 msgstr ""
 
-#: core/bookings/api-booking.php:2030
+#: core/bookings/api-booking.php:2269
 msgid "Invalid payment intent id."
 msgstr ""
 
-#: core/bookings/api-booking.php:2044
+#: core/bookings/api-booking.php:2283
 msgid "Booking already bound to another payment intent."
 msgstr ""
 
-#: core/bookings/api-booking.php:2057
+#: core/bookings/api-booking.php:2296
 msgid "Cannot verify payment intent with Stripe."
 msgstr ""
 
-#: core/bookings/api-booking.php:2085
+#: core/bookings/api-booking.php:2324
 msgid "Payment intent is bound to another booking."
 msgstr ""
 
-#: core/bookings/api-booking.php:2100
+#: core/bookings/api-booking.php:2339
 msgid "This time slot is no longer available. Please pick another time."
 msgstr ""
 
-#: core/bookings/api-booking.php:2133
+#: core/bookings/api-booking.php:2372
 msgid "Payment intent bound."
+msgstr ""
+
+#: core/bookings/booking-lock.php:43
+msgid "Another booking is being saved. Please try again."
+msgstr ""
+
+#: core/bookings/booking-lock.php:52
+msgid "Bookings cannot be saved right now. Please try again later or contact us."
 msgstr ""
 
 #: core/bookings/hooks.php:63
@@ -818,7 +850,7 @@ msgid_plural "Completed <span class=\"count\">(%s)</span>"
 msgstr[0] ""
 msgstr[1] ""
 
-#: core/bookings/hooks.php:673
+#: core/bookings/hooks.php:689
 msgid "Automatically cancelled — payment was not completed within the allowed time."
 msgstr ""
 
@@ -829,14 +861,14 @@ msgstr ""
 #. translators: 1: Time, 2: Day, 3: Date, 4: Time zone
 #. translators: 1: Time, 2: Day, 3: Date, 4: Timezone
 #: core/bookings/manage-links-sender.php:131
-#: templates/emails/new-event-customer.php:136
-#: templates/emails/new-event.php:111
+#: templates/emails/new-event-customer.php:137
+#: templates/emails/new-event.php:112
 #, php-format
 msgid "%1$s, %2$s %3$s (%4$s)"
 msgstr ""
 
 #: core/bookings/manage-links-sender.php:141
-#: templates/emails/new-event-customer.php:179
+#: templates/emails/new-event-customer.php:181
 #: assets/src/admin/pages/bookings/RescheduleModal.js:177
 #: assets/src/frontend/pages/bookings/BookingSuccess.js:270
 #: assets/src/frontend/pages/userAccount/TableHeader.js:20
@@ -844,7 +876,7 @@ msgid "Reschedule"
 msgstr ""
 
 #: core/bookings/manage-links-sender.php:142
-#: templates/emails/new-event-customer.php:184
+#: templates/emails/new-event-customer.php:186
 #: assets/src/admin/components/AllDayScheduleModal.js:87
 msgid "Cancel"
 msgstr ""
@@ -991,29 +1023,57 @@ msgstr ""
 msgid "Invalid booking."
 msgstr ""
 
-#: core/integrations/woocommerce/hooks.php:698
+#: core/integrations/woocommerce/hooks.php:715
 msgid "Date"
 msgstr ""
 
-#: core/integrations/woocommerce/hooks.php:699
+#: core/integrations/woocommerce/hooks.php:716
 #: assets/src/admin/pages/calendar/MoreLinks.js:47
 msgid "Time"
 msgstr ""
 
-#: core/integrations/woocommerce/hooks.php:700
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:337
+#: core/integrations/woocommerce/hooks.php:717
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:328
 #: assets/src/admin/pages/meeting/steps/CreateStep.js:402
 #: assets/src/frontend/pages/userAccount/TableHeader.js:62
 msgid "Duration"
 msgstr ""
 
-#: core/integrations/woocommerce/hooks.php:701
-#: assets/src/frontend/pages/bookings/ContactInfo.js:470
+#: core/integrations/woocommerce/hooks.php:718
+#: assets/src/frontend/pages/bookings/ContactInfo.js:489
 msgid "Location"
 msgstr ""
 
-#: core/integrations/woocommerce/hooks.php:702
+#: core/integrations/woocommerce/hooks.php:719
 msgid "Timezone"
+msgstr ""
+
+#. translators: 1: WooCommerce order ID, 2: booking ID
+#: core/integrations/woocommerce/hooks.php:877
+#, php-format
+msgid "Order #%1$d was paid, but booking #%2$d was not approved because the site was saving other bookings at that moment. To try once more, change the order to On hold and then back to Processing ( setting Processing again does nothing, the status has not changed ). Or approve the booking by hand."
+msgstr ""
+
+#. translators: 1: WooCommerce order ID, 2: booking ID
+#: core/integrations/woocommerce/hooks.php:880
+#, php-format
+msgid "Order #%1$d was paid, but booking #%2$d could not get its time back because someone else took it. The booking was not approved. Refund the order, or move the booking to another time."
+msgstr ""
+
+#. translators: 1: WooCommerce order ID, 2: booking ID
+#: core/integrations/woocommerce/hooks.php:883
+#, php-format
+msgid "Booking #%2$d of order #%1$d stays cancelled because the site was saving other bookings at that moment. To try once more, change the order to a different status, for example On hold."
+msgstr ""
+
+#. translators: 1: WooCommerce order ID, 2: booking ID
+#: core/integrations/woocommerce/hooks.php:886
+#, php-format
+msgid "Booking #%2$d of order #%1$d stays cancelled because its time was taken by someone else."
+msgstr ""
+
+#: core/integrations/woocommerce/hooks.php:896
+msgid "A paid booking was not approved"
 msgstr ""
 
 #: core/services/api-service.php:153
@@ -1183,8 +1243,8 @@ msgstr ""
 #: templates/emails/customer-cancel-event.php:57
 #: templates/emails/customer-update-event.php:70
 #: templates/emails/manage-links.php:27
-#: templates/emails/new-event-customer.php:111
-#: templates/emails/new-event.php:86
+#: templates/emails/new-event-customer.php:112
+#: templates/emails/new-event.php:87
 #: templates/emails/staff-booking-reminder.php:67
 #: templates/emails/update-event.php:69
 #, php-format
@@ -1199,15 +1259,15 @@ msgstr ""
 #: templates/emails/cancel-event.php:63
 #: templates/emails/customer-cancel-event.php:64
 #: templates/emails/customer-update-event.php:77
-#: templates/emails/new-event-customer.php:118
-#: templates/emails/new-event.php:93
+#: templates/emails/new-event-customer.php:119
+#: templates/emails/new-event.php:94
 #: templates/emails/update-event.php:76
 msgid "Meeting Name:"
 msgstr ""
 
 #: templates/emails/cancel-event.php:70
 #: templates/emails/customer-booking-reminder.php:83
-#: templates/emails/new-event.php:100
+#: templates/emails/new-event.php:101
 #: templates/emails/staff-booking-reminder.php:82
 #: templates/emails/update-event.php:83
 msgid "Invitee:"
@@ -1217,8 +1277,8 @@ msgstr ""
 #: templates/emails/customer-booking-reminder.php:91
 #: templates/emails/customer-cancel-event.php:79
 #: templates/emails/customer-update-event.php:92
-#: templates/emails/new-event-customer.php:133
-#: templates/emails/new-event.php:108
+#: templates/emails/new-event-customer.php:134
+#: templates/emails/new-event.php:109
 #: templates/emails/staff-booking-reminder.php:90
 #: templates/emails/update-event.php:91
 msgid "Date and time:"
@@ -1243,11 +1303,11 @@ msgstr ""
 #: templates/emails/customer-update-event.php:101
 #: templates/emails/new-event-customer.php:84
 #: templates/emails/new-event-customer.php:96
-#: templates/emails/new-event-customer.php:142
-#: templates/emails/new-event-customer.php:153
+#: templates/emails/new-event-customer.php:143
+#: templates/emails/new-event-customer.php:154
 #: templates/emails/new-event.php:63
 #: templates/emails/new-event.php:73
-#: templates/emails/new-event.php:117
+#: templates/emails/new-event.php:118
 #: templates/emails/staff-booking-reminder.php:54
 #: templates/emails/staff-booking-reminder.php:99
 #: templates/emails/update-event.php:55
@@ -1262,9 +1322,9 @@ msgstr ""
 #: templates/emails/customer-update-event.php:59
 #: templates/emails/customer-update-event.php:105
 #: templates/emails/new-event-customer.php:87
-#: templates/emails/new-event-customer.php:146
+#: templates/emails/new-event-customer.php:147
 #: templates/emails/new-event.php:66
-#: templates/emails/new-event.php:121
+#: templates/emails/new-event.php:122
 #: templates/emails/staff-booking-reminder.php:57
 #: templates/emails/staff-booking-reminder.php:103
 #: templates/emails/update-event.php:58
@@ -1276,8 +1336,8 @@ msgstr ""
 #: templates/emails/customer-booking-reminder.php:112
 #: templates/emails/customer-cancel-event.php:100
 #: templates/emails/customer-update-event.php:112
-#: templates/emails/new-event-customer.php:164
-#: templates/emails/new-event.php:130
+#: templates/emails/new-event-customer.php:166
+#: templates/emails/new-event.php:132
 #: templates/emails/staff-booking-reminder.php:113
 #: templates/emails/update-event.php:111
 msgid "Invitee Time Zone:"
@@ -1287,8 +1347,8 @@ msgstr ""
 #: templates/emails/customer-booking-reminder.php:118
 #: templates/emails/customer-cancel-event.php:107
 #: templates/emails/customer-update-event.php:118
-#: templates/emails/new-event-customer.php:189
-#: templates/emails/new-event.php:137
+#: templates/emails/new-event-customer.php:191
+#: templates/emails/new-event.php:139
 #: templates/emails/new-staff.php:30
 #: templates/emails/staff-booking-reminder.php:119
 #: templates/emails/update-event.php:117
@@ -1320,16 +1380,16 @@ msgstr ""
 msgid "If you did not ask for this email, you can ignore it."
 msgstr ""
 
-#: templates/emails/new-event-customer.php:114
-#: templates/emails/new-event.php:89
+#: templates/emails/new-event-customer.php:115
+#: templates/emails/new-event.php:90
 msgid "A new meeting has been scheduled"
 msgstr ""
 
-#: templates/emails/new-event-customer.php:125
+#: templates/emails/new-event-customer.php:126
 msgid "Organized By:"
 msgstr ""
 
-#: templates/emails/new-event-customer.php:174
+#: templates/emails/new-event-customer.php:176
 msgid "Need to make changes to this meeting?"
 msgstr ""
 
@@ -2048,8 +2108,8 @@ msgstr ""
 #: assets/src/admin/pages/bookings/FormField.js:665
 #: assets/src/admin/pages/meeting/LocationType.js:396
 #: assets/src/frontend/pages/bookings/BookingSuccess.js:231
-#: assets/src/frontend/pages/bookings/ContactInfo.js:679
-#: assets/src/frontend/pages/bookings/SidebarInfo.js:356
+#: assets/src/frontend/pages/bookings/ContactInfo.js:721
+#: assets/src/frontend/pages/bookings/SidebarInfo.js:245
 msgid "Google Meet"
 msgstr ""
 
@@ -2279,6 +2339,7 @@ msgid "free AI credits · no card, no trial"
 msgstr ""
 
 #: assets/src/admin/components/ask-ai/AisenticSetupDialog.js:110
+#: assets/src/admin/pages/bookings/BookingModal.js:208
 #: assets/src/admin/pages/customers/TableHeader.js:24
 #: assets/src/admin/pages/staff/FormField.js:68
 #: assets/src/admin/pages/staff/TableHeader.js:48
@@ -2407,7 +2468,7 @@ msgstr ""
 
 #: assets/src/admin/components/notification/ReminderTime.js:74
 #: assets/src/admin/pages/meeting/notification/ReminderTime.js:91
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:371
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:362
 #: assets/src/admin/pages/meeting/steps/CreateStep.js:432
 msgid "Set custom time"
 msgstr ""
@@ -2465,7 +2526,7 @@ msgstr ""
 #: assets/src/admin/module/onboard/components/Calendar.js:93
 #: assets/src/admin/module/onboard/components/InstallPlugins.js:274
 #: assets/src/admin/module/onboard/components/Profile.js:127
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:455
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:446
 msgid "Next"
 msgstr ""
 
@@ -2823,18 +2884,19 @@ msgstr ""
 msgid "What I can do"
 msgstr ""
 
-#: assets/src/admin/pages/bookings/bookingLists.js:123
+#: assets/src/admin/pages/bookings/bookingLists.js:130
 #: assets/src/frontend/pages/userAccount/UserBookingsList.js:137
 msgid "Are you sure delete this booking?"
 msgstr ""
 
-#: assets/src/admin/pages/bookings/bookingLists.js:124
-#: assets/src/admin/pages/bookings/bookingLists.js:212
-#: assets/src/admin/pages/calendar/EventPopOverTitle.js:44
+#: assets/src/admin/pages/bookings/bookingLists.js:135
+#: assets/src/admin/pages/bookings/bookingLists.js:224
+#: assets/src/admin/pages/bookings/BookingModal.js:78
+#: assets/src/admin/pages/calendar/EventPopOverTitle.js:48
 #: assets/src/admin/pages/customers/CustomerList.js:109
 #: assets/src/admin/pages/customers/CustomerList.js:178
-#: assets/src/admin/pages/meeting/MeetingCard.js:185
-#: assets/src/admin/pages/meeting/MeetingCard.js:205
+#: assets/src/admin/pages/meeting/MeetingCard.js:181
+#: assets/src/admin/pages/meeting/MeetingCard.js:201
 #: assets/src/admin/pages/meeting/MeetingList.js:98
 #: assets/src/admin/pages/staff/staffList.js:102
 #: assets/src/admin/pages/staff/staffList.js:150
@@ -2846,13 +2908,14 @@ msgstr ""
 msgid "Yes"
 msgstr ""
 
-#: assets/src/admin/pages/bookings/bookingLists.js:126
-#: assets/src/admin/pages/bookings/bookingLists.js:214
-#: assets/src/admin/pages/calendar/EventPopOverTitle.js:46
+#: assets/src/admin/pages/bookings/bookingLists.js:137
+#: assets/src/admin/pages/bookings/bookingLists.js:226
+#: assets/src/admin/pages/bookings/BookingModal.js:80
+#: assets/src/admin/pages/calendar/EventPopOverTitle.js:50
 #: assets/src/admin/pages/customers/CustomerList.js:111
 #: assets/src/admin/pages/customers/CustomerList.js:180
-#: assets/src/admin/pages/meeting/MeetingCard.js:187
-#: assets/src/admin/pages/meeting/MeetingCard.js:207
+#: assets/src/admin/pages/meeting/MeetingCard.js:183
+#: assets/src/admin/pages/meeting/MeetingCard.js:203
 #: assets/src/admin/pages/meeting/MeetingList.js:100
 #: assets/src/admin/pages/staff/staffList.js:104
 #: assets/src/admin/pages/staff/staffList.js:152
@@ -2864,7 +2927,7 @@ msgstr ""
 msgid "No"
 msgstr ""
 
-#: assets/src/admin/pages/bookings/bookingLists.js:222
+#: assets/src/admin/pages/bookings/bookingLists.js:234
 #: assets/src/admin/pages/customers/CustomerList.js:188
 #: assets/src/admin/pages/staff/staffList.js:158
 #: assets/src/frontend/pages/userAccount/UserBookingsList.js:239
@@ -2875,114 +2938,18 @@ msgstr ""
 msgid "Meeting, Customer email, Status..."
 msgstr ""
 
-#: assets/src/admin/pages/bookings/BookingModal.js:20
-msgid "meeting name:"
+#: assets/src/admin/pages/bookings/BookingModal.js:16
+#: assets/src/admin/pages/bookings/FormField.js:284
+#: assets/src/admin/pages/calendar/CalendarSearchActions.js:66
+#: assets/src/admin/pages/settings/General.js:244
+msgid "Approved"
 msgstr ""
 
-#: assets/src/admin/pages/bookings/BookingModal.js:28
-msgid "date and time:"
+#: assets/src/admin/pages/bookings/BookingModal.js:17
+msgid "Completed"
 msgstr ""
 
-#: assets/src/admin/pages/bookings/BookingModal.js:48
-msgid "Assigned Member:"
-msgstr ""
-
-#: assets/src/admin/pages/bookings/BookingModal.js:61
-msgid "meeting location:"
-msgstr ""
-
-#: assets/src/admin/pages/bookings/BookingModal.js:78
-msgid "Meeting Link: "
-msgstr ""
-
-#: assets/src/admin/pages/bookings/BookingModal.js:80
-msgid " Join Here "
-msgstr ""
-
-#: assets/src/admin/pages/bookings/BookingModal.js:88
-msgid "selected seats:"
-msgstr ""
-
-#: assets/src/admin/pages/bookings/BookingModal.js:107
-msgid "Meeting created at:"
-msgstr ""
-
-#: assets/src/admin/pages/bookings/BookingModal.js:116
-msgid "time zone:"
-msgstr ""
-
-#: assets/src/admin/pages/bookings/BookingModal.js:129
-msgid "name:"
-msgstr ""
-
-#: assets/src/admin/pages/bookings/BookingModal.js:137
-msgid "email:"
-msgstr ""
-
-#: assets/src/admin/pages/bookings/BookingModal.js:145
-msgid "booking id:"
-msgstr ""
-
-#: assets/src/admin/pages/bookings/BookingModal.js:153
-msgid "Phone:"
-msgstr ""
-
-#: assets/src/admin/pages/bookings/BookingModal.js:161
-msgid "booking status:"
-msgstr ""
-
-#: assets/src/admin/pages/bookings/BookingModal.js:169
-msgid "additional notes:"
-msgstr ""
-
-#: assets/src/admin/pages/bookings/BookingModal.js:177
-msgid "cancellation reason:"
-msgstr ""
-
-#: assets/src/admin/pages/bookings/BookingModal.js:185
-msgid "guest email:"
-msgstr ""
-
-#: assets/src/admin/pages/bookings/BookingModal.js:196
-msgid "payment method:"
-msgstr ""
-
-#: assets/src/admin/pages/bookings/BookingModal.js:207
-msgid "payment status:"
-msgstr ""
-
-#: assets/src/admin/pages/bookings/BookingModal.js:218
-msgid "transaction id:"
-msgstr ""
-
-#: assets/src/admin/pages/bookings/BookingModal.js:226
-msgid "amount:"
-msgstr ""
-
-#: assets/src/admin/pages/bookings/BookingModal.js:242
-msgid "payment time:"
-msgstr ""
-
-#: assets/src/admin/pages/bookings/BookingModal.js:296
-msgid "Booking details:"
-msgstr ""
-
-#: assets/src/admin/pages/bookings/BookingModal.js:319
-msgid "Customer details:"
-msgstr ""
-
-#: assets/src/admin/pages/bookings/BookingModal.js:376
-msgid "Payment details:"
-msgstr ""
-
-#: assets/src/admin/pages/bookings/BookingModal.js:397
-msgid "Invitee list:"
-msgstr ""
-
-#: assets/src/admin/pages/bookings/Create.js:34
-msgid "Back to Calendar "
-msgstr ""
-
+#: assets/src/admin/pages/bookings/BookingModal.js:18
 #: assets/src/admin/pages/bookings/FormField.js:279
 #: assets/src/admin/pages/calendar/CalendarSearchActions.js:70
 #: assets/src/admin/pages/settings/General.js:248
@@ -2990,16 +2957,137 @@ msgstr ""
 msgid "Pending"
 msgstr ""
 
-#: assets/src/admin/pages/bookings/FormField.js:284
-#: assets/src/admin/pages/calendar/CalendarSearchActions.js:66
-#: assets/src/admin/pages/settings/General.js:244
-msgid "Approved"
+#: assets/src/admin/pages/bookings/BookingModal.js:19
+msgid "Rescheduled"
 msgstr ""
 
+#: assets/src/admin/pages/bookings/BookingModal.js:20
 #: assets/src/admin/pages/bookings/FormField.js:290
 #: assets/src/admin/pages/calendar/CalendarSearchActions.js:74
 #: assets/src/admin/pages/settings/General.js:252
 msgid "Canceled"
+msgstr ""
+
+#. translators: %s: number of later sessions
+#: assets/src/admin/pages/bookings/BookingModal.js:70
+#, js-format
+msgid "Cancel this session and %s later session?"
+msgid_plural "Cancel this session and %s later sessions?"
+msgstr[0] ""
+msgstr[1] ""
+
+#: assets/src/admin/pages/bookings/BookingModal.js:108
+#, js-format
+msgid "Organizer will call +%s"
+msgstr ""
+
+#: assets/src/admin/pages/bookings/BookingModal.js:110
+#, js-format
+msgid "Attendee will call +%s"
+msgstr ""
+
+#: assets/src/admin/pages/bookings/BookingModal.js:135
+msgid "Subtotal"
+msgstr ""
+
+#: assets/src/admin/pages/bookings/BookingModal.js:136
+msgid "Coupon"
+msgstr ""
+
+#: assets/src/admin/pages/bookings/BookingModal.js:137
+msgid "Discount"
+msgstr ""
+
+#: assets/src/admin/pages/bookings/BookingModal.js:163
+#, js-format
+msgid "with %s"
+msgstr ""
+
+#: assets/src/admin/pages/bookings/BookingModal.js:172
+msgid "Join meeting"
+msgstr ""
+
+#: assets/src/admin/pages/bookings/BookingModal.js:179
+msgid "Sessions"
+msgstr ""
+
+#: assets/src/admin/pages/bookings/BookingModal.js:196
+msgid "Cancel this and later sessions"
+msgstr ""
+
+#: assets/src/admin/pages/bookings/BookingModal.js:203
+#: assets/src/admin/pages/bookings/TableHeader.js:124
+#: assets/src/admin/pages/calendar/EventPopOverContent.js:157
+msgid "Customer"
+msgstr ""
+
+#: assets/src/admin/pages/bookings/BookingModal.js:206
+#: assets/src/admin/pages/customers/TableHeader.js:19
+#: assets/src/admin/pages/staff/TableHeader.js:43
+#: assets/src/frontend/pages/bookings/ContactInfo.js:447
+msgid "Name"
+msgstr ""
+
+#: assets/src/admin/pages/bookings/BookingModal.js:213
+#: assets/src/admin/pages/customers/TableHeader.js:29
+#: assets/src/admin/pages/staff/FormField.js:89
+#: assets/src/admin/pages/staff/TableHeader.js:53
+#: assets/src/frontend/pages/bookings/ContactInfo.js:540
+#: assets/src/frontend/pages/userAccount/UserProfile.js:143
+msgid "Phone"
+msgstr ""
+
+#: assets/src/admin/pages/bookings/BookingModal.js:214
+msgid "Guests"
+msgstr ""
+
+#: assets/src/admin/pages/bookings/BookingModal.js:215
+msgid "Seats"
+msgstr ""
+
+#: assets/src/admin/pages/bookings/BookingModal.js:216
+msgid "Notes"
+msgstr ""
+
+#: assets/src/admin/pages/bookings/BookingModal.js:218
+msgid "Cancel reason"
+msgstr ""
+
+#: assets/src/admin/pages/bookings/BookingModal.js:225
+#: assets/src/admin/pages/settings/index.js:75
+msgid "Payment"
+msgstr ""
+
+#: assets/src/admin/pages/bookings/BookingModal.js:228
+msgid "Method"
+msgstr ""
+
+#: assets/src/admin/pages/bookings/BookingModal.js:229
+msgid "Amount"
+msgstr ""
+
+#: assets/src/admin/pages/bookings/BookingModal.js:231
+#: assets/src/admin/pages/bookings/FormField.js:646
+#: assets/src/admin/pages/bookings/TableHeader.js:138
+#: assets/src/admin/pages/calendar/EventPopOverContent.js:97
+#: assets/src/frontend/pages/userAccount/TableHeader.js:108
+msgid "Status"
+msgstr ""
+
+#: assets/src/admin/pages/bookings/BookingModal.js:232
+msgid "Transaction ID"
+msgstr ""
+
+#: assets/src/admin/pages/bookings/BookingModal.js:234
+msgid "Paid at"
+msgstr ""
+
+#: assets/src/admin/pages/bookings/BookingModal.js:244
+msgid "Invitee list"
+msgstr ""
+
+#: assets/src/admin/pages/bookings/Create.js:34
+msgid "Back to Calendar "
 msgstr ""
 
 #: assets/src/admin/pages/bookings/FormField.js:301
@@ -3078,7 +3166,7 @@ msgstr ""
 
 #: assets/src/admin/pages/bookings/FormField.js:486
 #: assets/src/admin/pages/meeting/LocationType.js:472
-#: assets/src/frontend/pages/bookings/ContactInfo.js:524
+#: assets/src/frontend/pages/bookings/ContactInfo.js:543
 #: assets/src/frontend/pages/userAccount/UserProfile.js:147
 msgid "Enter your phone number"
 msgstr ""
@@ -3105,13 +3193,6 @@ msgstr ""
 msgid "Time is required"
 msgstr ""
 
-#: assets/src/admin/pages/bookings/FormField.js:646
-#: assets/src/admin/pages/bookings/TableHeader.js:128
-#: assets/src/admin/pages/calendar/EventPopOverContent.js:97
-#: assets/src/frontend/pages/userAccount/TableHeader.js:108
-msgid "Status"
-msgstr ""
-
 #: assets/src/admin/pages/bookings/FormField.js:648
 msgid "Select Booking status"
 msgstr ""
@@ -3119,26 +3200,26 @@ msgstr ""
 #: assets/src/admin/pages/bookings/FormField.js:664
 #: assets/src/admin/pages/meeting/LocationType.js:404
 #: assets/src/admin/pages/settings/Integrations.js:105
-#: assets/src/frontend/pages/bookings/ContactInfo.js:678
+#: assets/src/frontend/pages/bookings/ContactInfo.js:720
 msgid "Zoom"
 msgstr ""
 
 #: assets/src/admin/pages/bookings/FormField.js:666
 #: assets/src/admin/pages/meeting/LocationType.js:433
-#: assets/src/frontend/pages/bookings/ContactInfo.js:680
-#: assets/src/frontend/pages/bookings/SidebarInfo.js:361
+#: assets/src/frontend/pages/bookings/ContactInfo.js:722
+#: assets/src/frontend/pages/bookings/SidebarInfo.js:250
 msgid "Organizer Phone Number"
 msgstr ""
 
 #: assets/src/admin/pages/bookings/FormField.js:667
 #: assets/src/admin/pages/meeting/LocationType.js:413
-#: assets/src/frontend/pages/bookings/ContactInfo.js:681
+#: assets/src/frontend/pages/bookings/ContactInfo.js:723
 msgid "In Person Meeting"
 msgstr ""
 
 #: assets/src/admin/pages/bookings/FormField.js:668
 #: assets/src/admin/pages/meeting/LocationType.js:425
-#: assets/src/frontend/pages/bookings/ContactInfo.js:682
+#: assets/src/frontend/pages/bookings/ContactInfo.js:724
 msgid "Attendee Phone Number"
 msgstr ""
 
@@ -3156,7 +3237,7 @@ msgstr ""
 
 #: assets/src/admin/pages/bookings/TableHeader.js:55
 #: assets/src/admin/pages/meeting/CategoryList.js:184
-#: assets/src/admin/pages/meeting/MeetingCard.js:215
+#: assets/src/admin/pages/meeting/MeetingCard.js:211
 msgid "Delete"
 msgstr ""
 
@@ -3165,12 +3246,13 @@ msgstr ""
 msgid "Booking Date"
 msgstr ""
 
-#: assets/src/admin/pages/bookings/TableHeader.js:114
-#: assets/src/admin/pages/calendar/EventPopOverContent.js:157
-msgid "Customer"
+#. translators: 1: session number, 2: sessions in the series
+#: assets/src/admin/pages/bookings/TableHeader.js:113
+#, js-format
+msgid "Session %1$s of %2$s"
 msgstr ""
 
-#: assets/src/admin/pages/bookings/TableHeader.js:193
+#: assets/src/admin/pages/bookings/TableHeader.js:203
 msgid "Details"
 msgstr ""
 
@@ -3245,7 +3327,7 @@ msgstr ""
 msgid "Assigned to"
 msgstr ""
 
-#: assets/src/admin/pages/calendar/EventPopOverTitle.js:43
+#: assets/src/admin/pages/calendar/EventPopOverTitle.js:44
 msgid "Are you sure to delete this booking?"
 msgstr ""
 
@@ -3274,20 +3356,6 @@ msgstr ""
 #: assets/src/admin/pages/customers/TableHeader.js:12
 #: assets/src/admin/pages/staff/TableHeader.js:38
 msgid "ID"
-msgstr ""
-
-#: assets/src/admin/pages/customers/TableHeader.js:19
-#: assets/src/admin/pages/staff/TableHeader.js:43
-#: assets/src/frontend/pages/bookings/ContactInfo.js:428
-msgid "Name"
-msgstr ""
-
-#: assets/src/admin/pages/customers/TableHeader.js:29
-#: assets/src/admin/pages/staff/FormField.js:89
-#: assets/src/admin/pages/staff/TableHeader.js:53
-#: assets/src/frontend/pages/bookings/ContactInfo.js:521
-#: assets/src/frontend/pages/userAccount/UserProfile.js:143
-msgid "Phone"
 msgstr ""
 
 #: assets/src/admin/pages/customers/TableHeader.js:34
@@ -3374,13 +3442,13 @@ msgstr ""
 msgid "One-to-Many meetings with the option to create seat plans. Best for restaurants, cinema halls, and conferences."
 msgstr ""
 
-#: assets/src/admin/pages/meeting/CustomizeForm.js:86
+#: assets/src/admin/pages/meeting/CustomizeForm.js:78
 #: assets/src/admin/pages/settings/CustomizeForm.js:63
 msgid "Invitee Questions"
 msgstr ""
 
-#: assets/src/admin/pages/meeting/CustomizeForm.js:110
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:261
+#: assets/src/admin/pages/meeting/CustomizeForm.js:102
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:252
 #: assets/src/admin/pages/settings/CustomizeForm.js:87
 msgid "Required"
 msgstr ""
@@ -3402,7 +3470,7 @@ msgstr ""
 msgid "Apply"
 msgstr ""
 
-#: assets/src/admin/pages/meeting/hook/useMeetings.js:406
+#: assets/src/admin/pages/meeting/hook/useMeetings.js:420
 msgid "The meeting could not be saved. Please try again."
 msgstr ""
 
@@ -3456,24 +3524,24 @@ msgstr ""
 msgid "A valid phone number is required!"
 msgstr ""
 
-#: assets/src/admin/pages/meeting/MeetingCard.js:174
+#: assets/src/admin/pages/meeting/MeetingCard.js:170
 msgid "Share"
 msgstr ""
 
-#: assets/src/admin/pages/meeting/MeetingCard.js:184
+#: assets/src/admin/pages/meeting/MeetingCard.js:180
 msgid "Are you sure to duplicate?"
 msgstr ""
 
-#: assets/src/admin/pages/meeting/MeetingCard.js:194
+#: assets/src/admin/pages/meeting/MeetingCard.js:190
 msgid "Clone"
 msgstr ""
 
-#: assets/src/admin/pages/meeting/MeetingCard.js:204
+#: assets/src/admin/pages/meeting/MeetingCard.js:200
 #: assets/src/admin/pages/meeting/MeetingList.js:97
 msgid "Are you sure delete?"
 msgstr ""
 
-#: assets/src/admin/pages/meeting/MeetingCard.js:290
+#: assets/src/admin/pages/meeting/MeetingCard.js:286
 #: assets/src/admin/pages/meeting/UpdateMeeting.js:188
 msgid "Preview"
 msgstr ""
@@ -3503,7 +3571,7 @@ msgid "Your meeting with {BOOKING-TITLE}"
 msgstr ""
 
 #: assets/src/admin/pages/meeting/notification/Notification.js:80
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:451
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:442
 #: assets/src/admin/pages/meeting/steps/CreateStep.js:587
 #: assets/src/admin/pages/meeting/steps/Integrations.js:300
 #: assets/src/admin/pages/meeting/steps/TimeAvailability.js:522
@@ -3529,92 +3597,92 @@ msgstr ""
 msgid "Copy"
 msgstr ""
 
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:217
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:208
 #: assets/src/admin/pages/meeting/steps/CreateStep.js:329
 msgid "default"
 msgstr ""
 
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:226
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:238
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:217
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:229
 #: assets/src/admin/pages/meeting/steps/CreateStep.js:342
 #: assets/src/admin/pages/meeting/steps/CreateStep.js:353
 msgid "Title"
 msgstr ""
 
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:229
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:220
 msgid "Please enter meeting name that will be displayed on the booking page."
 msgstr ""
 
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:233
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:224
 #: assets/src/admin/pages/meeting/steps/CreateStep.js:348
 msgid "Please enter title!"
 msgstr ""
 
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:244
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:235
 msgid "Description"
 msgstr ""
 
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:248
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:239
 msgid "Enter description"
 msgstr ""
 
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:250
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:241
 msgid "Enter meeting description"
 msgstr ""
 
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:256
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:247
 msgid "Booking phone field"
 msgstr ""
 
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:259
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:250
 msgid "Off"
 msgstr ""
 
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:260
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:251
 msgid "Optional"
 msgstr ""
 
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:283
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:274
 msgid "Categorize your meeting"
 msgstr ""
 
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:307
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:298
 msgid "Enter new category"
 msgstr ""
 
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:321
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:312
 msgid "Add Category"
 msgstr ""
 
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:341
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:332
 msgid "Select meeting duration"
 msgstr ""
 
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:345
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:336
 #: assets/src/admin/pages/meeting/steps/CreateStep.js:406
 msgid "Select your meeting duration"
 msgstr ""
 
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:353
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:344
 #: assets/src/admin/pages/meeting/steps/CreateStep.js:414
 msgid "Please select meeting duration!"
 msgstr ""
 
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:372
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:363
 msgid "Set custom meeting duration time in minutes or hours."
 msgstr ""
 
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:387
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:378
 #: assets/src/admin/pages/meeting/steps/CreateStep.js:444
 msgid "Custom meeting duration time is required!"
 msgstr ""
 
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:397
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:388
 #: assets/src/admin/pages/meeting/steps/CreateStep.js:454
 msgid "hr's / min"
 msgstr ""
 
-#: assets/src/admin/pages/meeting/steps/BasicInfo.js:418
+#: assets/src/admin/pages/meeting/steps/BasicInfo.js:409
 #: assets/src/admin/pages/meeting/steps/CreateStep.js:475
 msgid "Please select custom time"
 msgstr ""
@@ -3748,7 +3816,7 @@ msgstr ""
 
 #: assets/src/admin/pages/meeting/steps/TimeAvailability.js:532
 #: assets/src/frontend/paypal/CheckoutForm.js:34
-#: assets/src/frontend/stripe/CheckoutForm.js:215
+#: assets/src/frontend/stripe/CheckoutForm.js:217
 msgid "Back"
 msgstr ""
 
@@ -4085,10 +4153,6 @@ msgstr ""
 
 #: assets/src/admin/pages/settings/index.js:69
 msgid "Notifications"
-msgstr ""
-
-#: assets/src/admin/pages/settings/index.js:75
-msgid "Payment"
 msgstr ""
 
 #: assets/src/admin/pages/settings/integrationForm/GoogleCalendarForm.js:87
@@ -4445,7 +4509,7 @@ msgid "Enter your last name"
 msgstr ""
 
 #: assets/src/admin/pages/staff/FormField.js:74
-#: assets/src/frontend/pages/bookings/ContactInfo.js:449
+#: assets/src/frontend/pages/bookings/ContactInfo.js:468
 msgid "That doesn't look like an email address"
 msgstr ""
 
@@ -4574,6 +4638,14 @@ msgstr ""
 msgid "Change Avatar"
 msgstr ""
 
+#. translators: %s: number of other sessions
+#: assets/src/admin/utils/seriesDeleteNote.js:8
+#, js-format
+msgid "This is the first session of a recurring series. Its other %s session will be deleted too."
+msgid_plural "This is the first session of a recurring series. Its other %s sessions will be deleted too."
+msgstr[0] ""
+msgstr[1] ""
+
 #: assets/src/axios/requestConfig.js:48
 msgid "Could not reach the server. Please check your connection and try again."
 msgstr ""
@@ -4642,6 +4714,10 @@ msgstr ""
 msgid "That time is no longer available, please pick another."
 msgstr ""
 
+#: assets/src/frontend/hooks/useRecurringReview.js:58
+msgid "Could not check the sessions. Please try again."
+msgstr ""
+
 #: assets/src/frontend/pages/bookings/AddCalender.js:53
 msgid "Add to Calendar"
 msgstr ""
@@ -4659,7 +4735,7 @@ msgid " Seat Plan is not Complete yet!"
 msgstr ""
 
 #: assets/src/frontend/pages/bookings/BookingSlot.js:294
-#: assets/src/frontend/pages/bookings/BookingSlot.js:404
+#: assets/src/frontend/pages/bookings/BookingSlot.js:405
 msgid "No slot available"
 msgstr ""
 
@@ -4736,112 +4812,172 @@ msgstr ""
 msgid "Your booking schedule is canceled, please schedule book aging."
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/CancellationForm.js:140
-#: assets/src/frontend/pages/bookings/ContactInfo.js:363
+#: assets/src/frontend/pages/bookings/CancellationForm.js:154
+#: assets/src/frontend/pages/bookings/ContactInfo.js:382
 msgid "Give your information"
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/CancellationForm.js:163
-#: assets/src/frontend/pages/bookings/ContactInfo.js:386
+#: assets/src/frontend/pages/bookings/CancellationForm.js:177
+#: assets/src/frontend/pages/bookings/ContactInfo.js:405
 #: assets/src/frontend/pages/bookings/PaymentForm.js:65
 msgid "with"
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/CancellationForm.js:188
+#: assets/src/frontend/pages/bookings/CancellationForm.js:202
 msgid "Hello"
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/CancellationForm.js:188
+#: assets/src/frontend/pages/bookings/CancellationForm.js:202
 msgid "a"
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/CancellationForm.js:188
+#: assets/src/frontend/pages/bookings/CancellationForm.js:202
 msgid "meeting was scheduled from"
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/CancellationForm.js:188
+#: assets/src/frontend/pages/bookings/CancellationForm.js:202
 msgid "on"
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/CancellationForm.js:188
+#: assets/src/frontend/pages/bookings/CancellationForm.js:202
 msgid "Please make sure you are absolutely sure to cancel the booking."
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/CancellationForm.js:191
+#: assets/src/frontend/pages/bookings/CancellationForm.js:205
 msgid "No content found!"
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/CancellationForm.js:200
+#: assets/src/frontend/pages/bookings/CancellationForm.js:214
+msgid "Which sessions do you want to cancel?"
+msgstr ""
+
+#: assets/src/frontend/pages/bookings/CancellationForm.js:220
+msgid "Only this session"
+msgstr ""
+
+#: assets/src/frontend/pages/bookings/CancellationForm.js:229
+#, js-format
+msgid "This and %d later session"
+msgid_plural "This and %d later sessions"
+msgstr[0] ""
+msgstr[1] ""
+
+#: assets/src/frontend/pages/bookings/CancellationForm.js:252
+msgid "Reason (optional)"
+msgstr ""
+
+#: assets/src/frontend/pages/bookings/CancellationForm.js:255
 msgid "Please tell us the reason to cancel this meeting"
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/CancellationForm.js:218
+#: assets/src/frontend/pages/bookings/CancellationForm.js:273
 msgid "Cancel Appointment"
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/ContactInfo.js:424
+#: assets/src/frontend/pages/bookings/component/RecurringInput.js:11
+msgid "Repeats every day"
+msgid_plural "Repeats every %d days"
+msgstr[0] ""
+msgstr[1] ""
+
+#: assets/src/frontend/pages/bookings/component/RecurringInput.js:12
+msgid "Repeats every week"
+msgid_plural "Repeats every %d weeks"
+msgstr[0] ""
+msgstr[1] ""
+
+#: assets/src/frontend/pages/bookings/component/RecurringInput.js:13
+msgid "Repeats every month"
+msgid_plural "Repeats every %d months"
+msgstr[0] ""
+msgstr[1] ""
+
+#: assets/src/frontend/pages/bookings/component/RecurringInput.js:14
+msgid "Repeats every year"
+msgid_plural "Repeats every %d years"
+msgstr[0] ""
+msgstr[1] ""
+
+#: assets/src/frontend/pages/bookings/component/RecurringInput.js:35
+#, js-format
+msgid "Sessions (max %d)"
+msgstr ""
+
+#: assets/src/frontend/pages/bookings/component/RecurringInput.js:39
+msgid "One session less"
+msgstr ""
+
+#: assets/src/frontend/pages/bookings/component/RecurringInput.js:47
+msgid "Number of sessions"
+msgstr ""
+
+#: assets/src/frontend/pages/bookings/component/RecurringInput.js:57
+msgid "One session more"
+msgstr ""
+
+#: assets/src/frontend/pages/bookings/ContactInfo.js:443
 msgid "Enter Information"
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/ContactInfo.js:434
+#: assets/src/frontend/pages/bookings/ContactInfo.js:453
 msgid "Enter your name!"
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/ContactInfo.js:439
+#: assets/src/frontend/pages/bookings/ContactInfo.js:458
 msgid "Enter your name"
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/ContactInfo.js:444
+#: assets/src/frontend/pages/bookings/ContactInfo.js:463
 msgid "E-mail"
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/ContactInfo.js:456
+#: assets/src/frontend/pages/bookings/ContactInfo.js:475
 msgid "Enter your e-mail!"
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/ContactInfo.js:464
+#: assets/src/frontend/pages/bookings/ContactInfo.js:483
 msgid "Enter your e-mail"
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/ContactInfo.js:476
+#: assets/src/frontend/pages/bookings/ContactInfo.js:495
 msgid "Location is required!"
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/ContactInfo.js:485
+#: assets/src/frontend/pages/bookings/ContactInfo.js:504
 msgid "Select Meeting location"
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/ContactInfo.js:534
+#: assets/src/frontend/pages/bookings/ContactInfo.js:553
 msgid "Send me booking updates on WhatsApp"
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/ContactInfo.js:560
+#: assets/src/frontend/pages/bookings/ContactInfo.js:579
 msgid "Additional notes"
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/ContactInfo.js:564
+#: assets/src/frontend/pages/bookings/ContactInfo.js:583
 msgid "Please share anything that will help us prepare for the meeting"
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/ContactInfo.js:579
+#: assets/src/frontend/pages/bookings/ContactInfo.js:620
 msgid "Notice!"
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/ContactInfo.js:580
+#: assets/src/frontend/pages/bookings/ContactInfo.js:621
 msgid "No Payment method is enabled by Admin!"
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/ContactInfo.js:600
+#: assets/src/frontend/pages/bookings/ContactInfo.js:641
 #: assets/src/frontend/pages/bookings/SeatMap.js:172
 #: assets/src/frontend/pages/meetings/GoBackHeading.js:22
 msgid "Go back"
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/ContactInfo.js:620
+#: assets/src/frontend/pages/bookings/ContactInfo.js:661
 msgid "Reschedule Booking"
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/ContactInfo.js:642
+#: assets/src/frontend/pages/bookings/ContactInfo.js:684
 msgid "Confirm Booking"
 msgstr ""
 
@@ -4857,23 +4993,51 @@ msgstr ""
 msgid "Ticket Price: "
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/SidebarInfo.js:87
+#: assets/src/frontend/pages/bookings/Sidebar/RecurringList.js:38
+msgid "Closed on this day"
+msgstr ""
+
+#. translators: %s: picked time
+#: assets/src/frontend/pages/bookings/Sidebar/RecurringList.js:43
+#, js-format
+msgid "%s is taken"
+msgstr ""
+
+#: assets/src/frontend/pages/bookings/Sidebar/RecurringList.js:102
+msgid "Show fewer"
+msgstr ""
+
+#. translators: %d: number of sessions
+#: assets/src/frontend/pages/bookings/Sidebar/RecurringList.js:105
+#, js-format
+msgid "Show all %d sessions"
+msgstr ""
+
+#. translators: 1: booked sessions, 2: all sessions, 3: session price, 4: total
+#: assets/src/frontend/pages/bookings/Sidebar/RecurringList.js:115
+#, js-format
+msgid "Selected %1$d of %2$d sessions · %3$s × %1$d = %4$s"
+msgstr ""
+
+#. translators: 1: booked sessions, 2: all sessions
+#: assets/src/frontend/pages/bookings/Sidebar/RecurringList.js:123
+#, js-format
+msgid "Selected %1$d of %2$d sessions"
+msgstr ""
+
+#: assets/src/frontend/pages/bookings/SidebarInfo.js:90
 msgid "Selected seats: "
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/SidebarInfo.js:108
+#: assets/src/frontend/pages/bookings/SidebarInfo.js:111
 msgid "Ticket quantity: "
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/SidebarInfo.js:114
+#: assets/src/frontend/pages/bookings/SidebarInfo.js:117
 msgid "Total Price: "
 msgstr ""
 
-#: assets/src/frontend/pages/bookings/SidebarInfo.js:339
-msgid "Continue booking?"
-msgstr ""
-
-#: assets/src/frontend/pages/bookings/SidebarInfo.js:404
+#: assets/src/frontend/pages/bookings/SidebarInfo.js:293
 msgid "Timezone: "
 msgstr ""
 
@@ -4966,19 +5130,19 @@ msgstr ""
 msgid "Click Here"
 msgstr ""
 
-#: assets/src/frontend/stripe/CheckoutForm.js:95
+#: assets/src/frontend/stripe/CheckoutForm.js:97
 msgid "Payment is not ready. Please refresh and try again."
 msgstr ""
 
-#: assets/src/frontend/stripe/CheckoutForm.js:111
+#: assets/src/frontend/stripe/CheckoutForm.js:113
 msgid "Could not bind payment to booking."
 msgstr ""
 
-#: assets/src/frontend/stripe/CheckoutForm.js:146
+#: assets/src/frontend/stripe/CheckoutForm.js:148
 msgid "Your payment succeeded, but we could not finalize your booking. Please contact support before booking again."
 msgstr ""
 
-#: assets/src/frontend/stripe/CheckoutForm.js:231
+#: assets/src/frontend/stripe/CheckoutForm.js:233
 msgid "Pay now"
 msgstr ""
 

@@ -917,7 +917,6 @@ class Appointment extends PostModel {
     private function get_schedule_by_date( $date, $staff_id, $time_zone = '' ) {
         $day_name = ucfirst( gmdate( 'D', strtotime( $date ) ) );
         $schedule = $this->get_schedule();
-        $interval         = $this->get_interval();
         $target_schedule = [];
 
         $slots = [];
@@ -926,23 +925,15 @@ class Appointment extends PostModel {
             $target_schedule = $schedule[$staff_id][$day_name] ?? [];
         }
 
+        // Once per day, so a long date range does not run a query per slot.
+        $sessions = $target_schedule ? $this->staff_sessions( $date, $staff_id ) : array();
+
         foreach ( $target_schedule as $day ) {
-            $start = strtotime( $day['start'] );
-            $end   = strtotime( $day['end'] );
-
-            // Get buffer times in seconds
-            $buffer_before = $this->get_buffer_time_before_in_seconds();
-            $buffer_after = $this->get_buffer_time_after_in_seconds();
-
-            // Adjust the start time to include buffer before
-            $adjusted_start = $start + $buffer_before;
-
-            // Adjust the end time to ensure we have enough time for the slot + buffer after
-            $min_slot_duration = $interval + $buffer_after;
-
-            for ( $time = $adjusted_start; $time + $min_slot_duration <= $end; $time += $interval + $buffer_after + $buffer_before ) {
-                $booked_entry = $this->get_booking_entries( $date, $time, $staff_id );
-                $status       = 'available';
+            foreach ( $this->slot_times( $day ) as $time ) {
+                $session_time = $this->session_time( $date, gmdate( 'g:ia', $time ) );
+                $booked_entry = $this->own_session_entry( $sessions, $session_time );
+                $staff_busy   = $this->overlaps_other_session( $session_time, $sessions );
+                $status       = $staff_busy ? 'unavailable' : 'available';
                 $capacity     = $this->get_effective_capacity();
                 $booked       = 0;
 
@@ -962,6 +953,7 @@ class Appointment extends PostModel {
                     'status'     => $status,
                     'start_time' => $datetime->format( 'g:ia' ),
                     'booked'     => $booked,
+                    'staff_busy' => $staff_busy,
                     // The visitor's date, which can differ from $date.
                     'date'       => $datetime->format( 'Y-m-d' ),
                 ];
@@ -980,39 +972,201 @@ class Appointment extends PostModel {
     }
 
     /**
-     * Get booked entry status
+     * Clock times of the slots in one working period.
      *
-     * @param   string  $date
-     * @param   string  $time
-     * @param   interger  $staff_id
+     * The slot list and the booking check both read this, so a time the list
+     * does not offer cannot be booked.
+     *
+     * @param   array  $day  Working period with `start` and `end`.
+     *
+     * @return  integer[]  Timestamps. Only their clock reading means anything.
+     */
+    private function slot_times( $day ) {
+        $interval = (int) $this->get_interval();
+        $before   = $this->get_buffer_time_before_in_seconds();
+        $after    = $this->get_buffer_time_after_in_seconds();
+        $end      = strtotime( $day['end'] );
+        $times    = array();
+
+        // A meeting saved without a duration would never leave the loop.
+        if ( $interval <= 0 ) {
+            return $times;
+        }
+
+        for ( $time = strtotime( $day['start'] ) + $before; $time + $interval + $after <= $end; $time += $interval + $after + $before ) {
+            $times[] = $time;
+        }
+
+        return $times;
+    }
+
+    /**
+     * Whether a staff member is in another session during this meeting's session.
+     *
+     * One function for the slot list and every save, so they cannot disagree.
+     *
+     * @param   string   $date            Session date, in the meeting's timezone.
+     * @param   string   $clock           Session start, in the meeting's timezone.
+     * @param   integer  $staff_id        Staff member.
+     * @param   integer  $ignore_entry_id Entry a move is about to leave.
      *
      * @return  bool
      */
-    private function get_booking_entries( $date, $time, $staff_id ) {
-        $time            = gmdate( 'h:i a', $time );
-        $booking_entries = new Booking_Entry();
-        $entries         = $booking_entries->find( [
-            'staff_id'   => $staff_id,
-            'date'       => $this->convert_timezone( $date, $this->get_timezone())->format('Y-m-d'),
-        ] );
+    public function is_staff_busy( $date, $clock, $staff_id, $ignore_entry_id = 0 ) {
+        return $this->overlaps_other_session(
+            $this->session_time( $date, $clock ),
+            $this->staff_sessions( $date, $staff_id ),
+            $ignore_entry_id
+        );
+    }
+
+    /**
+     * When one of this meeting's sessions starts, and the time it keeps its staff busy.
+     *
+     * @param   string  $date   Date, in the meeting's timezone.
+     * @param   string  $clock  Start, in the meeting's timezone.
+     *
+     * @return  integer[]  Timestamps: `start`, then `from` and `to` with the buffers.
+     */
+    private function session_time( $date, $clock ) {
+        $start = $this->convert_timezone( $date . ' ' . $clock, $this->get_timezone() )->getTimestamp();
+
+        return array(
+            'start' => $start,
+            'from'  => $start - $this->get_buffer_time_before_in_seconds(),
+            'to'    => $start + (int) $this->get_interval() + $this->get_buffer_time_after_in_seconds(),
+        );
+    }
+
+    /**
+     * A staff member's sessions around a date, on any meeting.
+     *
+     * Two days each way: an entry's date is in its own meeting's timezone, and two
+     * timezones can be two dates apart. An emptied group entry stays with 0 booked.
+     *
+     * @param   string   $date      Date, in this meeting's timezone.
+     * @param   integer  $staff_id  Staff member.
+     *
+     * @return  array[]  Each with `entry`, `meeting_id`, and the session_time() keys.
+     */
+    private function staff_sessions( $date, $staff_id ) {
+        $dates = array();
+
+        foreach ( array( '-2 days', '-1 day', '+0 day', '+1 day', '+2 days' ) as $shift ) {
+            $dates[] = gmdate( 'Y-m-d', strtotime( $date . ' ' . $shift ) );
+        }
+
+        $entries = ( new Booking_Entry() )->find(
+            array(
+                'staff_id' => $staff_id,
+                'date'     => $dates,
+            )
+        );
+
+        $meetings = array( (int) $this->get_id() => $this );
+        $sessions = array();
 
         foreach ( $entries as $entry ) {
-            $start_time   = $entry->get_start();
-            $end_time     = $entry->get_end();
-
-            // Check if current time slot falls within the booking duration
-            if ( ! $this->is_time_in_range( $time, $start_time, $end_time ) ) {
+            if ( intval( $entry->get_booked() ) < 1 || $this->is_orphan_entry( $entry ) ) {
                 continue;
             }
 
-            if ( $this->is_orphan_entry( $entry ) ) {
-                continue;
+            $meeting_id = (int) $entry->get_meeting_id();
+
+            if ( ! isset( $meetings[ $meeting_id ] ) ) {
+                $meetings[ $meeting_id ] = new self( $meeting_id );
             }
 
-            return $entry;
+            $sessions[] = array(
+                'entry'      => $entry,
+                'meeting_id' => $meeting_id,
+            ) + $this->entry_time( $entry, $meetings[ $meeting_id ] );
+        }
+
+        return $sessions;
+    }
+
+    /**
+     * The time an entry keeps its staff busy.
+     *
+     * Read from its meeting, because the stored end is what the request sent. An
+     * entry with no usable meeting can only use what it stored.
+     *
+     * @param   Booking_Entry  $entry    The entry.
+     * @param   Appointment    $meeting  The entry's meeting.
+     *
+     * @return  integer[]  See session_time().
+     */
+    private function entry_time( $entry, $meeting ) {
+        if (
+            $meeting->is_appointment()
+            && timetics_is_valid_timezone( $meeting->get_timezone() )
+            && (int) $meeting->get_interval() > 0
+        ) {
+            return $meeting->session_time( $entry->get_date(), $entry->get_start() );
+        }
+
+        $start = $this->convert_timezone( $entry->get_date() . ' ' . $entry->get_start(), $this->get_timezone() )->getTimestamp();
+        $end   = $this->convert_timezone( $entry->get_date() . ' ' . $entry->get_end(), $this->get_timezone() )->getTimestamp();
+
+        return array(
+            'start' => $start,
+            'from'  => $start,
+            'to'    => $end > $start ? $end : $end + DAY_IN_SECONDS,
+        );
+    }
+
+    /**
+     * This session's own entry, which holds its seat count.
+     *
+     * @param   array[]    $sessions  From staff_sessions().
+     * @param   integer[]  $time      From session_time().
+     *
+     * @return  Booking_Entry|false
+     */
+    private function own_session_entry( $sessions, $time ) {
+        foreach ( $sessions as $session ) {
+            if ( $this->is_same_session( $session, $time ) ) {
+                return $session['entry'];
+            }
         }
 
         return false;
+    }
+
+    /**
+     * Whether a time overlaps a session other than itself. Sessions that only touch do not.
+     *
+     * @param   integer[]  $time             From session_time().
+     * @param   array[]    $sessions         From staff_sessions().
+     * @param   integer    $ignore_entry_id  Entry to leave out.
+     *
+     * @return  bool
+     */
+    private function overlaps_other_session( $time, $sessions, $ignore_entry_id = 0 ) {
+        foreach ( $sessions as $session ) {
+            if ( $this->is_same_session( $session, $time ) || (int) $session['entry']->get_id() === (int) $ignore_entry_id ) {
+                continue;
+            }
+
+            if ( $time['from'] < $session['to'] && $session['from'] < $time['to'] ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Whether a session is this meeting's, at this start. Its seats decide, not an overlap.
+     *
+     * @param   array      $session  One of staff_sessions().
+     * @param   integer[]  $time     From session_time().
+     *
+     * @return  bool
+     */
+    private function is_same_session( $session, $time ) {
+        return (int) $this->get_id() === $session['meeting_id'] && $time['start'] === $session['start'];
     }
 
     /**
@@ -1035,23 +1189,6 @@ class Appointment extends PostModel {
         $booking = get_post( $booking_id );
 
         return ! $booking || 'timetics-booking' !== $booking->post_type;
-    }
-
-    /**
-     * Check if a time falls within a given time range
-     *
-     * @param   string  $current_time  Current time in h:i a format
-     * @param   string  $start_time    Start time in h:i a format
-     * @param   string  $end_time      End time in h:i a format
-     *
-     * @return  bool
-     */
-    private function is_time_in_range( $current_time, $start_time, $end_time ) {
-        $current = strtotime( $current_time );
-        $start   = strtotime( $start_time );
-        $end     = strtotime( $end_time );
-
-        return $current >= $start && $current < $end;
     }
 
     /**
@@ -1106,7 +1243,6 @@ class Appointment extends PostModel {
     public function get_avilable_timeslots( $date, $staff_id, $time_zone = '' ) {
         $time_zone = $time_zone ? $time_zone : $this->get_timezone();
         $schedule  = $this->get_schedule();
-        $interval  = $this->get_interval();
         $slots     = [];
 
         if ( ! isset( $schedule[ $staff_id ] ) || empty( array_filter( $schedule[ $staff_id ] ) ) ) {
@@ -1120,10 +1256,7 @@ class Appointment extends PostModel {
             $day_name     = ucfirst( gmdate( 'D', strtotime( $meeting_date ) ) );
 
             foreach ( $schedule[ $staff_id ][ $day_name ] ?? [] as $day ) {
-                $start = strtotime( $day['start'] );
-                $end   = strtotime( $day['end'] );
-
-                for ( $time = $start; $time <= $end; $time += $interval ) {
+                foreach ( $this->slot_times( $day ) as $time ) {
                     // Slot's own date, see get_schedule_by_date().
                     $datetime = $this->convert_timezone( $meeting_date . ' ' . gmdate( 'g:ia', $time ), $time_zone );
 

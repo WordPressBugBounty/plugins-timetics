@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 use Timetics\Core\Admin\Notification;
 use Timetics\Core\Appointments\Appointment;
 use Timetics\Core\Bookings\Booking;
+use Timetics\Core\Bookings\Booking_Lock;
 use Timetics\Core\Customers\Customer;
 use Timetics\Utils\Singleton;
 use Timetics\Core\Emails\New_Event_Email;
@@ -185,11 +186,24 @@ class Hooks {
         // Get the default booking status (e.g., 'approved')
         $default_booking_status = timetics_get_option( 'default_booking_status', 'approved' );
 
-        $booking->update( [
-            'post_status'    => $default_booking_status,
-            'payment_status' => 'completed',
-            'payment_method' => 'woocommerce',
-        ] );
+        // The money is in, but the booking may have lost its time while it waited
+        // ( cancelled order, then paid late ). Approve it only if the time is ours.
+        $outcome = $this->bring_back_booking(
+            $booking,
+            array(
+                'post_status'    => $default_booking_status,
+                'payment_status' => 'completed',
+                'payment_method' => 'woocommerce',
+            )
+        );
+
+        if ( 'ok' !== $outcome ) {
+            $this->report_booking_not_brought_back( $booking, $order_id, $order, $outcome, true );
+            Status_Mapper::set_order_id_for_booking( $session_data['booking_id'], $order_id );
+            Status_Mapper::set_booking_id_for_order( $order_id, $session_data['booking_id'] );
+            WC()->session->set( 'timetics_data', null );
+            return;
+        }
 
         // Store the order ID in booking meta and booking id in woocommerce order meta for status syncing
         Status_Mapper::set_order_id_for_booking( $session_data['booking_id'], $order_id );
@@ -209,6 +223,9 @@ class Hooks {
         }
 
         do_action( 'timetics_gln_hook', 'booking_created', Notification::get_hook_data( $booking ) );
+
+        // Paid, as after Stripe or PayPal, so "booking paid" automations run for it too.
+        do_action( 'timetics_booking_payment', $booking );
 
         WC()->session->set( 'timetics_data', null );
 
@@ -794,6 +811,93 @@ class Hooks {
     }
 
     /**
+     * Update a booking, taking back its time first when it gave that up.
+     *
+     * A booking that still holds its place is just updated. One that gave it up
+     * ( order cancelled, payment declined ) takes the place back and changes its
+     * status in one step under the booking lock. Done as two steps, a second
+     * request could come in between, see a booking that still looks cancelled and
+     * take the place again.
+     *
+     * @param   Booking  $booking  The booking the order belongs to.
+     * @param   array    $update   What to save on the booking, including its new status.
+     *
+     * @return  string  'ok', 'taken' ( someone else holds the time ) or 'busy' ( the lock was not free ).
+     */
+    private function bring_back_booking( $booking, $update ) {
+        if ( $booking->holds_slot() ) {
+            $booking->update( $update );
+
+            return 'ok';
+        }
+
+        $result = Booking_Lock::run(
+            function () use ( $booking, $update ) {
+                // Read again: another request may have brought it back while this one waited.
+                $fresh = new Booking( $booking->get_id() );
+
+                if ( ! $fresh->holds_slot() ) {
+                    // A booking cancelled by an older version has no released flag, only
+                    // the cancel status. Flag it so the place is really taken back.
+                    $fresh->mark_slot_released();
+
+                    if ( ! $fresh->take_slot_back() ) {
+                        return 'taken';
+                    }
+                }
+
+                $booking->update( $update );
+
+                return 'ok';
+            }
+        );
+
+        return is_wp_error( $result ) ? 'busy' : $result;
+    }
+
+    /**
+     * Tell the admin a booking was not brought back by its order.
+     *
+     * The order is never refunded here; the admin decides ( refund, or move the
+     * booking to another time ). Only an order that was really paid sends an email.
+     *
+     * @param   Booking      $booking   The booking the order belongs to.
+     * @param   integer      $order_id  WooCommerce order ID.
+     * @param   object|bool  $order     The order, or false when it cannot be loaded.
+     * @param   string       $outcome   'taken' or 'busy', from bring_back_booking().
+     * @param   bool         $paid      Whether the order was paid.
+     *
+     * @return  void
+     */
+    private function report_booking_not_brought_back( $booking, $order_id, $order, $outcome, $paid ) {
+        $busy = 'busy' === $outcome;
+
+        if ( $paid && $busy ) {
+            /* translators: 1: WooCommerce order ID, 2: booking ID */
+            $text = __( 'Order #%1$d was paid, but booking #%2$d was not approved because the site was saving other bookings at that moment. To try once more, change the order to On hold and then back to Processing ( setting Processing again does nothing, the status has not changed ). Or approve the booking by hand.', 'timetics' );
+        } elseif ( $paid ) {
+            /* translators: 1: WooCommerce order ID, 2: booking ID */
+            $text = __( 'Order #%1$d was paid, but booking #%2$d could not get its time back because someone else took it. The booking was not approved. Refund the order, or move the booking to another time.', 'timetics' );
+        } elseif ( $busy ) {
+            /* translators: 1: WooCommerce order ID, 2: booking ID */
+            $text = __( 'Booking #%2$d of order #%1$d stays cancelled because the site was saving other bookings at that moment. To try once more, change the order to a different status, for example On hold.', 'timetics' );
+        } else {
+            /* translators: 1: WooCommerce order ID, 2: booking ID */
+            $text = __( 'Booking #%2$d of order #%1$d stays cancelled because its time was taken by someone else.', 'timetics' );
+        }
+
+        $message = sprintf( $text, $order_id, $booking->get_id() );
+
+        if ( $order ) {
+            $order->add_order_note( $message );
+        }
+
+        if ( $paid ) {
+            wp_mail( get_option( 'admin_email' ), __( 'A paid booking was not approved', 'timetics' ), $message );
+        }
+    }
+
+    /**
      * Sync booking status when WooCommerce order status changes
      *
      * @param int    $order_id   The WooCommerce order ID
@@ -863,7 +967,23 @@ class Hooks {
 
             // Update booking status
             // This will trigger transition_post_status, but our pair lock prevents reverse sync
-            $booking->update( [ 'post_status' => $booking_status ] );
+            if ( in_array( $booking_status, array( 'cancel', 'failed' ), true ) ) {
+                $booking->update( array( 'post_status' => $booking_status ) );
+            } else {
+                // A cancelled order can be reopened or paid late ( slow bank, manual change
+                // by an admin ). Bringing the booking back needs its time back first; if
+                // that fails, leave the booking cancelled and tell the admin.
+                $outcome = $this->bring_back_booking( $booking, array( 'post_status' => $booking_status ) );
+
+                if ( 'ok' !== $outcome ) {
+                    $order = function_exists( 'wc_get_order' ) ? wc_get_order( $order_id ) : false;
+                    $paid  = $order ? $order->is_paid() : in_array( $new_status, array( 'processing', 'completed' ), true );
+
+                    $this->report_booking_not_brought_back( $booking, $order_id, $order, $outcome, $paid );
+
+                    return;
+                }
+            }
 
             // Send cancellation emails if status changed to 'cancel'
             if ( 'cancel' === $booking_status ) {

@@ -309,18 +309,6 @@ class Api_Booking extends Api {
             return new WP_HTTP_Response( apply_filters( 'timetics/admin/booking/error_data', $response, 'type_check' ), 403 );
         }
 
-        $recurring_booking = ! empty( $data['recurring_dates'] ) ? $data['recurring_dates'] : [];
-
-        if ( $recurring_booking && apply_filters( 'timetics/booking/appointment/recurring_check', false, $recurring_booking ) == true ) {
-            $response = [
-                'status_code' => 403,
-                'success'     => 0,
-                'message'     => esc_html__( 'Recurring booking limit exit', 'timetics' ),
-            ];
-
-            return new WP_HTTP_Response( $response, 403 );
-        } // End.
-
         $result = $this->save_bookings( $request );
         if ( $rate_key && $result instanceof WP_HTTP_Response && 200 === $result->get_status() && ! empty( $result->get_data()['success'] ) ) {
             set_transient( $rate_key, (int) get_transient( $rate_key ) + 1, HOUR_IN_SECONDS );
@@ -457,8 +445,14 @@ class Api_Booking extends Api {
     public function bulk_delete( $request ) {
 
         $bookings = json_decode( $request->get_body(), true );
+        // Deleting a series' first booking also deletes its sessions, maybe before their turn.
+        $existed = array_filter( (array) $bookings, 'get_post' );
 
         foreach ( $bookings as $booking ) {
+            if ( in_array( $booking, $existed, true ) && ! get_post( $booking ) ) {
+                continue;
+            }
+
             $delete = $this->delete( $booking );
 
             if ( ! $delete ) {
@@ -986,28 +980,61 @@ class Api_Booking extends Api {
                 );
             }
 
-            /**
-             * Filters a booking request before any check reads it.
-             *
-             * Runs before validation, so a listener may change `staff` and the
-             * checks then test that host. The request data is unvalidated input.
-             * Return a WP_Error to stop the booking.
-             *
-             * @param array $data Decoded request body.
-             * @param int   $id   Booking ID, 0 for a new booking.
-             */
-            $data = apply_filters( 'timetics_booking_appointment_data', $data, $id );
-
-            if ( is_wp_error( $data ) ) {
-                return $data;
-            }
-
-            if ( ! is_array( $data ) ) {
-                return new WP_Error( 'invalid_booking_data', __( 'Invalid booking data.', 'timetics' ), array( 'status' => 400 ) );
-            }
-
-            return  $this->booking_appointment($data, $id);
+            // Taken before the filter: Pro checks series dates and picks a round robin host in it.
+            return Booking_Lock::run(
+                function () use ( $data, $id ) {
+                    return $this->filter_and_book( $data, $id );
+                }
+            );
         }
+    }
+
+    /**
+     * Apply the request filter, then book. Runs under the booking lock.
+     *
+     * @param   array    $data  Decoded request body.
+     * @param   integer  $id    Booking ID, 0 for a new booking.
+     *
+     * @return  mixed  What booking_appointment() returns, or the error that stopped it.
+     */
+    private function filter_and_book( $data, $id ) {
+        /**
+         * Filters a booking request before any check reads it.
+         *
+         * Runs before validation, so a listener may change `staff` and the
+         * checks then test that host. The request data is unvalidated input.
+         * Return a WP_Error to stop the booking.
+         *
+         * @param array $data Decoded request body.
+         * @param int   $id   Booking ID, 0 for a new booking.
+         */
+        $data = apply_filters( 'timetics_booking_appointment_data', $data, $id );
+
+        if ( is_wp_error( $data ) ) {
+            return $data;
+        }
+
+        if ( ! is_array( $data ) ) {
+            return new WP_Error( 'invalid_booking_data', __( 'Invalid booking data.', 'timetics' ), array( 'status' => 400 ) );
+        }
+
+        // Here, not on the raw request: Pro adds the series dates in the filter above.
+        if ( ! $id && ! empty( $data['recurring_dates'] ) ) {
+            $series_dates = array_merge( array( $data['start_date'] ?? '' ), (array) $data['recurring_dates'] );
+
+            if ( apply_filters( 'timetics/booking/appointment/recurring_check', false, $series_dates ) == true ) {
+                return new WP_HTTP_Response(
+                    array(
+                        'status_code' => 403,
+                        'success'     => 0,
+                        'message'     => esc_html__( 'Recurring booking limit exit', 'timetics' ),
+                    ),
+                    403
+                );
+            }
+        }
+
+        return $this->booking_appointment( $data, $id );
     }
 
      /**
@@ -1061,20 +1088,16 @@ class Api_Booking extends Api {
         $action          = $id ? 'updated' : 'created';
 
         $is_privileged    = current_user_can( 'manage_timetics' ) || current_user_can( 'edit_booking' );
-        $server_total     = (int) $this->calculate_order_total( $data );
+        $server_total     = 0;
+        $pricing          = array();
         $default_status   = timetics_get_option( 'default_booking_status', 'approved' );
         $payment_method_l = strtolower( $payment_method );
 
         if ( $is_privileged ) {
             $status = '' !== $client_status ? $client_status : $default_status;
         } elseif ( 'created' === $action ) {
-            if ( $server_total > 0 && 'stripe' === $payment_method_l ) {
-                $status = 'pending';
-            } elseif ( $server_total > 0 && 'woocommerce' === $payment_method_l ) {
-                $status = 'failed';
-            } else {
-                $status = $default_status;
-            }
+            // Chosen once the booking is priced, below: a coupon can change the total.
+            $status = '';
         } else {
             $current_booking = new Booking( $id );
 
@@ -1191,12 +1214,18 @@ class Api_Booking extends Api {
         // Checked before the old slot is released below, so a refused move keeps it.
         $takes_new_slot = 'created' === $action || $this->is_moving_slot( $booking, $meeting, $slot, $status );
 
+        // A move may overlap the time it is about to leave.
+        if ( 'created' !== $action ) {
+            $slot['own_entry_id'] = $booking->sole_entry_id();
+        }
+
         if ( $takes_new_slot && ! $this->is_available_slot( $meeting, $slot ) ) {
             /* translators: %s: Time slot */
             return new WP_Error( 'time_slot_error', sprintf( __( '%s time slot is not available', 'timetics' ), $start_time ), array( 'status' => 409 ) );
         }
 
-        if ( $meeting->is_recurring() ) {
+        // Only a series has dates to check; without Pro a recurring meeting books one session.
+        if ( $meeting->is_recurring() && $recurring_dates ) {
             $valid_recurrence = apply_filters( 'timetics_validate_recurring_booking', $recurring_dates, $start_time, $staff->get_id(), $meeting->get_id() );
 
             if ( ! $valid_recurrence ) {
@@ -1207,6 +1236,32 @@ class Api_Booking extends Api {
                 ];
 
                 return new WP_HTTP_Response( $recurring_error, 403 );
+            }
+        }
+
+        // Priced after every check, so a pricing listener only ever sees a bookable request.
+        if ( 'created' === $action ) {
+            $pricing = $this->price_booking( $data, $email );
+
+            if ( is_wp_error( $pricing ) ) {
+                return $pricing;
+            }
+
+            $server_total = $pricing['total'];
+
+            // The coupon may have changed after the customer saw the price. Never book a total they did not see.
+            if ( '' !== $pricing['coupon_code'] && isset( $data['order_total'] ) && is_numeric( $data['order_total'] ) && abs( (float) $data['order_total'] - $server_total ) > 0.005 ) {
+                return new WP_Error( 'coupon_price_changed', __( 'The price changed. Please apply the coupon again.', 'timetics' ), array( 'status' => 409 ) );
+            }
+
+            if ( ! $is_privileged ) {
+                // A paid booking must use a gateway the site really offers. Any other
+                // string used to fall through to the default (approved) status.
+                if ( $server_total > 0 && ! $this->is_enabled_payment_method( $payment_method_l ) ) {
+                    return new WP_Error( 'invalid_payment_method', __( 'Invalid payment method.', 'timetics' ), array( 'status' => 400 ) );
+                }
+
+                $status = $this->new_booking_status( $server_total, $payment_method_l, $default_status );
             }
         }
 
@@ -1286,13 +1341,21 @@ class Api_Booking extends Api {
             'end_date'            => $end_date,
             'start_time'          => $start_time,
             'end_time'            => $end_time,
-            'order_total'         => ( $id && ! $is_privileged ) ? $booking->get_total() : $this->calculate_order_total( $data ),
+            // A coupon price is kept on every update: re-pricing would drop the discount.
+            'order_total'         => ( $id && ( ! $is_privileged || '' !== (string) $booking->get_coupon_code() ) ) ? $booking->get_total() : $this->calculate_order_total( $data, $id ),
             'post_status'         => $status,
             'location'            => $location,
             'location_type'       => $location_type,
             'timezone'            => $timezone,
             'cancel_reason'       => $cancel_reason,
         ];
+
+        if ( 'created' === $action ) {
+            $booking_props['order_total']     = $pricing['total'];
+            $booking_props['order_subtotal']  = $pricing['subtotal'];
+            $booking_props['coupon_code']     = $pricing['coupon_code'];
+            $booking_props['coupon_discount'] = $pricing['discount'];
+        }
 
         if ( 'created' === $action && '' !== $payment_method ) {
             $booking_props['payment_method'] = $payment_method;
@@ -1325,6 +1388,60 @@ class Api_Booking extends Api {
         // Fire when booking is completed.
         do_action( 'timetics_after_booking_create', $booking->get_id(), $customer->get_id(), $meeting->get_id(), $data );
 
+        // Convert booking time to staff/meeting time.
+        $slot_start = timetics_convert_timezone( $start_date . ' ' . $start_time, $timezone, $meeting->get_timezone() );
+        $slot_end   = timetics_convert_timezone( $start_date . ' ' . $end_time, $timezone, $meeting->get_timezone() );
+
+        // Take the new slot right after the booking is saved, before any calendar
+        // or email call. A reschedule has already freed the old slot above, so a
+        // slow or failing call between the two would leave the booking on a time
+        // nobody is holding.
+        //
+        // Skipped on cancel — the slot for this booking was already released
+        // above, and re-running this block would either recreate the just-deleted
+        // entry (one-to-one) or double the decrement (group), re-blocking or
+        // over-freeing the slot.
+        if ( 'cancel' !== $status ) {
+            $entries = $booking_entry->find(
+                [
+                    'staff_id'   => $staff->get_id(),
+                    'meeting_id' => $meeting->get_id(),
+                    'date'       => $slot_start->format( 'Y-m-d' ),
+                    'start'      => $slot_start->format( 'h:i a' ),
+                ]
+            );
+
+            if ( $entries ) {
+                $entry = $booking_entry->first();
+
+                $booked      = intval( $entry->get_booked() ) + 1;
+                $booked_data = apply_filters( 'timetics_booking_update_schedule', $entry, ['booked' => $booked], $data, $booking );
+
+                $entry->update( $this->normalize_schedule_update( $booked_data, $booked ) );
+            } else {
+                $book_entry_data = [
+                    'meeting_id'  => $meeting->get_id(),
+                    'staff_id'    => $staff->get_id(),
+                    'customer_id' => $customer->get_id(),
+                    'booking_id'  => $booking->get_id(),
+                    'booked'      => 1,
+                    'date'        => $slot_start->format( 'Y-m-d' ),
+                    'start'       => $slot_start->format( 'h:i a' ),
+                    'end'         => $slot_end->format( 'h:i a' ),
+                ];
+
+                $book_entry_data = apply_filters( 'timetics_booking_schedule', $book_entry_data, $data );
+                $booking_entry->create( $book_entry_data );
+            }
+
+            // A failed booking that was rescheduled holds a place again.
+            $booking->mark_slot_held();
+        }
+
+        // The slot is saved. The calendar and email calls below can take seconds,
+        // and other customers should not wait for them.
+        Booking_Lock::release();
+
         // Note: booking creation emails for new bookings are sent further below,
         // AFTER the calendar event is created, so the Google Meet join link is
         // available in the email. See the "created" branch after the schedule
@@ -1347,7 +1464,17 @@ class Api_Booking extends Api {
                     $customer_cancel_event_email->send();
                 }
 
-                do_action( 'timetics_gln_hook', 'booking_canceled', Notification::get_hook_data( $booking ) );
+                /**
+                 * Filters the Automation data of a cancel, with the request that made it.
+                 *
+                 * Timetics Pro lists every session a "this and all later" cancel removes.
+                 *
+                 * @param array   $hook_data Notification data.
+                 * @param Booking $booking   Cancelled booking.
+                 * @param array   $data      Request data, e.g. `cancel_scope`.
+                 */
+                $cancel_hook_data = apply_filters( 'timetics_booking_canceled_flow_data', Notification::get_hook_data( $booking ), $booking, $data );
+                do_action( 'timetics_gln_hook', 'booking_canceled', $cancel_hook_data );
 
                 /**
                  * Added temporary for leagacy sass. It will remove in future.
@@ -1423,51 +1550,6 @@ class Api_Booking extends Api {
             }
         }
 
-        // Convert booking time to staff/meeting time.
-        $date_time = timetics_convert_timezone( $start_date . ' ' . $start_time, $timezone, $meeting->get_timezone() );
-        $end_time  = timetics_convert_timezone( $start_date . ' ' . $end_time, $timezone, $meeting->get_timezone() );
-
-        // Create booking schedule. Skipped on cancel — the slot for this
-        // booking was already released above, and re-running this block would
-        // either recreate the just-deleted entry (one-to-one) or double the
-        // decrement (group), re-blocking or over-freeing the slot.
-        if ( 'cancel' !== $status ) {
-            $entries = $booking_entry->find(
-                [
-                    'staff_id'   => $staff->get_id(),
-                    'meeting_id' => $meeting->get_id(),
-                    'date'       => $date_time->format( 'Y-m-d' ),
-                    'start'      => $date_time->format( 'h:i a' ),
-                ]
-            );
-
-            if ( $entries ) {
-                $entry = $booking_entry->first();
-
-                $booked      = intval( $entry->get_booked() ) + 1;
-                $booked_data = apply_filters( 'timetics_booking_update_schedule', $entry, ['booked' => $booked], $data, $booking );
-
-                $entry->update( $this->normalize_schedule_update( $booked_data, $booked ) );
-            } else {
-                $book_entry_data = [
-                    'meeting_id'  => $meeting->get_id(),
-                    'staff_id'    => $staff->get_id(),
-                    'customer_id' => $customer->get_id(),
-                    'booking_id'  => $booking->get_id(),
-                    'booked'      => 1,
-                    'date'        => $date_time->format( 'Y-m-d' ),
-                    'start'       => $date_time->format( 'h:i a' ),
-                    'end'         => $end_time->format( 'h:i a' ),
-                ];
-
-                $book_entry_data = apply_filters( 'timetics_booking_schedule', $book_entry_data, $data );
-                $booking_entry->create( $book_entry_data );
-            }
-
-            // A failed booking that was rescheduled holds a place again.
-            $booking->mark_slot_held();
-        }
-
         // For newly created bookings, create the calendar event now that the
         // booking schedule entry exists. This generates the Google Meet link
         // (stored in booking meta) so it can be shown on the success page and
@@ -1519,10 +1601,44 @@ class Api_Booking extends Api {
             'status_code' => 200,
             /* translators: Action */
             'message'     => sprintf( esc_html__( 'Successfully %s booking', 'timetics' ), $action ),
-            'data'        => $this->prepare_item( $booking ),
+            'data'        => $this->hide_account_details(
+                $this->prepare_item( $booking ),
+                array(
+                    'first_name' => $first_name,
+                    'last_name'  => $last_name,
+                    'phone'      => $phone,
+                )
+            ),
         ];
 
         return new WP_HTTP_Response( $data, 200 );
+    }
+
+    /**
+     * Swap the account's stored name and phone in a booking response for what
+     * the visitor typed, unless they own the account or manage bookings.
+     *
+     * A guest may type any registered user's email, and the booking is then
+     * linked to that account: its stored details must not come back to them.
+     *
+     * @param array $item  Booking from prepare_item().
+     * @param array $typed first_name, last_name and phone from the request.
+     *
+     * @return array
+     */
+    protected function hide_account_details( $item, $typed ) {
+        $customer_id = (int) $item['customer']['id'];
+
+        if ( current_user_can( 'manage_timetics' ) || ( $customer_id && get_current_user_id() === $customer_id ) ) {
+            return $item;
+        }
+
+        $item['customer']['first_name'] = $typed['first_name'];
+        $item['customer']['last_name']  = $typed['last_name'];
+        $item['customer']['full_name']  = trim( $typed['first_name'] . ' ' . $typed['last_name'] );
+        $item['customer']['phone']      = $typed['phone'];
+
+        return $item;
     }
 
     /**
@@ -1557,6 +1673,9 @@ class Api_Booking extends Api {
             'random_id'       => $booking->get_random_id(),
             'status'          => $booking->get_status(),
             'order_total'     => $booking->get_total(),
+            'order_subtotal'  => $booking->get_order_subtotal(),
+            'coupon_code'     => $booking->get_coupon_code(),
+            'coupon_discount' => $booking->get_coupon_discount(),
             'start_date'      => $start_date_time->format( 'Y-m-d' ),
             'end_date'        => $end_date_time->format( 'Y-m-d' ),
             'date'            => $date,
@@ -1609,6 +1728,11 @@ class Api_Booking extends Api {
             $response['meeting_link'] = $join_link;
         }
 
+        $series = $booking->get_series_place();
+        if ( $series ) {
+            $response['series'] = $series;
+        }
+
         return apply_filters( 'timetics_booking_json_data', $response, $booking );
     }
 
@@ -1642,13 +1766,13 @@ class Api_Booking extends Api {
             return new WP_HTTP_Response( $data, 403 );
         }
 
-
-        $booking->release_slot();
-
+        // The slot is given back when the post is deleted ( Hooks::release_slot_on_delete ),
+        // so it is still held below, and a failed delete does not free it.
         $recurrences = $booking->get_recurrence();
 
         /**
-         * Fired before a booking is deleted, while its data can still be read.
+         * Fired before a booking is deleted, while its data can still be read
+         * and its slot is still held.
          *
          * `timetics_after_booking_delete` runs after the post has already gone
          * and only receives the recurrence data, so an integration that needs
@@ -1713,6 +1837,10 @@ class Api_Booking extends Api {
         $booked = $entries ? $booking_entries->first() : false;
 
         if ( $booked && intval( $booked->get_booked() ) >= $meeting->get_effective_capacity() ) {
+            return false;
+        }
+
+        if ( $meeting->is_staff_busy( $slot_datetime->format( 'Y-m-d' ), $slot_datetime->format( 'h:i a' ), $staff_id, $booking_data['own_entry_id'] ?? 0 ) ) {
             return false;
         }
 
@@ -1808,14 +1936,13 @@ class Api_Booking extends Api {
         $status       = ! empty( $data['status'] ) ? sanitize_text_field( $data['status'] ) : '';
         $seats           = ! empty( $data['seats'] ) ? $data['seats'] : [];
         $timeslots       = $meeting->get_avilable_timeslots( $start_date, $staff_id, $timezone );
-        $meeting_has_buffer_time = $meeting->get_buffer_time_after_in_seconds() > 0 || $meeting->get_buffer_time_before_in_seconds() > 0;
 
         if ( ! $meeting->is_appointment() ) {
             return $this->create_error_response( __( 'Invalid meeting.', 'timetics' ), 422 );
         }
 
         if ( 'cancel' !== $status ) {
-            if ( ! $meeting_has_buffer_time && ! in_array( gmdate( 'g:ia', strtotime( $start_time ) ), $timeslots ) ) {
+            if ( ! in_array( gmdate( 'g:ia', strtotime( $start_time ) ), $timeslots, true ) ) {
                 return $this->create_error_response( __( 'Invalid timeslot.', 'timetics' ), 422 );
             }
 
@@ -1843,35 +1970,147 @@ class Api_Booking extends Api {
     }
 
     /**
+     * Whether a payment method name is one the site currently offers.
+     *
+     * @param string $method Lower-cased method name sent by the client.
+     *
+     * @return bool
+     */
+    private function is_enabled_payment_method( $method ) {
+        foreach ( timetics_get_payment_methods() as $item ) {
+            if ( ! empty( $item['status'] ) && strtolower( (string) $item['name'] ) === $method ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Calculate order total
      *
      * @param   array  $data  Request data
+     * @param   int    $id    Booking ID, 0 for a new booking.
      *
      * @return  integer
      */
-    private function calculate_order_total($data) {
+    private function calculate_order_total( $data, $id = 0 ) {
         $seats          = ! empty( $data['seats'] ) ? $data['seats'] : [];
         $meeting_id =   ! empty( $data['appointment'] ) ? $data['appointment'] : 0;
         $total_price = 0;
-
-        if ( class_exists( SeatPlan::class ) && $seats ) {
-            foreach( $seats as $seat ) {
-                $seat_object = SeatPlan::find( $seat );
-                $total_price += $seat_object->price;
-            }
-
-            return $total_price;
-        }
 
         $meeting = new Appointment( $meeting_id );
 
         $prices = $meeting->get_price();
 
-        if ( $prices && is_array( $prices ) ) {
-            return $prices[0]['ticket_price'];
+        if ( class_exists( SeatPlan::class ) && $seats ) {
+            // Price a seat by its ticket, like the booking page does: a seat row keeps
+            // the price from when the seat map was saved, even after the ticket changes.
+            $tickets = [];
+            foreach ( is_array( $prices ) ? $prices : [] as $ticket ) {
+                if ( is_array( $ticket ) && isset( $ticket['ticket_price'] ) ) {
+                    $tickets[ ! empty( $ticket['ticket_name'] ) ? $ticket['ticket_name'] : 'default' ] = (float) $ticket['ticket_price'];
+                }
+            }
+
+            foreach( $seats as $seat ) {
+                $seat_object = SeatPlan::find( $seat );
+                if ( ! $seat_object ) {
+                    continue;
+                }
+                $total_price += isset( $tickets[ $seat_object->ticketType ] ) ? $tickets[ $seat_object->ticketType ] : (float) $seat_object->price;
+            }
+        } elseif ( $prices && is_array( $prices ) ) {
+            $total_price = $prices[0]['ticket_price'];
         }
 
-        return 0;
+        /**
+         * Filters the price the server charges for a booking.
+         *
+         * @param int|float $total_price One ticket, or the picked seats.
+         * @param array     $data        Request data.
+         * @param int       $id          Booking ID, 0 for a new booking.
+         */
+        return apply_filters( 'timetics_booking_order_total', $total_price, $data, $id );
+    }
+
+    /**
+     * Server price of a new booking: the meeting price, minus what a coupon takes off.
+     *
+     * Pro sets the discount through `timetics_booking_pricing`. Only `discount` and
+     * `coupon_code` are read back, so a listener can never change the subtotal or total.
+     *
+     * @param   array   $data   Booking request data.
+     * @param   string  $email  Email typed in the booking form.
+     *
+     * @return  array|WP_Error  `subtotal`, `discount`, `total` (floats) and `coupon_code`.
+     */
+    public function price_booking( array $data, $email ) {
+        $subtotal   = round( (float) $this->calculate_order_total( $data ), 2 );
+        $meeting_id = ! empty( $data['appointment'] ) ? intval( $data['appointment'] ) : 0;
+        $pricing    = array(
+            'subtotal'    => $subtotal,
+            'discount'    => 0.0,
+            'total'       => $subtotal,
+            'coupon_code' => '',
+        );
+
+        $result = apply_filters( 'timetics_booking_pricing', $pricing, $data, $meeting_id, (string) $email );
+
+        if ( is_wp_error( $result ) ) {
+            $error_data = $result->get_error_data();
+
+            if ( empty( $error_data['status'] ) ) {
+                $result->add_data( array_merge( is_array( $error_data ) ? $error_data : array(), array( 'status' => 422 ) ) );
+            }
+
+            return $result;
+        }
+
+        $invalid = new WP_Error( 'invalid_booking_pricing', __( 'The booking price could not be worked out.', 'timetics' ), array( 'status' => 400 ) );
+
+        if ( ! is_array( $result ) || ! isset( $result['discount'] ) || ! is_numeric( $result['discount'] ) || ! is_string( $result['coupon_code'] ?? '' ) ) {
+            return $invalid;
+        }
+
+        $discount = round( (float) $result['discount'], 2 );
+        $code     = strtoupper( trim( sanitize_text_field( $result['coupon_code'] ?? '' ) ) );
+
+        if ( ! is_finite( $discount ) || $discount < 0 || $discount > $subtotal || strlen( $code ) > 50 || ( $discount > 0 && '' === $code ) ) {
+            return $invalid;
+        }
+
+        return array(
+            'subtotal'    => $subtotal,
+            'discount'    => $discount,
+            'total'       => round( max( 0, $subtotal - $discount ), 2 ),
+            'coupon_code' => $code,
+        );
+    }
+
+    /**
+     * Status a visitor's new booking starts with
+     *
+     * @param   float   $total           Server price after any coupon.
+     * @param   string  $payment_method  Lower-case payment method.
+     * @param   string  $default_status  The site's default booking status.
+     *
+     * @return  string
+     */
+    private function new_booking_status( $total, $payment_method, $default_status ) {
+        // PayPal waits like Stripe, so the cleanup can cancel an abandoned one. Only when a
+        // PayPal plugin can tell the cleanup a booking is paid; an older Pro cannot.
+        $paypal_waits = 'paypal' === $payment_method && has_filter( 'timetics_keep_unpaid_booking' );
+
+        if ( (float) $total > 0 && ( 'stripe' === $payment_method || $paypal_waits ) ) {
+            return 'pending';
+        }
+
+        if ( (float) $total > 0 && 'woocommerce' === $payment_method ) {
+            return 'failed';
+        }
+
+        return $default_status;
     }
 
     /**

@@ -321,13 +321,14 @@ class Notification_Seeder {
      * Definitions for all 8 default flows.
      */
     private static function get_default_flows() {
+        // Bold lines, not a table: the flow editor (Quill) has no tables and
+        // squashes one into a single line the first time the flow is saved.
         $booking_tags = implode( '', array(
-            '<table style="border-collapse:collapse;width:100%;margin:20px 0;">',
-            '<tr><td style="padding:8px 0;font-weight:600;color:#0C274A;width:40%;">Meeting</td><td style="padding:8px 0;color:#556880;">{%meeting_title%}</td></tr>',
-            '<tr><td style="padding:8px 0;font-weight:600;color:#0C274A;">Date</td><td style="padding:8px 0;color:#556880;">{%meeting_date%}</td></tr>',
-            '<tr><td style="padding:8px 0;font-weight:600;color:#0C274A;">Time</td><td style="padding:8px 0;color:#556880;">{%meeting_time%}</td></tr>',
-            '<tr><td style="padding:8px 0;font-weight:600;color:#0C274A;">Duration</td><td style="padding:8px 0;color:#556880;">{%meeting_duration%}</td></tr>',
-            '<tr><td style="padding:8px 0;font-weight:600;color:#0C274A;">Location</td><td style="padding:8px 0;color:#556880;">{%meeting_location%}</td></tr>',
+            '<p><strong>Meeting:</strong> {%meeting_title%}</p>',
+            '<p><strong>Date:</strong> {%meeting_date%}</p>',
+            '<p><strong>Time:</strong> {%meeting_time%}</p>',
+            '<p><strong>Duration:</strong> {%meeting_duration%}</p>',
+            '<p><strong>Location:</strong> {%meeting_location%}</p>',
         ) );
 
         return array(
@@ -344,8 +345,8 @@ class Notification_Seeder {
                     'Booking Confirmed: {%meeting_title%}',
                     '<p>Hi {%customer_name%},</p><p>Your booking has been confirmed.</p>'
                     . $booking_tags
-                    . '<tr><td style="padding:8px 0;font-weight:600;color:#0C274A;">Host</td><td style="padding:8px 0;color:#556880;">{%host_name%}</td></tr>'
-                    . '</table><p>Thank you!</p>'
+                    . '<p><strong>Host:</strong> {%host_name%}</p>'
+                    . '<p>Thank you!</p>'
                 ),
             ),
 
@@ -360,8 +361,8 @@ class Notification_Seeder {
                     'New Booking: {%meeting_title%}',
                     '<p>Hi {%host_name%},</p><p>A new booking has been made.</p>'
                     . $booking_tags
-                    . '<tr><td style="padding:8px 0;font-weight:600;color:#0C274A;">Customer</td><td style="padding:8px 0;color:#556880;">{%customer_name%} ({%customer_email%})</td></tr>'
-                    . '</table><p>Thank you!</p>'
+                    . '<p><strong>Customer:</strong> {%customer_name%} ({%customer_email%})</p>'
+                    . '<p>Thank you!</p>'
                 ),
             ),
 
@@ -376,11 +377,10 @@ class Notification_Seeder {
                     'Customer Email',
                     'Booking Canceled: {%meeting_title%}',
                     '<p>Hi {%customer_name%},</p><p>Your booking has been canceled.</p>'
-                    . '<table style="border-collapse:collapse;width:100%;margin:20px 0;">'
-                    . '<tr><td style="padding:8px 0;font-weight:600;color:#0C274A;width:40%;">Meeting</td><td style="padding:8px 0;color:#556880;">{%meeting_title%}</td></tr>'
-                    . '<tr><td style="padding:8px 0;font-weight:600;color:#0C274A;">Date</td><td style="padding:8px 0;color:#556880;">{%meeting_date%}</td></tr>'
-                    . '<tr><td style="padding:8px 0;font-weight:600;color:#0C274A;">Time</td><td style="padding:8px 0;color:#556880;">{%meeting_time%}</td></tr>'
-                    . '</table><p>If you have questions, please contact us.</p><p>Thank you!</p>'
+                    . '<p><strong>Meeting:</strong> {%meeting_title%}</p>'
+                    . '<p><strong>Date:</strong> {%meeting_date%}</p>'
+                    . '<p><strong>Time:</strong> {%meeting_time%}</p>'
+                    . '<p>If you have questions, please contact us.</p><p>Thank you!</p>'
                 ),
             ),
 
@@ -394,12 +394,11 @@ class Notification_Seeder {
                     'Host Email',
                     'Booking Canceled: {%meeting_title%}',
                     '<p>Hi {%host_name%},</p><p>A booking has been canceled.</p>'
-                    . '<table style="border-collapse:collapse;width:100%;margin:20px 0;">'
-                    . '<tr><td style="padding:8px 0;font-weight:600;color:#0C274A;width:40%;">Meeting</td><td style="padding:8px 0;color:#556880;">{%meeting_title%}</td></tr>'
-                    . '<tr><td style="padding:8px 0;font-weight:600;color:#0C274A;">Date</td><td style="padding:8px 0;color:#556880;">{%meeting_date%}</td></tr>'
-                    . '<tr><td style="padding:8px 0;font-weight:600;color:#0C274A;">Time</td><td style="padding:8px 0;color:#556880;">{%meeting_time%}</td></tr>'
-                    . '<tr><td style="padding:8px 0;font-weight:600;color:#0C274A;">Customer</td><td style="padding:8px 0;color:#556880;">{%customer_name%} ({%customer_email%})</td></tr>'
-                    . '</table><p>Thank you!</p>'
+                    . '<p><strong>Meeting:</strong> {%meeting_title%}</p>'
+                    . '<p><strong>Date:</strong> {%meeting_date%}</p>'
+                    . '<p><strong>Time:</strong> {%meeting_time%}</p>'
+                    . '<p><strong>Customer:</strong> {%customer_name%} ({%customer_email%})</p>'
+                    . '<p>Thank you!</p>'
                 ),
             ),
 
@@ -414,13 +413,12 @@ class Notification_Seeder {
                     'Customer Email',
                     'Booking Rescheduled: {%meeting_title%}',
                     '<p>Hi {%customer_name%},</p><p>Your booking has been rescheduled.</p>'
-                    . '<table style="border-collapse:collapse;width:100%;margin:20px 0;">'
-                    . '<tr><td style="padding:8px 0;font-weight:600;color:#0C274A;width:40%;">Meeting</td><td style="padding:8px 0;color:#556880;">{%meeting_title%}</td></tr>'
-                    . '<tr><td style="padding:8px 0;font-weight:600;color:#0C274A;">New Date</td><td style="padding:8px 0;color:#556880;">{%meeting_date%}</td></tr>'
-                    . '<tr><td style="padding:8px 0;font-weight:600;color:#0C274A;">New Time</td><td style="padding:8px 0;color:#556880;">{%meeting_time%}</td></tr>'
-                    . '<tr><td style="padding:8px 0;font-weight:600;color:#0C274A;">Location</td><td style="padding:8px 0;color:#556880;">{%meeting_location%}</td></tr>'
-                    . '<tr><td style="padding:8px 0;font-weight:600;color:#0C274A;">Host</td><td style="padding:8px 0;color:#556880;">{%host_name%}</td></tr>'
-                    . '</table><p>Thank you!</p>'
+                    . '<p><strong>Meeting:</strong> {%meeting_title%}</p>'
+                    . '<p><strong>New Date:</strong> {%meeting_date%}</p>'
+                    . '<p><strong>New Time:</strong> {%meeting_time%}</p>'
+                    . '<p><strong>Location:</strong> {%meeting_location%}</p>'
+                    . '<p><strong>Host:</strong> {%host_name%}</p>'
+                    . '<p>Thank you!</p>'
                 ),
             ),
 
@@ -434,12 +432,11 @@ class Notification_Seeder {
                     'Host Email',
                     'Booking Rescheduled: {%meeting_title%}',
                     '<p>Hi {%host_name%},</p><p>A booking has been rescheduled.</p>'
-                    . '<table style="border-collapse:collapse;width:100%;margin:20px 0;">'
-                    . '<tr><td style="padding:8px 0;font-weight:600;color:#0C274A;width:40%;">Meeting</td><td style="padding:8px 0;color:#556880;">{%meeting_title%}</td></tr>'
-                    . '<tr><td style="padding:8px 0;font-weight:600;color:#0C274A;">New Date</td><td style="padding:8px 0;color:#556880;">{%meeting_date%}</td></tr>'
-                    . '<tr><td style="padding:8px 0;font-weight:600;color:#0C274A;">New Time</td><td style="padding:8px 0;color:#556880;">{%meeting_time%}</td></tr>'
-                    . '<tr><td style="padding:8px 0;font-weight:600;color:#0C274A;">Customer</td><td style="padding:8px 0;color:#556880;">{%customer_name%} ({%customer_email%})</td></tr>'
-                    . '</table><p>Thank you!</p>'
+                    . '<p><strong>Meeting:</strong> {%meeting_title%}</p>'
+                    . '<p><strong>New Date:</strong> {%meeting_date%}</p>'
+                    . '<p><strong>New Time:</strong> {%meeting_time%}</p>'
+                    . '<p><strong>Customer:</strong> {%customer_name%} ({%customer_email%})</p>'
+                    . '<p>Thank you!</p>'
                 ),
             ),
 
@@ -455,8 +452,8 @@ class Notification_Seeder {
                     'Reminder: {%meeting_title%} is coming up',
                     '<p>Hi {%customer_name%},</p><p>This is a reminder that your meeting is coming up soon.</p>'
                     . $booking_tags
-                    . '<tr><td style="padding:8px 0;font-weight:600;color:#0C274A;">Host</td><td style="padding:8px 0;color:#556880;">{%host_name%}</td></tr>'
-                    . '</table><p>We look forward to seeing you!</p><p>Thank you!</p>'
+                    . '<p><strong>Host:</strong> {%host_name%}</p>'
+                    . '<p>We look forward to seeing you!</p><p>Thank you!</p>'
                 ),
             ),
 
@@ -471,8 +468,8 @@ class Notification_Seeder {
                     'Reminder: {%meeting_title%} is coming up',
                     '<p>Hi {%host_name%},</p><p>This is a reminder that a meeting is coming up soon.</p>'
                     . $booking_tags
-                    . '<tr><td style="padding:8px 0;font-weight:600;color:#0C274A;">Customer</td><td style="padding:8px 0;color:#556880;">{%customer_name%} ({%customer_email%})</td></tr>'
-                    . '</table><p>Thank you!</p>'
+                    . '<p><strong>Customer:</strong> {%customer_name%} ({%customer_email%})</p>'
+                    . '<p>Thank you!</p>'
                 ),
             ),
 

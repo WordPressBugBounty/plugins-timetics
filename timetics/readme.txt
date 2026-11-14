@@ -3,7 +3,7 @@ Contributors: arraytics, ehsanriyadh
 Tags: appointment booking, booking calendar, appointment scheduler, online booking, online scheduling, reservation system, elearning, booking system
 Requires at least: 5.3
 Tested up to: 7.1
-Stable tag: 1.0.66
+Stable tag: 1.0.67
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -316,6 +316,15 @@ Handles secure online payment transactions for appointment bookings made through
 **Note:** Optional integration, only active if you configure Stripe payment settings.
 
 == Changelog ==
+
+= 1.0.67 (November 14, 2026) =
+Fix: Security improvements for guest bookings and payments.
+Fix: Two bookings can no longer take the same slot or the same staff member.
+Fix: WooCommerce payments, cancels and reschedules now keep slots safe.
+Fix: A seat is charged its ticket price from server.
+Fix: Meeting saves no longer undo each other.
+Fix: 12 am times follow the site time setting.
+Fix: Automation emails no longer get squashed in the flow editor.
 
 = 1.0.66 (October 29, 2026) =
 Improvement: The phone field now opens on the site's own country by default.

@@ -850,6 +850,11 @@ class Api_Appointment extends Api {
 
         $data = json_decode( $request->get_body(), true );
 
+        // An update changes only what it sends, so a page holding an old copy cannot undo another save.
+        if ( $id ) {
+            $data = array_merge( $this->saved_fields( $appoint ), (array) $data );
+        }
+
         $data = apply_filters( 'timetics_meeting_data', $data );
 
         $name                  = ! empty( $data['name'] ) ? sanitize_text_field( $data['name'] ) : $appoint->get_name();
@@ -1040,6 +1045,26 @@ class Api_Appointment extends Api {
         ];
 
         return rest_ensure_response( $response );
+    }
+
+    /**
+     * A meeting's saved values, in the shape an update request sends them.
+     *
+     * @param   Appointment  $appointment
+     *
+     * @return  array
+     */
+    private function saved_fields( $appointment ) {
+        $fields = $this->prepare_item( $appointment );
+
+        // The response hides these from some users or while recurring is off, and gives staff as objects.
+        $hidden = array( 'notifications', 'fluent_hook_overwrite', 'fleunt_crm_webhook', 'pabbly_hook_overwrite', 'pabbly_webook', 'zapier_hook_overwrite', 'zapier_webook', 'recurring_limit', 'recurring_interval', 'recurring_interval_name' );
+        foreach ( $hidden as $key ) {
+            $fields[ $key ] = $appointment->get_prop( $key );
+        }
+        $fields['staff'] = $appointment->get_staff_ids();
+
+        return $fields;
     }
 
     /**

@@ -48,6 +48,8 @@ class FlowManager {
             'meta_key'    => $meta_key,
             'meta_value'  => $action,
             'post_status' => 'publish',
+            // Every published flow for this event, not get_posts()' default of 5.
+            'numberposts' => -1,
         ] );
 
         if ( empty( $flows ) || !is_array( $flows ) ) {
@@ -100,6 +102,25 @@ class FlowManager {
         $hook_data   = $checkpoint['hook_data'];
         $resume_node = $checkpoint['resume_node'] ?? null;
         $action = $checkpoint['action'];
+
+        /**
+         * Filters whether a delayed flow step still runs.
+         *
+         * The host plugin knows things the SDK does not, e.g. that the
+         * appointment a reminder was queued for has since been cancelled.
+         *
+         * @param bool   $should_resume Default true.
+         * @param array  $hook_data     Trigger data saved when the flow started.
+         * @param string $action        Trigger value, e.g. 'appointment_scheduled'.
+         * @param array  $checkpoint    Saved checkpoint: resume_node, resume_after, flow_snapshot.
+         */
+        $should_resume = apply_filters( $this->identifier . '_should_resume_flow', true, $hook_data, $action, $checkpoint );
+
+        if ( true !== $should_resume ) {
+            // Skipped for good: without the checkpoint this step can never run.
+            delete_transient( sprintf( 'flow_checkpoint_%s_%s', $flow_id, $resume_time ) );
+            return;
+        }
 
         $this->execute_flow( $flow, $hook_data, $action, $resume_node );
     }
@@ -374,6 +395,11 @@ class FlowManager {
         if ( $operator === null ) {
             return false;
         }
+
+        // The flow editor saves these spellings; older flows use the ones below.
+        $aliases  = [ 'equal' => '=', 'greater_then' => 'greater_than', 'less_then' => 'less_than' ];
+        $operator = $aliases[ $operator ] ?? $operator;
+
         switch ( $operator ) {
         case '=':
             return $left == $right;
@@ -443,12 +469,29 @@ class FlowManager {
             }
 
             if ( $edge['source'] === $from_id ) {
-                if ( $label === null || ( isset( $edge['label'] ) && $edge['label'] === $label ) ) {
+                if ( $label === null || $this->edge_branch( $edge ) === strtolower( $label ) ) {
                     return $edge['target'];
                 }
             }
         }
         return null;
+    }
+
+    /**
+     * Which condition branch an edge is: 'true', 'false' or null.
+     *
+     * The editor translates the edge label, so data.condition is read first;
+     * the label is only a fallback for flows saved without it.
+     *
+     * @param array $edge The edge.
+     *
+     * @return string|null
+     */
+    protected function edge_branch( $edge ) {
+        $data   = (array) ( $edge['data'] ?? [] );
+        $branch = $data['condition'] ?? $edge['sourceHandle'] ?? $edge['label'] ?? null;
+
+        return is_string( $branch ) ? strtolower( $branch ) : null;
     }
 
     /**
@@ -465,8 +508,8 @@ class FlowManager {
             return;
         }
 
-        // Set a minimum expiration of 1 hour and maximum of 30 days
-        $expiration = max( HOUR_IN_SECONDS, min( $data['resume_after'] - time() + DAY_IN_SECONDS, 30 * DAY_IN_SECONDS ) );
+        // Keep the payload until the scheduled resume, with a day for late cron.
+        $expiration = max( HOUR_IN_SECONDS, $data['resume_after'] - time() + DAY_IN_SECONDS );
         $key = sprintf( 'flow_checkpoint_%s_%s', $flow_id, $resume_time );
         
         // Store the flow_id and resume_time in the data for verification

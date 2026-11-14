@@ -631,11 +631,9 @@ class Hooks {
             return false;
         }
 
-        // Stripe: a customer may still be completing checkout when this
-        // expires. Cancel the PaymentIntent first so a late confirm can't
-        // charge the card after we release the slot. If Stripe refuses
-        // because it already succeeded, the money is real — leave the
-        // booking pending instead of cancelling a paid customer.
+        // Stripe: cancel the PaymentIntent first so a late confirm can't charge the card
+        // after the slot is released. If it already succeeded, the customer paid and closed
+        // the tab: finish the payment as their browser would have, so it is never asked again.
         if ( 'stripe' === strtolower( (string) $booking->get_payment_method() ) ) {
             $intent_id = $booking->get_stripe_payment_intent_id();
 
@@ -644,11 +642,29 @@ class Hooks {
                 $intent = $stripe->retrieve_payment_intent( $intent_id );
 
                 if ( is_array( $intent ) && isset( $intent['status'] ) && 'succeeded' === $intent['status'] ) {
+                    $request = new \WP_REST_Request( 'PUT', '/timetics/v1/bookings/' . $booking->get_id() . '/payment' );
+                    $request->set_param( 'booking_id', $booking->get_id() );
+                    $request->set_body(
+                        wp_json_encode(
+                            array(
+                                'payment_method'  => 'stripe',
+                                'payment_details' => array( 'id' => $intent_id ),
+                            )
+                        )
+                    );
+                    Api_Booking::instance()->make_payment( $request );
+
                     return false;
                 }
 
                 $stripe->cancel_payment_intent( $intent_id );
             }
+        }
+
+        // Gateways in other plugins (Pro's PayPal) say here when the money is already
+        // taken, so a paid customer is left pending for the admin, never cancelled.
+        if ( apply_filters( 'timetics_keep_unpaid_booking', false, $booking ) ) {
+            return false;
         }
 
         // No permission check: only caller is the WP-Cron sweep, which has no
@@ -673,6 +689,13 @@ class Hooks {
                 'cancel_reason'  => __( 'Automatically cancelled — payment was not completed within the allowed time.', 'timetics' ),
             ]
         );
+
+        /**
+         * Fires after an unpaid booking was cancelled by the cleanup.
+         *
+         * @param int $booking_id Booking ID.
+         */
+        do_action( 'timetics_after_unpaid_booking_cancel', $booking_id );
     }
 
     	/**

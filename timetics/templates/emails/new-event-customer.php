@@ -103,6 +103,7 @@ defined( 'ABSPATH' ) || exit;
                 <?php endif;?>
 
                 <?php do_action( 'timetics_new_event_email', $this->booking, 'customer' ); ?>
+                <?php do_action( 'timetics_new_event_sessions', $this->booking, 'customer' ); ?>
 
             <?php else: ?>
                 <p class="greeting" style="color: #556880; margin-bottom: 5px">
@@ -159,6 +160,7 @@ defined( 'ABSPATH' ) || exit;
                     <?php endif;?>
 
                     <?php do_action( 'timetics_new_event_email', $this->booking, 'customer' ); ?>
+                <?php do_action( 'timetics_new_event_sessions', $this->booking, 'customer' ); ?>
                     <?php if($timetics_timezone) :?>
                         <div class="single-data-entry" style="margin: 10px 0 20px;">
                             <p style="font-weight: 600; font-size: 14px; line-height: 1; color: #0C274A; margin: 0 0 5px;"><?php echo esc_html__( 'Invitee Time Zone:', 'timetics' ); ?></p>

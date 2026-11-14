@@ -56,37 +56,34 @@ class Helpers {
     }
 
     /**
-     * will sanitize recursive
+     * Sanitize a flow config, keeping plain text as typed.
      *
-     * @return  array
+     * HTML such as an email body goes through wp_kses_post(). Text with no
+     * tags (a condition's "Sessions > 1") only loses tags: kses would turn
+     * its < and > into &lt; and &gt;, which the editor then shows.
+     *
+     * @param mixed $input Value to sanitize.
+     *
+     * @return mixed
      */
     public static function ens_sanitize_recursive( $input ) {
         if ( is_array( $input ) ) {
-
             foreach ( $input as $key => $value ) {
-                $input[$key] = ens_sanitize_recursive( $value );
+                $input[$key] = self::ens_sanitize_recursive( $value );
             }
-
         } elseif ( is_object( $input ) ) {
-
             foreach ( $input as $key => $value ) {
-                $input->$key = ens_sanitize_recursive( $value );
+                $input->$key = self::ens_sanitize_recursive( $value );
             }
-
-        } else {
-            if ( filter_var( $input, FILTER_VALIDATE_URL ) !== false ) {
-                $input = sanitize_url( $input );
-            } elseif ( is_email( $input ) ) {
-                $input = sanitize_email( $input );
-            } elseif ( is_int( $input ) ) {
-                $input = intval( $input );
-            } elseif ( is_float( $input ) ) {
-                $input = floatval( $input );
-            } elseif ( is_string( $input ) ) {
-                if ( strpos( $input, '<svg' ) === false ) {
-                    $input = wp_kses_post( $input );
-                }
-            }
+        } elseif ( filter_var( $input, FILTER_VALIDATE_URL ) !== false ) {
+            $input = sanitize_url( $input );
+        } elseif ( is_email( $input ) ) {
+            $input = sanitize_email( $input );
+        } elseif ( is_string( $input ) && strip_tags( $input ) === $input ) {
+            // Decode first, so text saved as &gt; by older versions reads right again.
+            $input = strip_tags( html_entity_decode( $input, ENT_QUOTES, 'UTF-8' ) );
+        } elseif ( is_string( $input ) && strpos( $input, '<svg' ) === false ) {
+            $input = wp_kses_post( $input );
         }
 
         return $input;

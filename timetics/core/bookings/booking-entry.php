@@ -253,7 +253,7 @@ class Booking_Entry {
                 $meta_query = [
                     'key'     => $meta_key,
                     'value'   => $value,
-                    'compare' => '=',
+                    'compare' => is_array( $value ) ? 'IN' : '=',
                 ];
 
                 $query[] = $meta_query;

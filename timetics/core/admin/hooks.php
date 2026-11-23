@@ -71,7 +71,7 @@ class Hooks {
         }
 
         $notice = '<div class="notice notice-danger is-dismissible error">';
-        $notice .= sprintf('<p><strong>%s</strong></p>', __( 'Timetics requires WooCommerce to enable woocommerce integration. You can download <a href="https://wordpress.org/plugins/woocommerce/" target="_blank">WooCommerce</a> here.', 'timetics' ) );
+        $notice .= sprintf( '<p><strong>%s</strong></p>', __( 'WPTimetics requires WooCommerce to enable woocommerce integration. You can download <a href="https://wordpress.org/plugins/woocommerce/" target="_blank">WooCommerce</a> here.', 'timetics' ) );
         $notice .= '</div>';
 
         echo wp_kses_post( $notice );
@@ -112,7 +112,7 @@ class Hooks {
     }
 
     /**
-     * Add settings on plugin action row
+     * Add Meetings, Settings, Upgrade to Pro and Documentation links to the Plugins page row.
      *
      * @param   array  $actions
      * @param   string  $plugin_file
@@ -120,16 +120,39 @@ class Hooks {
      * @return  array
      */
     public function add_settings_plugin_tab( $actions, $plugin_file ) {
-        // Check if the plugin file matches your target plugin
-        if ( 'timetics/timetics.php' === $plugin_file ) {
-            // Add your custom tab
-            $settings_tab = array(
-                'timetics-settings' => sprintf( '<a href="%s">%s</a>', esc_url( admin_url('admin.php?page=timetics#/settings') ), __( 'Settings', 'timetics' ) ),
-            );
-            // Merge the custom tab with existing actions
-            $actions = array_merge( $settings_tab, $actions );
+        if ( plugin_basename( \Timetics::get_plugin_file() ) !== $plugin_file ) {
+            return $actions;
         }
-        return $actions;
+
+        $links = array(
+            'timetics-meetings' => sprintf( '<a href="%s">%s</a>', esc_url( admin_url( 'admin.php?page=timetics#/meetings' ) ), esc_html__( 'Meetings', 'timetics' ) ),
+            'timetics-settings' => sprintf( '<a href="%s">%s</a>', esc_url( admin_url( 'admin.php?page=timetics#/settings' ) ), esc_html__( 'Settings', 'timetics' ) ),
+        );
+
+        // Installed but inactive Pro also hides it: the user already owns Pro.
+        $pro_installed = false;
+        foreach ( get_plugins() as $plugin ) {
+            if ( isset( $plugin['TextDomain'] ) && 'timetics-pro' === $plugin['TextDomain'] ) {
+                $pro_installed = true;
+                break;
+            }
+        }
+
+        if ( ! $pro_installed ) {
+            $links['timetics-upgrade'] = sprintf(
+                '<a href="%s" target="_blank" rel="noopener noreferrer" style="color:#e8364c;font-weight:600;">%s</a>',
+                esc_url( 'https://arraytics.com/wptimetics/pricing/' ),
+                esc_html__( 'Upgrade to Pro', 'timetics' )
+            );
+        }
+
+        $links['timetics-docs'] = sprintf(
+            '<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
+            esc_url( 'https://arraytics.com/docs/wptimetics/' ),
+            esc_html__( 'Documentation', 'timetics' )
+        );
+
+        return array_merge( $links, $actions );
     }
 
     /**

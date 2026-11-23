@@ -19,11 +19,11 @@ class Product {
      */
     public function  create( $meeting ) {
         $product_id = $meeting->get_wc_product_id();
+        $product    = $product_id ? wc_get_product( $product_id ) : false;
 
-        if ( $product_id ) {
-            $product = wc_get_product( $product_id );
-        } else {
-            $product = new \WC_Product_Simple ();
+        // The saved product may have been deleted in WooCommerce: make a new one.
+        if ( ! $product ) {
+            $product = new \WC_Product_Simple();
         }
 
         $product_category    = get_term_by( 'slug', 'timetics-meeting', 'product_cat' );

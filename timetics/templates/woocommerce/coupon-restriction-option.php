@@ -15,7 +15,7 @@ wp_nonce_field( 'timetics_coupon_action', 'timetics_coupon_nonce' );
 
 ?>
 <p class="form-field">
-    <label><?php esc_html_e( 'Timetics Meetings', 'timetics' ); ?></label>
+    <label><?php esc_html_e( 'WPTimetics Meetings', 'timetics' ); ?></label>
     <select class="timetics-product-search" multiple="multiple" style="width: 50%;" name="timetics_meeting_ids[]" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'timetics' ); ?>">
         <?php
         $timetics_args = array(

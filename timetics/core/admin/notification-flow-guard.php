@@ -107,7 +107,7 @@ class Notification_Flow_Guard {
      * @param  int $booking_id
      * @return void
      */
-    private static function purge( $booking_id ) {
+    public static function purge( $booking_id ) {
         self::clear_pending_flows( $booking_id );
         Booking_Hooks::clear_reminders( $booking_id );
     }
@@ -145,6 +145,8 @@ class Notification_Flow_Guard {
         // recipients immediately before the SDK resumes a delayed action.
         $fresh = Notification::get_hook_data( new Booking( $booking_id ) );
         if ( is_array( $fresh ) ) {
+            // Keep the link made at booking time: the refresh never makes one.
+            unset( $fresh['set_password_url'] );
             $checkpoint['hook_data'] = array_merge( $checkpoint['hook_data'], $fresh );
             self::save_checkpoint( $flow_id, $resume_time, $checkpoint );
         }

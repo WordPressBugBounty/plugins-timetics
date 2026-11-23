@@ -132,7 +132,7 @@ abstract class Email {
          */
         $data = apply_filters( 'timetics/admin/email/send', [$to, $subject, $message, $headers] );
 
-        return wp_mail( ...$data );
+        return timetics_safe_mail( ...$data );
     }
 
     public function sanitize_content( $content ) {

@@ -75,7 +75,7 @@ class Google_Calendar_Sync {
         } catch ( \Throwable $e ) {
             if ( defined( 'WP_DEBUG' ) && WP_DEBUG && defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG ) {
                 // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Debug logging is properly guarded by WP_DEBUG checks
-                error_log( 'Timetics Google Calendar Sync: ' . $e->getMessage() );
+                error_log( 'WPTimetics Google Calendar Sync: ' . $e->getMessage() );
             }
         }
     }

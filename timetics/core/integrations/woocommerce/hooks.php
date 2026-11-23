@@ -27,6 +27,11 @@ class Hooks {
     use Singleton;
 
     /**
+     * Cart item data key holding the booking id. Only add_booking_to_cart() sets it.
+     */
+    const CART_KEY = 'timetics_booking_id';
+
+    /**
      * Initialize
      *
      * @return  void
@@ -36,10 +41,19 @@ class Hooks {
 
         add_action( 'woocommerce_init', [$this, 'load_woocommerce_required_files'] );
 
-        add_action( 'woocommerce_thankyou', [$this, 'update_booking_payment_status'] );
-
-        // After the status update, so a just-paid booking is already final.
+        // The paid work runs on the order status change, so this page only shows the time.
         add_action( 'woocommerce_thankyou', [$this, 'announce_booking'], 20 );
+
+        add_action( 'woocommerce_before_calculate_totals', array( $this, 'price_booking_lines' ) );
+
+        add_filter( 'woocommerce_add_to_cart_validation', array( $this, 'keep_booking_cart_alone' ), 10, 2 );
+
+        // Runs on the cart page and before an order is made, in classic and block checkout.
+        add_action( 'woocommerce_check_cart_items', array( $this, 'drop_stale_booking_lines' ) );
+
+        // Both run before payment, so an order that is never paid is still linked.
+        add_action( 'woocommerce_checkout_order_created', array( $this, 'link_order_to_booking' ) );
+        add_action( 'woocommerce_store_api_checkout_order_processed', array( $this, 'link_order_to_booking' ) );
 
         // Sync booking status when WooCommerce order status changes
         add_action( 'woocommerce_order_status_changed', [$this, 'sync_booking_status_from_order'], 10, 3 );
@@ -63,8 +77,6 @@ class Hooks {
         add_filter( 'woocommerce_checkout_fields', [$this, 'hide_checkout_fields'] );
 
         add_filter( 'woocommerce_checkout_posted_data', [$this, 'modify_order_data'] );
-
-        add_action( 'timetics_after_booking_create', [$this, 'add_product_to_cart'], 10, 4 );
 
         add_filter( 'timetics_currency', [ $this, 'support_woocommerce_currency' ] );
 
@@ -155,43 +167,249 @@ class Hooks {
     }
 
     /**
-     * Update booking payment status
+     * Whether a booking still waits for its WooCommerce payment.
      *
-     * @param   integer  $order_id
+     * @param   Booking  $booking
+     *
+     * @return  bool
+     */
+    public static function is_waiting( Booking $booking ) {
+        return timetics_is_woocommerce_active()
+            && $booking->is_booking()
+            && 'woocommerce' === strtolower( (string) $booking->get_payment_method() )
+            && (float) $booking->get_total() > 0
+            && 'completed' !== $booking->get_payment_status()
+            && 'cancel' !== $booking->get_status();
+    }
+
+    /**
+     * Put a booking in the cart as the only line, tagged with its id.
+     *
+     * The cart is emptied first: the order status sync changes the whole order,
+     * so a booking order must not carry other products.
+     *
+     * @param   Booking  $booking  A waiting booking ( is_waiting() ).
+     *
+     * @return  bool  Whether the line was added.
+     */
+    public static function add_booking_to_cart( Booking $booking ) {
+        $meeting    = new Appointment( $booking->get_appointment() );
+        $product_id = $meeting->get_wc_product_id();
+        $wc_product = $product_id ? wc_get_product( $product_id ) : false;
+
+        if ( ! $wc_product ) {
+            $product_id = ( new Product() )->create( $meeting );
+            $wc_product = $product_id ? wc_get_product( $product_id ) : false;
+        }
+
+        if ( ! $wc_product ) {
+            return false;
+        }
+
+        // WooCommerce refuses a product without a price; the line is repriced from the booking anyway.
+        if ( ! $wc_product->get_price() ) {
+            update_post_meta( $product_id, '_regular_price', wc_format_decimal( $booking->get_total() ) );
+            update_post_meta( $product_id, '_price', wc_format_decimal( $booking->get_total() ) );
+        }
+
+        WC()->cart->empty_cart();
+
+        $key = WC()->cart->add_to_cart( $product_id, self::seat_count( $booking ), 0, array(), array( self::CART_KEY => (int) $booking->get_id() ) );
+
+        return (bool) $key;
+    }
+
+    /**
+     * Quantity of a booking line: one per seat, so a per-product coupon discounts each seat.
+     *
+     * @param   Booking  $booking
+     *
+     * @return  int
+     */
+    private static function seat_count( Booking $booking ) {
+        $seats = $booking->get_seat();
+
+        return is_array( $seats ) && $seats ? count( $seats ) : 1;
+    }
+
+    /**
+     * The booking a cart line was added for, or null for any other line.
+     *
+     * The product must still be that booking's meeting product.
+     *
+     * @param   array  $cart_item  Cart line, or the cart values of an order line.
+     *
+     * @return  Booking|null
+     */
+    private function booking_of_line( $cart_item ) {
+        // A cart filled before this version has the old "booking_id" key. That key was put
+        // on every product, so the product check below is what keeps it off shop products.
+        $booking_id = (int) ( $cart_item[ self::CART_KEY ] ?? $cart_item['booking_id'] ?? 0 );
+
+        if ( ! $booking_id || empty( $cart_item['product_id'] ) ) {
+            return null;
+        }
+
+        $booking = new Booking( $booking_id );
+
+        if ( ! $booking->is_booking() ) {
+            return null;
+        }
+
+        $meeting = new Appointment( $booking->get_appointment() );
+
+        return (int) $meeting->get_wc_product_id() === (int) $cart_item['product_id'] ? $booking : null;
+    }
+
+    /**
+     * The booking in the current cart, or null when the cart holds none.
+     *
+     * @return  Booking|null
+     */
+    private function cart_booking() {
+        if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
+            return null;
+        }
+
+        foreach ( WC()->cart->get_cart() as $cart_item ) {
+            $booking = $this->booking_of_line( $cart_item );
+
+            if ( $booking ) {
+                return $booking;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Price each booking line from its saved booking: total / seats, one seat per quantity.
+     *
+     * The quantity is set back to the seat count, so changing it in the cart never
+     * changes what the customer pays.
+     *
+     * @param   \WC_Cart  $cart
      *
      * @return  void
      */
-    public function update_booking_payment_status( $order_id ) {
+    public function price_booking_lines( $cart ) {
+        foreach ( $cart->get_cart() as $key => $cart_item ) {
+            $booking = $this->booking_of_line( $cart_item );
 
-        $order = wc_get_order( $order_id );
-
-        if ( ! $order->is_paid() ) {
-            // Mark booking as failed if payment was not completed
-            $session_data = WC()->session->get( 'timetics_data' );
-            if ( $session_data ) {
-                Status_Mapper::set_order_id_for_booking( $session_data['booking_id'], $order_id );
+            if ( ! $booking ) {
+                continue;
             }
-            WC()->session->set( 'timetics_data', null );
+
+            $seats = self::seat_count( $booking );
+
+            if ( $seats !== (int) $cart_item['quantity'] ) {
+                $cart->set_quantity( $key, $seats, false );
+            }
+
+            $price = (float) $booking->get_total() / $seats;
+
+            $cart_item['data']->set_price( $price );
+            $cart_item['data']->set_regular_price( $price );
+            $cart_item['data']->set_sale_price( $price );
+        }
+    }
+
+    /**
+     * Refuse other products while the cart holds a booking still waiting for payment.
+     *
+     * Runs only for the add to cart form and the Store API; WC_Cart::add_to_cart()
+     * itself skips it. A line whose booking no longer waits is removed instead.
+     *
+     * @param   bool  $passed
+     * @param   int   $product_id
+     *
+     * @return  bool
+     */
+    public function keep_booking_cart_alone( $passed, $product_id ) {
+        if ( ! $passed || ! WC()->cart ) {
+            return $passed;
+        }
+
+        foreach ( WC()->cart->get_cart() as $key => $cart_item ) {
+            $booking = $this->booking_of_line( $cart_item );
+
+            if ( ! $booking ) {
+                continue;
+            }
+
+            if ( ! self::is_waiting( $booking ) ) {
+                WC()->cart->remove_cart_item( $key );
+                continue;
+            }
+
+            wc_add_notice( __( 'Please pay for your booking, or remove it from the cart, before adding other products.', 'timetics' ), 'error' );
+
+            return false;
+        }
+
+        return $passed;
+    }
+
+    /**
+     * Remove a booking line whose booking can no longer be paid, before an order is made.
+     *
+     * Cancelled ( by a person or by the unpaid cleanup ), already paid, or the
+     * integration turned off since it went in the cart.
+     *
+     * @return  void
+     */
+    public function drop_stale_booking_lines() {
+        if ( ! WC()->cart ) {
             return;
         }
 
-        $session_data = WC()->session->get( 'timetics_data' );
+        foreach ( WC()->cart->get_cart() as $key => $cart_item ) {
+            $booking = $this->booking_of_line( $cart_item );
 
-        if ( ! $session_data ) {
-            return;
+            if ( ! $booking || self::is_waiting( $booking ) ) {
+                continue;
+            }
+
+            WC()->cart->remove_cart_item( $key );
+            wc_add_notice( __( 'Your booking can no longer be paid, so it was removed from your cart. Please book again.', 'timetics' ), 'error' );
         }
+    }
 
-        $booking = new Booking( $session_data['booking_id'] );
+    /**
+     * Write the booking -> order link once the new order has an id.
+     *
+     * @param   \WC_Order  $order
+     *
+     * @return  void
+     */
+    public function link_order_to_booking( $order ) {
+        $booking_id = (int) $order->get_meta( '_tt_booking_id' );
 
-        // Get the default booking status (e.g., 'approved')
-        $default_booking_status = timetics_get_option( 'default_booking_status', 'approved' );
+        if ( $booking_id ) {
+            Status_Mapper::set_order_id_for_booking( $booking_id, $order->get_id() );
+        }
+    }
+
+    /**
+     * Approve a booking whose order was just paid, then send what a new booking sends.
+     *
+     * Runs once: it is only called while the booking is not marked paid yet.
+     *
+     * @param   Booking      $booking
+     * @param   integer      $order_id
+     * @param   \WC_Order    $order
+     *
+     * @return  void
+     */
+    private function finish_paid_booking( $booking, $order_id, $order ) {
+        Status_Mapper::set_order_id_for_booking( $booking->get_id(), $order_id );
 
         // The money is in, but the booking may have lost its time while it waited
         // ( cancelled order, then paid late ). Approve it only if the time is ours.
         $outcome = $this->bring_back_booking(
             $booking,
             array(
-                'post_status'    => $default_booking_status,
+                'post_status'    => timetics_get_option( 'default_booking_status', 'approved' ),
                 'payment_status' => 'completed',
                 'payment_method' => 'woocommerce',
             )
@@ -199,36 +417,23 @@ class Hooks {
 
         if ( 'ok' !== $outcome ) {
             $this->report_booking_not_brought_back( $booking, $order_id, $order, $outcome, true );
-            Status_Mapper::set_order_id_for_booking( $session_data['booking_id'], $order_id );
-            Status_Mapper::set_booking_id_for_order( $order_id, $session_data['booking_id'] );
-            WC()->session->set( 'timetics_data', null );
             return;
         }
 
-        // Store the order ID in booking meta and booking id in woocommerce order meta for status syncing
-        Status_Mapper::set_order_id_for_booking( $session_data['booking_id'], $order_id );
-        Status_Mapper::set_booking_id_for_order( $order_id, $session_data['booking_id'] );
-
         $booking->create_event();
-        $is_email_to_customer = timetics_get_option( 'booking_created_customer');
-        $is_email_to_host     = timetics_get_option( 'booking_created_host');
-        if( $is_email_to_host ){
-            $new_event_email = new New_Event_Email( $booking );
-            $new_event_email->send();
+
+        if ( timetics_get_option( 'booking_created_host' ) ) {
+            ( new New_Event_Email( $booking ) )->send();
         }
 
-        if( $is_email_to_customer ){
-            $new_event_customer_email = new New_Event_Customer_Email( $booking );
-            $new_event_customer_email->send();
+        if ( timetics_get_option( 'booking_created_customer' ) ) {
+            ( new New_Event_Customer_Email( $booking ) )->send();
         }
 
-        do_action( 'timetics_gln_hook', 'booking_created', Notification::get_hook_data( $booking ) );
+        timetics_notify( 'booking_created', Notification::get_hook_data( $booking, true ) );
 
         // Paid, as after Stripe or PayPal, so "booking paid" automations run for it too.
         do_action( 'timetics_booking_payment', $booking );
-
-        WC()->session->set( 'timetics_data', null );
-
     }
 
     /**
@@ -437,13 +642,8 @@ class Hooks {
      * @return  array
      */
     public function hide_checkout_fields( $fields ) {
-        if ( ! function_exists( 'WC' ) || ! WC()->session ) {
-            return $fields;
-        }
-
-        $session_data = WC()->session->get( 'timetics_data' );
-
-        if ( ! $session_data ) {
+        // The booking form already took the customer's details; modify_order_data() fills them in.
+        if ( ! $this->cart_booking() ) {
             return $fields;
         }
 
@@ -465,18 +665,13 @@ class Hooks {
      * @return  array
      */
     public function modify_order_data( $data ) {
-        if ( ! function_exists( 'WC' ) || ! WC()->session ) {
+        $booking = $this->cart_booking();
+
+        if ( ! $booking ) {
             return $data;
         }
 
-        $session_data = WC()->session->get( 'timetics_data' );
-
-        if ( ! $session_data ) {
-            return $data;
-        }
-
-        $booking  = new Booking( $session_data['booking_id'] );
-        $customer = new Customer( $booking->get_customer_id() );
+        $customer = Customer::from_booking( $booking );
 
         $first_name = $customer->get_first_name();
         $last_name  = $customer->get_last_name();
@@ -500,82 +695,6 @@ class Hooks {
         }
 
         return $data;
-    }
-
-    /**
-     * Add to cart timetics appointment
-     *
-     * @param   integer  $booking_id
-     * @param   integer  $customer_id
-     * @param   integer  $meeting_id
-     * @param   array  $data
-     *
-     * @return  void
-     */
-    public function add_product_to_cart( $booking_id, $customer_id, $meeting_id, $data ) {
-        if ( 'woocommerce' !== $data['payment_method'] ) {
-            return;
-        }
-
-        $booking    = new Booking( $booking_id );
-        $meeting_id = $booking->get_appointment();
-        if( !empty($data['seats']) && is_array( $data['seats'])) {
-            $quantity   = count( $data['seats'] );
-        }else {
-            $quantity   = 1;
-        }
-        $price      = $booking->get_total();
-
-        // Get meeting details for checkout display
-        $appointment = new Appointment( $meeting_id );
-        $start_date  = $booking->get_start_date();
-        $start_time  = $booking->get_start_time();
-        $end_time    = $booking->get_end_time();
-        $timezone    = $booking->get_timezone();
-        $location    = $booking->get_location();
-        $location_type = $booking->get_location_type();
-        $duration    = $appointment->get_duration();
-        $meeting_timezone = $appointment->get_timezone();
-
-        // Set session for timetics data for woocommerce.
-        WC()->session->set( 'timetics_data', [
-            'booking_id'      => $booking_id,
-            'meeting_id'      => $meeting_id,
-            'price'           => $price,
-            'start_date'      => $start_date,
-            'start_time'      => $start_time,
-            'end_time'        => $end_time,
-            'timezone'        => $timezone,
-            'meeting_timezone' => $meeting_timezone,
-            'location'        => $location,
-            'location_type'   => $location_type,
-            'duration'        => $duration,
-        ] );
-
-        // Remove all items from cart.
-        WC()->cart->empty_cart();
-
-        // Preparing for add to cart.
-        $meeting    = new Appointment( $meeting_id );
-        $product_id = $meeting->get_wc_product_id();
-
-
-        if ( ! $product_id ) {
-            $product    = new Product();
-            $product_id = $product->create( $meeting );
-        }
-
-        $wc_product = wc_get_product( $product_id );
-        if ( ! $wc_product->get_price() ) {
-            update_post_meta( $product_id, '_regular_price',  wc_format_decimal( $price ) );
-            update_post_meta( $product_id, '_price',  wc_format_decimal( $price ) );
-        }
-
-        if ( ! $product_id ) {
-            return;
-        }
-
-        WC()->cart->add_to_cart( $product_id, $quantity );
     }
 
     /**
@@ -608,10 +727,8 @@ class Hooks {
     }
 
     public function hide_regular_price_checkout_css() {
-        $session = WC()->session;
-        if ( (is_checkout() || is_cart()) && $session ) {
-            $timetics_data = $session->get('timetics_data');
-            if( isset($timetics_data) ) {
+        if ( is_checkout() || is_cart() ) {
+            if ( $this->cart_booking() ) {
             ?>
             <style type="text/css">
                 .wc-block-components-order-summary .wc-block-components-order-summary-item__individual-prices {
@@ -694,12 +811,22 @@ class Hooks {
      * Shared by the cart / checkout item data and the order line item meta so the
      * customer sees the same details before and after paying.
      *
-     * @param   array  $session_data
+     * @param   Booking  $booking
      *
      * @return  array
      */
-    private function get_meeting_detail_pairs( $session_data ) {
-        $details = $this->prepare_meeting_details( $session_data );
+    private function get_meeting_detail_pairs( $booking ) {
+        $meeting = new Appointment( $booking->get_appointment() );
+        $details = $this->prepare_meeting_details(
+            array(
+                'start_date'       => $booking->get_start_date(),
+                'start_time'       => $booking->get_start_time(),
+                'timezone'         => $booking->get_timezone(),
+                'meeting_timezone' => $meeting->get_timezone(),
+                'duration'         => $meeting->get_duration(),
+                'location_type'    => $booking->get_location_type(),
+            )
+        );
 
         if ( ! $details ) {
             return [];
@@ -717,28 +844,35 @@ class Hooks {
             __( 'Duration', 'timetics' ) => $details['duration'],
             __( 'Location', 'timetics' ) => $details['location_label'],
             __( 'Timezone', 'timetics' ) => $details['timezone'],
+            __( 'Sessions', 'timetics' ) => $this->series_summary( $booking ),
         ] );
     }
 
     /**
-     * Whether the given product is the meeting product this session booked.
+     * "4 (23/11/2026, 30/11/2026, ...)" for a recurring series, empty for one booking.
      *
-     * The cart can hold other products, so the details must only be attached to
-     * the meeting line.
+     * The line carries the whole series price, so the customer sees every date they pay for.
      *
-     * @param   array    $session_data
-     * @param   integer  $product_id
+     * @param   Booking  $booking  The first booking of the series.
      *
-     * @return  bool
+     * @return  string
      */
-    private function is_meeting_product( $session_data, $product_id ) {
-        if ( empty( $session_data['meeting_id'] ) ) {
-            return false;
+    private function series_summary( $booking ) {
+        $series = $booking->get_series_place();
+
+        if ( ! $series ) {
+            return '';
         }
 
-        $meeting = new Appointment( $session_data['meeting_id'] );
+        $date_format = get_option( 'date_format', 'F j, Y' );
+        $dates       = array();
 
-        return (int) $meeting->get_wc_product_id() === (int) $product_id;
+        // Dates are in the meeting's timezone, like the Date line above.
+        foreach ( $series['sessions'] as $session ) {
+            $dates[] = date_i18n( $date_format, strtotime( $session['date'] ) );
+        }
+
+        return sprintf( '%d (%s)', $series['size'], implode( ', ', $dates ) );
     }
 
     /**
@@ -755,13 +889,13 @@ class Hooks {
      * @return  array
      */
     public function add_meeting_details_to_cart_item( $item_data, $cart_item ) {
-        $session_data = WC()->session ? WC()->session->get( 'timetics_data' ) : null;
+        $booking = $this->booking_of_line( $cart_item );
 
-        if ( ! $session_data || ! $this->is_meeting_product( $session_data, $cart_item['product_id'] ) ) {
+        if ( ! $booking ) {
             return $item_data;
         }
 
-        foreach ( $this->get_meeting_detail_pairs( $session_data ) as $label => $value ) {
+        foreach ( $this->get_meeting_detail_pairs( $booking ) as $label => $value ) {
             $item_data[] = [
                 'key'   => $label,
                 'value' => $value,
@@ -772,42 +906,35 @@ class Hooks {
     }
 
     /**
-     * Store meeting details as order line item meta.
+     * Store meeting details as order line item meta, and link the order to its booking.
      *
-     * The booking details only live in the WooCommerce session, which is cleared
-     * once the order is placed. Copying them onto the line item makes WooCommerce
-     * render them everywhere an order is shown: the thank you page, the customer
-     * and admin order emails, My Account -> View order, and the admin order screen.
+     * The line item meta makes WooCommerce show the details everywhere an order is
+     * shown: thank you page, order emails, My Account and the admin order screen.
+     * Classic and block checkout both build line items through this hook.
      *
      * @param   \WC_Order_Item_Product  $item
      * @param   string                  $cart_item_key
-     * @param   array                   $values
+     * @param   array                   $values         The cart line.
      * @param   \WC_Order               $order
      *
      * @return  void
      */
     public function add_meeting_details_to_order_item( $item, $cart_item_key, $values, $order ) {
-        $session_data = WC()->session ? WC()->session->get( 'timetics_data' ) : null;
+        $booking = $this->booking_of_line( $values );
 
-        if ( ! $session_data || ! $this->is_meeting_product( $session_data, $item->get_product_id() ) ) {
+        if ( ! $booking ) {
             return;
         }
 
-        foreach ( $this->get_meeting_detail_pairs( $session_data ) as $label => $value ) {
+        foreach ( $this->get_meeting_detail_pairs( $booking ) as $label => $value ) {
             $item->add_meta_data( $label, $value, true );
         }
 
-        // Link the order back to the booking here rather than on woocommerce_thankyou.
-        // The thank you page only runs for a customer who actually lands on it and, for
-        // an unpaid order, only stored the booking -> order half of the link. Without the
-        // order -> booking half, sync_booking_status_from_order() finds no booking and an
-        // admin later marking the order paid or cancelled silently does nothing.
-        //
-        // The order is not saved here on purpose: in the classic checkout the order has no
-        // ID yet at this point. WooCommerce saves it right after building the line items.
-        if ( ! empty( $session_data['booking_id'] ) ) {
-            $order->update_meta_data( '_tt_booking_id', $session_data['booking_id'] );
-        }
+        $item->add_meta_data( '_tt_booking_id', $booking->get_id(), true );
+
+        // Not saved here: in the classic checkout the order has no id yet. WooCommerce
+        // saves it right after the line items, then link_order_to_booking() runs.
+        $order->update_meta_data( '_tt_booking_id', $booking->get_id() );
     }
 
     /**
@@ -893,7 +1020,7 @@ class Hooks {
         }
 
         if ( $paid ) {
-            wp_mail( get_option( 'admin_email' ), __( 'A paid booking was not approved', 'timetics' ), $message );
+            timetics_safe_mail( get_option( 'admin_email' ), __( 'A paid booking was not approved', 'timetics' ), $message );
         }
     }
 
@@ -937,6 +1064,18 @@ class Hooks {
             // Map WooCommerce status to Timetics booking status
             $booking_status = Status_Mapper::order_to_booking_status( $new_status );
 
+            $order = function_exists( 'wc_get_order' ) ? wc_get_order( $order_id ) : false;
+
+            $paid_statuses = function_exists( 'wc_get_is_paid_statuses' ) ? wc_get_is_paid_statuses() : array( 'processing', 'completed' );
+            $was_paid      = in_array( $old_status, $paid_statuses, true );
+
+            // Only the move into a paid status is the payment. An older order can be paid while its
+            // booking is still marked unpaid; completing it weeks later must not send new-booking emails.
+            if ( ! $was_paid && in_array( $booking_status, array( 'approved', 'completed' ), true ) && $order && $order->is_paid() && 'completed' !== $booking->get_payment_status() ) {
+                $this->finish_paid_booking( $booking, $order_id, $order );
+                return;
+            }
+
             // Get current booking status
             $current_status = $booking->get_status();
 
@@ -976,7 +1115,6 @@ class Hooks {
                 $outcome = $this->bring_back_booking( $booking, array( 'post_status' => $booking_status ) );
 
                 if ( 'ok' !== $outcome ) {
-                    $order = function_exists( 'wc_get_order' ) ? wc_get_order( $order_id ) : false;
                     $paid  = $order ? $order->is_paid() : in_array( $new_status, array( 'processing', 'completed' ), true );
 
                     $this->report_booking_not_brought_back( $booking, $order_id, $order, $outcome, $paid );
@@ -1002,7 +1140,7 @@ class Hooks {
                     $customer_cancel_event_email->send();
                 }
 
-                do_action( 'timetics_gln_hook', 'booking_canceled', Notification::get_hook_data( $booking ) );
+                timetics_notify( 'booking_canceled', Notification::get_hook_data( $booking ) );
             }
 
         } finally {

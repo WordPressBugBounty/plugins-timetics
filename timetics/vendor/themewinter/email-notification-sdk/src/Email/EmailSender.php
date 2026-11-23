@@ -70,7 +70,13 @@ class EmailSender {
         $this->message = apply_filters( Helpers::get_hook_name( $this->identifier, 'notification_sdk_email_body' ), $this->message, $this->subject, $this->action_name, $this->receiver_type, $this->action_data );
         $this->message = apply_filters( Helpers::get_hook_name( $this->identifier, 'notification_sdk_email_footer' ), $this->message );
         
-        wp_mail( $this->to, $this->subject, $this->message, $headers );
+        // wp_mail() only catches PHPMailer's own exceptions. A host with mail() disabled
+        // throws an Error that would also kill the booking or order that sent this email.
+        try {
+            wp_mail( $this->to, $this->subject, $this->message, $headers );
+        } catch ( \Throwable $e ) {
+            do_action( 'wp_mail_failed', new \WP_Error( 'wp_mail_failed', $e->getMessage() ) );
+        }
 
         // Remove the filter to avoid affecting other emails
         remove_filter( 'wp_mail_content_type', 'set_html_content_type' );

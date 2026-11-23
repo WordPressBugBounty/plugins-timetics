@@ -36,6 +36,13 @@ class Customer {
     public $error;
 
     /**
+     * Guest row when this customer comes from the customer table
+     *
+     * @var array|null
+     */
+    protected $record = null;
+
+    /**
      * Customer data
      *
      * @var array
@@ -66,12 +73,92 @@ class Customer {
     }
 
     /**
+     * Customer from a guest row
+     *
+     * @param int $record_id Row id in the customer table.
+     *
+     * @return self
+     */
+    public static function from_record( $record_id ) {
+        $customer = new self();
+        $row      = Customer_Store::get( $record_id );
+
+        $customer->record = $row ? $row : array( 'id' => 0 );
+
+        return $customer;
+    }
+
+    /**
+     * The customer as this booking knows them: the details typed for it.
+     *
+     * Older bookings kept no copy, so they get their WordPress customer.
+     * A guest copy reports id 0, so callers cannot act on a matched account.
+     *
+     * @param Booking $booking Booking.
+     *
+     * @return self
+     */
+    public static function from_booking( Booking $booking ) {
+        if ( $booking->is_legacy_customer() ) {
+            return new self( $booking->get_customer_id() );
+        }
+
+        $snapshot = $booking->get_customer_snapshot();
+        $customer = new self();
+
+        $customer->record = array(
+            'id'         => $booking->get_customer_record_id(),
+            'wp_user_id' => null,
+            'email'      => $snapshot['email'],
+            'first_name' => $snapshot['first_name'],
+            'last_name'  => $snapshot['last_name'],
+            'phone'      => $snapshot['phone'],
+        );
+
+        return $customer;
+    }
+
+    /**
+     * Whether this customer is a guest row
+     *
+     * @return bool
+     */
+    public function is_guest() {
+        return null !== $this->record;
+    }
+
+    /**
+     * Guest row id
+     *
+     * @return int 0 for a WordPress customer.
+     */
+    public function get_record_id() {
+        return $this->is_guest() ? absint( $this->record['id'] ) : 0;
+    }
+
+    /**
+     * WordPress account the guest row is linked to
+     *
+     * @return int
+     */
+    public function get_wp_user_id() {
+        if ( $this->is_guest() ) {
+            return empty( $this->record['wp_user_id'] ) ? 0 : absint( $this->record['wp_user_id'] );
+        }
+
+        return absint( $this->id );
+    }
+
+    /**
      * Get customer id
+     *
+     * A guest returns 0 even when linked: old callers pass this id to WordPress
+     * user functions, and a link is not permission to act on that account.
      *
      * @return integer
      */
     public function get_id() {
-        return $this->id;
+        return $this->is_guest() ? 0 : $this->id;
     }
 
     /**
@@ -80,6 +167,10 @@ class Customer {
      * @return  string
      */
     public function get_first_name() {
+        if ( $this->is_guest() ) {
+            return $this->record_field( 'first_name' );
+        }
+
 		return get_user_meta( $this->id, 'first_name', true );
     }
 
@@ -89,7 +180,22 @@ class Customer {
      * @return  string
      */
     public function get_last_name() {
+        if ( $this->is_guest() ) {
+            return $this->record_field( 'last_name' );
+        }
+
 		return get_user_meta( $this->id, 'last_name', true );
+    }
+
+    /**
+     * A field of the guest row
+     *
+     * @param string $field Column.
+     *
+     * @return string
+     */
+    protected function record_field( $field ) {
+        return isset( $this->record[ $field ] ) ? (string) $this->record[ $field ] : '';
     }
 
     /**
@@ -107,6 +213,10 @@ class Customer {
      * @return  string
      */
     public function get_email() {
+        if ( $this->is_guest() ) {
+            return $this->record_field( 'email' );
+        }
+
         $customer = get_userdata( $this->id );
 
         if ( $customer ) {
@@ -122,6 +232,10 @@ class Customer {
      * @return  string
      */
     public function get_phone() {
+        if ( $this->is_guest() ) {
+            return $this->record_field( 'phone' );
+        }
+
         return $this->get_prop( 'phone' );
     }
 
@@ -131,6 +245,10 @@ class Customer {
      * @return  string
      */
     public function get_image() {
+        if ( $this->is_guest() ) {
+            return get_avatar_url( $this->record_field( 'email' ) );
+        }
+
         $image = $this->get_prop( 'image' );
 
         if ( ! $image ) {
@@ -207,6 +325,11 @@ class Customer {
      * @return string
      */
     public function get_metadata( $prop = '' ) {
+        // A guest has no user meta; reading id 0 would return nothing anyway.
+        if ( $this->is_guest() ) {
+            return '';
+        }
+
 		if( $prop == 'first_name' || $prop == 'last_name' ) {
 			$meta_key = $prop;
 		} else {
@@ -247,6 +370,11 @@ class Customer {
      */
     public function save_metadata() {
         foreach ( $this->data as $key => $value ) {
+            // WordPress keeps the login password hashed; a copy here would sit in plain text.
+            if ( 'password' === $key ) {
+                continue;
+            }
+
             // Prepare meta key.
 			if( $key == 'first_name' || $key == 'last_name' ) {
 				$meta_key = $key;
@@ -265,6 +393,10 @@ class Customer {
      * @return  bool
      */
     public function is_customer() {
+        if ( $this->is_guest() ) {
+            return $this->get_record_id() > 0;
+        }
+
         $user = get_userdata( $this->id );
 
         if ( $user ) {
@@ -289,8 +421,10 @@ class Customer {
 
         $user_data = get_user_by( 'email', $this->data['email'] );
 
-        if ( $user_data && ! in_array( 'timetics-customer', $user_data->roles, true ) ) {
+        // Only when adding a customer: an edit of an account without the role must save, not stop here.
+        if ( ! $this->id && $user_data && ! in_array( 'timetics-customer', $user_data->roles, true ) ) {
             $user_data->add_role( 'timetics-customer' );
+            Customer_Store::ensure_for_user( $user_data );
 
             return $user_data->ID;
         }
@@ -312,6 +446,19 @@ class Customer {
 
         $this->set_id( $customer_id );
         $this->save_metadata();
+
+        // The Customers screen lists rows only.
+        Customer_Store::ensure_for_user( $customer_id );
+    }
+
+    /**
+     * Delete a guest row only. Its bookings keep their own copy of the details,
+     * and a linked WordPress account is not touched.
+     *
+     * @return bool
+     */
+    public function delete_record() {
+        return $this->is_guest() && Customer_Store::delete( $this->get_record_id() );
     }
 
     /**
@@ -320,25 +467,10 @@ class Customer {
      * @return  bool
      */
     public function delete() {
-        require_once ABSPATH . 'wp-admin/includes/user.php';
-        $user = get_userdata( $this->id );
+        // Removing a customer only hides the contact: its bookings and account stay.
+        $row = $this->is_guest() ? Customer_Store::get( $this->get_record_id() ) : Customer_Store::find_by_user( $this->id );
 
-        // Get all bookings for this customer.
-        $bookings = $this->get_bookings();
-
-        // Delete all bookings for this customer.
-        foreach ( $bookings  as $booking ) {
-            $booking = new Booking( $booking );
-            $booking->delete();
-        }
-
-        if ( count( $user->roles ) > 1 ) {
-            $user->remove_role('timetics-customer');
-
-            return true;
-        }
-
-        return wp_delete_user( $this->id );
+        return $row ? Customer_Store::hide( $row['id'] ) : false;
     }
 
     /**
@@ -359,13 +491,25 @@ class Customer {
 
         $args = wp_parse_args( $args, $defaults );
 
-        if ( email_exists( $args['email'] ) ) {
-            $user = get_user_by( 'email', $args['email'] );
+        // email_exists() can be filtered, so it may name an account get_user_by() cannot find.
+        $user = email_exists( $args['email'] ) ? get_user_by( 'email', $args['email'] ) : false;
+
+        if ( $user ) {
+
+            /**
+             * Filters whether this save may change an existing customer's account.
+             * MCP turns it off, so what staff type through an AI app links the
+             * booking and never rewrites a stored contact.
+             *
+             * @param bool $may_edit Whether the current user may edit customers.
+             * @param int  $user_id  The existing customer.
+             */
+            $may_edit = apply_filters( 'timetics_customer_make_may_edit', current_user_can( 'manage_timetics' ), $user->ID );
 
             // The booking form is public: anyone can type any email. Only the
             // owner or an admin may change that account, so a guest booking
             // just links to it and leaves it alone.
-            if ( get_current_user_id() !== $user->ID && ! current_user_can( 'manage_timetics' ) ) {
+            if ( get_current_user_id() !== $user->ID && ! $may_edit ) {
                 $this->set_id( $user->ID );
 
                 return $user->ID;
@@ -436,8 +580,8 @@ class Customer {
 				'post_type'   => 'timetics-booking',
 				'post_status' => $counted_statuses,
                 // @codingStandardsIgnoreStart
-				'meta_key'    => '_tt_booking_customer',
-				'meta_value'  => $this->id,
+				'meta_key'    => $this->is_guest() ? '_tt_booking_customer_record' : '_tt_booking_customer',
+				'meta_value'  => $this->is_guest() ? $this->get_record_id() : $this->id,
                 // @codingStandardsIgnoreEnd
 			]
         );

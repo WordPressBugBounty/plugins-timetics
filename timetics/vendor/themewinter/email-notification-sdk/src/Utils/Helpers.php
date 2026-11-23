@@ -1,6 +1,8 @@
 <?php
 namespace Ens\Utils;
 
+use WP_HTTP_Response;
+
 class Helpers {
 
     /**

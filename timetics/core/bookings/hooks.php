@@ -39,10 +39,6 @@ class Hooks {
         // Covers sites active before this cron existed; no-op once scheduled.
         add_action( 'init', [$this, 'maybe_schedule_cleanup_cron'] );
 
-        add_action('woocommerce_before_calculate_totals', [ $this, 'timetics_variation_ticket_total_price' ] );
-
-        add_filter( 'woocommerce_add_cart_item_data', [ $this, 'timetics_add_cart_item_data' ], 10, 2 );
-
         add_filter( 'cron_schedules', [$this, 'register_cron_schedules'] );
 
         // Was admin_init-triggered, so unpaid bookings only got cleaned up when
@@ -60,7 +56,7 @@ class Hooks {
     public function register_cron_schedules( $schedules ) {
         $schedules['timetics_five_minutes'] = [
             'interval' => 5 * MINUTE_IN_SECONDS,
-            'display'  => __( 'Every 5 Minutes (Timetics)', 'timetics' ),
+            'display'  => __( 'Every 5 Minutes (WPTimetics)', 'timetics' ),
         ];
 
         return $schedules;
@@ -696,53 +692,5 @@ class Hooks {
          * @param int $booking_id Booking ID.
          */
         do_action( 'timetics_after_unpaid_booking_cancel', $booking_id );
-    }
-
-    	/**
-	 * Change price for cart item
-	 */
-	public function timetics_variation_ticket_total_price( $cart_object ) {
-		foreach ( $cart_object->cart_contents as $key => $value ) {
-			if ( ! empty( $value['booking_id'] ) && $value['booking_id'] !== 0 ) {
-			$order_total = !empty( $value['_timetics_variation_total_price'] ) ? $value['_timetics_variation_total_price'] : 0;
-
-            $value['data']->get_price();
-            $value['data']->set_price($order_total);
-            $value['data']->set_regular_price($order_total);
-			$value['data']->set_sale_price($order_total);
-
-			}
-		}
-
-	}
-
-    /**
-	 * add booking_id as cart item data
-	 *
-	 * @param   integer  $booking_id
-	 *
-	 * @return  void
-	 */
-	public function timetics_add_cart_item_data( $cart_item_data ) {
-        $session_data = WC()->session->get( 'timetics_data' );
-        $booking_id  = $session_data['booking_id'];
-        $booking     = new Booking( $booking_id );
-        $total_price = floatval($booking->get_total()); // Ensure $total_price is a float
-
-        if ( is_array( $booking->get_seat() ) ) {
-            $total_quantity = count( $booking->get_seat() );
-        } else {
-            $total_quantity = 1;
-        }
-
-        if( ! empty( $booking_id ) && $total_price !== 0 ) {
-            $cart_item_data['_timetics_variation_total_quantity'] = $total_quantity;
-            $cart_item_data['booking_id'] = $booking_id;
-
-            // For balancing the cart item price
-            $cart_item_data['_timetics_variation_total_price'] = $total_price / $total_quantity;
-        }
-
-        return $cart_item_data;
     }
 }

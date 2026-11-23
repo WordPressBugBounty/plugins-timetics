@@ -10,6 +10,8 @@ namespace Timetics\Core\Reports;
 defined( 'ABSPATH' ) || exit;
 
 use Timetics\Base\Api;
+use Timetics\Core\Customers\Customer_Backfill;
+use Timetics\Core\Customers\Customer_Store;
 use Timetics\Utils\Singleton;
 
 /**
@@ -100,7 +102,7 @@ class Api_Report extends Api {
 
         // Staff only see their own numbers, administrators see the whole site.
         $booking_scope  = $this->get_booking_scope_args();
-        $customer_scope = $this->get_customer_scope_args();
+        $customer_ids   = $this->get_customer_ids();
 
         if ( $input_data ) {
             foreach ( $input_data as $data ) {
@@ -135,12 +137,7 @@ class Api_Report extends Api {
                     break;
 
                 case 'total_customer':
-                    $total_customer = timetics_count_users( array_merge( [
-                        'role'       => 'timetics-customer',
-                        'date_range' => $date_range,
-                    ], $customer_scope ) );
-
-                    $reports['total_customer'] = $total_customer;
+                        $reports['total_customer'] = $this->count_customers( $data, $customer_ids );
                     break;
 
                 case 'booking_reports':
@@ -213,15 +210,35 @@ class Api_Report extends Api {
     }
 
     /**
-     * Get the user query args that limit a report to what the current user may see
+     * Contacts added in the report's range. Copied older customers keep their sign-up date.
      *
-     * @return  array Empty for administrators, who see every customer.
+     * @param array      $data         Report request: start_date, end_date.
+     * @param array|null $customer_ids Rows the user may count, null for all.
+     *
+     * @return int
      */
-    protected function get_customer_scope_args() {
+    protected function count_customers( $data, $customer_ids ) {
+        Customer_Backfill::run_batch();
+
+        return Customer_Store::count(
+            array(
+                'from' => $data['start_date'],
+                'to'   => $data['end_date'],
+                'ids'  => $customer_ids,
+            )
+        );
+    }
+
+    /**
+     * Contact rows the current user may count
+     *
+     * @return  array|null Null for administrators, who count every contact.
+     */
+    protected function get_customer_ids() {
         if ( timetics_can_view_all_data() ) {
-            return [];
+            return null;
         }
 
-        return ['include' => timetics_get_visible_customer_ids( get_current_user_id() )];
+        return Customer_Store::ids_for_bookings( timetics_get_visible_booking_ids( get_current_user_id() ) );
     }
 }

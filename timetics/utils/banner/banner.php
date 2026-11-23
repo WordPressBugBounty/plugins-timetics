@@ -7,7 +7,7 @@ if(!class_exists('\Wpmet\Libs\Banner')):
 
 class Banner {
 
-    protected $script_version = '2.1.0';
+		protected $script_version = '2.2.0';
 
     protected $key = 'wpmet_banner';
     protected $data;
@@ -97,6 +97,15 @@ class Banner {
     }
 
     private function init_banner($content, $instance, $inline_css){
+
+			// Newer banner styles arrive as finished HTML. Notice prints it through wp_kses_post().
+			if ( ! empty( $content->data->html ) ) {
+				$instance->set_gutter( false )
+					->set_class( ' wpmet-jhanda-float' )
+					->set_html( $content->data->html )
+					->call();
+				return;
+			}
 
         $html = '<a target="_blank" '.$inline_css.' class="wpmet-jhanda-href" href="'.$content->data->banner_link.'"><img style="display: block;margin: 0 auto;" src="'.$content->data->banner_image.'" /></a>';
 
@@ -203,9 +212,12 @@ class Banner {
         $this->last_check = $this->last_check == '' ? 0 : $this->last_check;
 
         if(($this->check_interval + $this->last_check) < time()){
+				// Stamp before the request: runs on every admin page, so a down server must not be retried on each load.
+				update_option( $this->text_domain . '__banner_last_check', time() );
+
             $response = wp_remote_get( $this->api_url . '/cache/'.$this->text_domain.'.json?nocache='.time(),
                 [
-                    'timeout'     => 10,
+                    'timeout'     => 5,
                     'httpversion' => '1.1',
                 ]
             );
@@ -216,7 +228,6 @@ class Banner {
 
                 if(!empty($response)) {
                     $this->data = $response;
-                    update_option($this->text_domain . '__banner_last_check', time());
                     update_option($this->text_domain . '__banner_data', $this->data);
                 }
 

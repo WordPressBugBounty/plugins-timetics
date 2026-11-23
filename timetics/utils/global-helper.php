@@ -649,13 +649,18 @@ if ( ! function_exists( 'timetics_add_woocommerce_product_cat' ) ) {
      * @return  void
      */
     function timetics_add_woocommerce_product_cat() {
-        $category_name = __( 'Timetics Meeting', 'timetics' );
+        // Match on slug: a renamed or translated name would add a second "timetics-meeting-2" category.
+        if ( term_exists( 'timetics-meeting', 'product_cat' ) ) {
+            return;
+        }
+
+        $category_name = __( 'WPTimetics Meeting', 'timetics' );
 
         // Prepare category arguments
         $category_args = array(
             'taxonomy'             => 'product_cat',
             'cat_name'             => $category_name,
-            'category_description' => __( 'Timetics meeting', 'timetics' ),
+            'category_description' => __( 'WPTimetics meeting', 'timetics' ),
             'slug'                 => 'timetics-meeting',
         );
 
@@ -905,21 +910,21 @@ if ( ! function_exists( 'timetics_modules_list' ) ) {
                 'settings_link' => '',
                 'doc_link'      => 'https://docs.arraytics.com/docs/booktics/',
             ],
-            'poptics'  => [
-                'name'          => 'poptics',
-                'slug'          => 'poptics',
+            'pointics' => [
+                'name'          => 'pointics',
+                'slug'          => 'pointics',
                 'type'          => 'plugin',
                 'upgrade'       => false,
-                'upgrade_link'  => 'https://arraytics.com/poptics',
+                'upgrade_link'  => 'https://themewinter.com/pointics/',
                 'status'        => 'on',
                 'is_pro'        => false,
-                'title'         => __( 'Poptics', 'timetics' ),
-                'description'   => __( 'Discover the ultimate popup mix with Poptics Popup Builder to boost your lead generation and sales conversions.', 'timetics' ),
-                'icon'          => \Timetics\Core\Addon\Extension_Icon::get( 'poptics' ),
+                'title'         => __( 'Pointics', 'timetics' ),
+                'description'   => __( 'Loyalty points and rewards for WordPress. Reward orders, signups, reviews and referrals to turn one-time buyers into repeat customers.', 'timetics' ),
+                'icon'          => \Timetics\Core\Addon\Extension_Icon::get( 'pointics' ),
                 'notice'        => '',
-                'demo_link'     => 'https://arraytics.com/poptics',
+                'demo_link'     => 'https://themewinter.com/pointics/',
                 'settings_link' => '',
-                'doc_link'      => 'https://docs.aethonic.com/docs/getting-started/intro/',
+                'doc_link'      => 'https://support.themewinter.com/docs/plugins/docs/pointics/',
             ],
             'wpcafe'   => [
                 'name'          => 'wpcafe',
@@ -946,7 +951,7 @@ if ( ! function_exists( 'timetics_modules_list' ) ) {
                 'status'        => 'on',
                 'is_pro'        => false,
                 'title'         => __( 'Aisentic', 'timetics' ),
-                'description'   => __( 'Your AI assistant for Timetics. Manage bookings, analyze schedules and automate routine tasks using plain English — get work done in seconds instead of hours.', 'timetics' ),
+                'description'   => __( 'Your AI assistant for WPTimetics. Manage bookings, analyze schedules and automate routine tasks using plain English — get work done in seconds instead of hours.', 'timetics' ),
                 'icon'          => \Timetics\Core\Addon\Extension_Icon::get( 'aisentic' ),
                 'notice'        => '',
                 'demo_link'     => '',
@@ -1163,5 +1168,148 @@ if ( ! function_exists( 'timetics_phone_default_country' ) ) {
         }
 
         return 'us';
+    }
+}
+
+if ( ! function_exists( 'timetics_guest_wp_user_enabled' ) ) {
+    /**
+     * Whether a new guest also gets a WordPress account. On until the admin turns it off.
+     *
+     * Reads the raw settings: timetics_get_option() hands back the default for an
+     * empty value, which would turn a saved "off" back on.
+     *
+     * @return bool
+     */
+    function timetics_guest_wp_user_enabled() {
+        $settings = get_option( 'timetics_settings', array() );
+
+        if ( ! is_array( $settings ) || ! array_key_exists( 'customer_create_wp_user', $settings ) ) {
+            return true;
+        }
+
+        return timetics_is_truthy_setting( $settings['customer_create_wp_user'] );
+    }
+}
+
+if ( ! function_exists( 'timetics_is_truthy_setting' ) ) {
+    /**
+     * Strict on/off for a stored or posted switch. A loose check reads "no" and "false" as on.
+     *
+     * @param mixed $value Value.
+     *
+     * @return bool
+     */
+    function timetics_is_truthy_setting( $value ) {
+        return in_array( $value, array( true, 1, '1', 'yes', 'true' ), true );
+    }
+}
+
+if ( ! function_exists( 'timetics_is_safe_customer_role' ) ) {
+    /**
+     * Whether a role can be given to accounts made from public bookings.
+     * Only roles whose enabled capabilities are `read` and nothing else.
+     * `level_0` is WordPress's old "no access" user level, held by subscriber.
+     *
+     * @param string $slug Role slug.
+     *
+     * @return bool
+     */
+    function timetics_is_safe_customer_role( $slug ) {
+        $role = is_string( $slug ) ? get_role( $slug ) : null;
+
+        if ( ! $role ) {
+            return false;
+        }
+
+        $enabled = array_keys( array_filter( (array) $role->capabilities ) );
+
+        return ! array_diff( $enabled, array( 'read', 'level_0' ) );
+    }
+}
+
+if ( ! function_exists( 'timetics_safe_customer_roles' ) ) {
+    /**
+     * Roles the admin may pick for accounts made from guest bookings.
+     *
+     * @return array Role slug => translated name.
+     */
+    function timetics_safe_customer_roles() {
+        $roles = array();
+
+        foreach ( wp_roles()->roles as $slug => $role ) {
+            if ( timetics_is_safe_customer_role( $slug ) ) {
+                $roles[ $slug ] = translate_user_role( $role['name'] );
+            }
+        }
+
+        return $roles;
+    }
+}
+
+if ( ! function_exists( 'timetics_guest_wp_user_role' ) ) {
+    /**
+     * Role for accounts made from guest bookings.
+     *
+     * Checked again here, not only on save: a role can gain capabilities later.
+     *
+     * @return string Role slug, or '' when the stored role is no longer safe.
+     */
+    function timetics_guest_wp_user_role() {
+        $slug = timetics_get_option( 'customer_wp_user_role', 'timetics-customer' );
+
+        return timetics_is_safe_customer_role( $slug ) ? $slug : '';
+    }
+}
+
+if ( ! function_exists( 'timetics_safe_mail' ) ) {
+    /**
+     * Send an email without letting a broken mail setup stop the request.
+     *
+     * Some hosts remove PHP's mail(); with no SMTP plugin, wp_mail() then throws an
+     * Error that would leave an already saved booking showing a "critical error".
+     *
+     * @param string|array $to          Recipients.
+     * @param string       $subject     Subject.
+     * @param string       $message     Body.
+     * @param string|array $headers     Headers.
+     * @param string|array $attachments Attachments.
+     *
+     * @return bool Whether it was sent.
+     */
+    function timetics_safe_mail( $to, $subject, $message, $headers = '', $attachments = array() ) {
+        try {
+            return wp_mail( $to, $subject, $message, $headers, $attachments );
+        } catch ( \Throwable $e ) {
+            // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Site owners need to see why emails stopped.
+            error_log( 'WPTimetics could not send an email: ' . $e->getMessage() );
+
+            // Mail log plugins listen here, as for any failed wp_mail().
+            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WordPress core hook, fired on purpose.
+            do_action( 'wp_mail_failed', new WP_Error( 'wp_mail_failed', $e->getMessage(), array( 'to' => $to, 'subject' => $subject ) ) );
+
+            return false;
+        }
+    }
+}
+
+if ( ! function_exists( 'timetics_notify' ) ) {
+    /**
+     * Start the notification flows for a booking event.
+     *
+     * The flows send their own emails, so a broken mail setup must not undo the
+     * booking change that has already been saved.
+     *
+     * @param string $event Event, like booking_created.
+     * @param array  $data  Notification data.
+     *
+     * @return void
+     */
+    function timetics_notify( $event, $data ) {
+        try {
+            do_action( 'timetics_gln_hook', $event, $data );
+        } catch ( \Throwable $e ) {
+            // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Site owners need to see why a notification stopped.
+            error_log( sprintf( 'WPTimetics notification "%s" failed: %s', $event, $e->getMessage() ) );
+        }
     }
 }

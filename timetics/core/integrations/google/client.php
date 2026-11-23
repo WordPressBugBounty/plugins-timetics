@@ -236,7 +236,7 @@ class Client {
 
         if ( defined( 'WP_DEBUG' ) && WP_DEBUG && defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG ) {
             // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Debug logging is guarded by WP_DEBUG checks.
-            error_log( sprintf( 'Timetics Google token refresh failed (HTTP %d): %s', $status_code, $body ) );
+            error_log( sprintf( 'WPTimetics Google token refresh failed (HTTP %d): %s', $status_code, $body ) );
         }
 
         return new \WP_Error(

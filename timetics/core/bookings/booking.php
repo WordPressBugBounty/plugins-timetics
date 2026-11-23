@@ -101,6 +101,14 @@ class Booking {
         'whatsapp_opt_in_at'    => '',
         'whatsapp_opt_in_source' => '',
         'whatsapp_opt_out_at'   => '',
+        // This booking's own copy of what the customer typed, and who may manage it.
+        'customer_fname'        => '',
+        'customer_lname'        => '',
+        'customer_email'        => '',
+        'customer_phone'        => '',
+        'customer_record'       => 0,
+        'owner_user'            => 0,
+        'owner_source'          => '',
     ];
 
     /**
@@ -193,12 +201,122 @@ class Booking {
     }
 
     /**
-     * Get customer
+     * Get the customer: the guest row when the booking has one, else the legacy WordPress user.
      *
-     * @return  User Object
+     * @return Customer
      */
     public function get_customer() {
-        return get_userdata( $this->get_customer_id() );
+        $record_id = $this->get_customer_record_id();
+
+        if ( $record_id ) {
+            return Customer::from_record( $record_id );
+        }
+
+        return new Customer( $this->get_customer_id() );
+    }
+
+    /**
+     * Get the guest customer row id
+     *
+     * @return int 0 for bookings made before guest customers existed.
+     */
+    public function get_customer_record_id() {
+        return absint( $this->get_prop( 'customer_record' ) );
+    }
+
+    /**
+     * Whether this booking predates guest customers. Those are owned by their WordPress customer.
+     *
+     * @return bool
+     */
+    public function is_legacy_customer() {
+        return ! $this->get_customer_record_id();
+    }
+
+    /**
+     * WordPress user who may see and manage this booking.
+     *
+     * Never derived from the email: a new booking with no owner stays without one.
+     *
+     * @return int 0 when nobody owns it.
+     */
+    public function get_owner_user_id() {
+        if ( $this->is_legacy_customer() ) {
+            return absint( $this->get_customer_id() );
+        }
+
+        return absint( $this->get_prop( 'owner_user' ) );
+    }
+
+    /**
+     * How the owner was set: authenticated, created_account, or legacy.
+     *
+     * @return string '' when the booking has no owner.
+     */
+    public function get_owner_source() {
+        if ( ! $this->get_owner_user_id() ) {
+            return '';
+        }
+
+        if ( $this->is_legacy_customer() ) {
+            return 'legacy';
+        }
+
+        $source = (string) $this->get_prop( 'owner_source' );
+
+        return in_array( $source, array( 'authenticated', 'created_account', 'legacy' ), true ) ? $source : '';
+    }
+
+    /**
+     * Whether the given user owns this booking
+     *
+     * @param int $user_id User id.
+     *
+     * @return bool
+     */
+    public function belongs_to_user( $user_id ) {
+        $user_id = absint( $user_id );
+
+        return $user_id > 0 && $user_id === $this->get_owner_user_id();
+    }
+
+    /**
+     * Account this booking created, the only one that may get a set-password link.
+     *
+     * Asking WordPress for a reset key writes a new one, which would cancel a
+     * reset the account's real owner already asked for.
+     *
+     * @return int 0 when the booking created no account.
+     */
+    public function get_created_account_id() {
+        return 'created_account' === $this->get_owner_source() ? $this->get_owner_user_id() : 0;
+    }
+
+    /**
+     * Name, email and phone as given for this booking.
+     *
+     * Older bookings kept no copy, so they read their WordPress customer.
+     *
+     * @return array first_name, last_name, email, phone.
+     */
+    public function get_customer_snapshot() {
+        if ( $this->is_legacy_customer() && '' === (string) $this->get_prop( 'customer_email' ) ) {
+            $customer = new Customer( $this->get_customer_id() );
+
+            return array(
+                'first_name' => (string) $customer->get_first_name(),
+                'last_name'  => (string) $customer->get_last_name(),
+                'email'      => (string) $customer->get_email(),
+                'phone'      => (string) $customer->get_phone(),
+            );
+        }
+
+        return array(
+            'first_name' => (string) $this->get_prop( 'customer_fname' ),
+            'last_name'  => (string) $this->get_prop( 'customer_lname' ),
+            'email'      => (string) $this->get_prop( 'customer_email' ),
+            'phone'      => (string) $this->get_prop( 'customer_phone' ),
+        );
     }
 
     /**
@@ -683,7 +801,8 @@ class Booking {
             // A real 0 price (free, or a 100% coupon) is kept; only an empty value falls back.
             $is_zero_money = in_array( $key, array( 'order_total', 'order_subtotal', 'coupon_discount' ), true ) && ( 0 === $value || 0.0 === $value );
 
-            if ( ! $value && ! $is_zero_money && ! in_array( $key, array( 'whatsapp_number', 'whatsapp_opt_in' ), true ) ) {
+            // The typed copy may be cleared on purpose; the API already kept fields the request left out.
+            if ( ! $value && ! $is_zero_money && ! in_array( $key, array( 'whatsapp_number', 'whatsapp_opt_in', 'customer_lname', 'customer_phone' ), true ) ) {
                 $value = $this->get_prop( $key );
             }
 
@@ -894,7 +1013,7 @@ class Booking {
                 [
                     'meeting_id'  => $meeting->get_id(),
                     'staff_id'    => $this->get_staff_id(),
-                    'customer_id' => $this->get_customer(),
+                    'customer_id' => (int) $this->get_customer_id(),
                     'booking_id'  => $this->id,
                     'booked'      => $taking,
                     'date'        => $start->format( 'Y-m-d' ),
@@ -981,7 +1100,7 @@ class Booking {
                 // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Debug-only diagnostics for a missing booking entry.
                 error_log(
                     sprintf(
-                        'Timetics release_slot: no Booking_Entry found for booking #%d ( staff %s, meeting %s, slot %s %s ).',
+                        'WPTimetics release_slot: no Booking_Entry found for booking #%d ( staff %s, meeting %s, slot %s %s ).',
                         $this->id,
                         $this->get_staff_id(),
                         $this->get_appointment(),
@@ -1241,7 +1360,6 @@ class Booking {
 
         $meeting_id    = $this->get_appointment();
         $staff_id      = $this->get_staff_id();
-        $customer_id   = $this->get_customer_id();
         $location_type = $this->get_location_type();
         $access_token  = timetics_get_google_access_token( $staff_id );
 
@@ -1251,7 +1369,7 @@ class Booking {
 
         $meeting  = new Appointment( $meeting_id );
         $staff    = new Staff( $staff_id );
-        $customer = new Customer( $customer_id );
+        $customer = Customer::from_booking( $this );
 
         $time     = gmdate( 'h:i a', strtotime( $this->get_start_time() ) );
         $date     = gmdate( 'd F Y', strtotime( $this->get_start_date() ) );

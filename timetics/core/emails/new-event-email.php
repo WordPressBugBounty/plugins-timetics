@@ -52,7 +52,7 @@ class New_Event_Email extends Email {
         $this->booking  = $booking;
         $this->meeting  = new Appointment( $booking->get_appointment() );
         $this->staff    = new Staff( $booking->get_staff_id() );
-        $this->customer = new Customer( $booking->get_customer_id() );
+        $this->customer = Customer::from_booking( $booking );
 
         parent::__construct();
     }

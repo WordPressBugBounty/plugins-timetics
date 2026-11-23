@@ -2,6 +2,7 @@
 namespace Ens\Whatsapp;
 
 use Ens\Utils\Helpers;
+use WP_Error;
 use WP_HTTP_Response;
 use WP_REST_Controller;
 use WP_REST_Server;
@@ -84,29 +85,34 @@ class TemplatesAPI extends WP_REST_Controller {
     }
 
     /**
-     * Permission check — only logged-in users with manage capability.
+     * Permission check: a user with manage_options and a valid nonce.
      *
-     * Consumers can override via the `{prefix}_ens_whatsapp_templates_permission` filter.
+     * Consumers can widen the capability via the `{prefix}_ens_whatsapp_templates_permission`
+     * filter; the nonce is always required.
      *
      * @since 1.0.0
      *
      * @param \WP_REST_Request $request Current request.
      *
-     * @return bool|WP_HTTP_Response
+     * @return bool|WP_Error
      */
     public function get_items_permissions_check( $request ) {
-        $nonce_check = Helpers::ens_verify_nonce( $request->get_header( 'x_wp_nonce' ), $this->identifier );
-        if ( $nonce_check instanceof WP_HTTP_Response ) {
-            return $nonce_check;
-        }
-
-        $can = current_user_can( 'manage_options' );
-
-        return (bool) apply_filters(
+        $can = (bool) apply_filters(
             Helpers::get_hook_name( $this->identifier, 'ens_whatsapp_templates_permission' ),
-            $can,
+            current_user_can( 'manage_options' ),
             $request
         );
+        if ( ! $can ) {
+            return false;
+        }
+
+        // WordPress denies only on WP_Error, false or null; the nonce helper's
+        // WP_HTTP_Response would count as allowed, so turn it into a WP_Error.
+        if ( true !== Helpers::ens_verify_nonce( $request->get_header( 'x_wp_nonce' ), $this->identifier ) ) {
+            return new WP_Error( 'rest_forbidden', __( 'Nonce not verified', Helpers::get_config_data( $this->identifier, 'text_domain' ) ), [ 'status' => 403 ] );
+        }
+
+        return true;
     }
 
     /**
@@ -205,8 +211,8 @@ class TemplatesAPI extends WP_REST_Controller {
     /**
      * Reduce a raw Meta template object to the shape the UI needs.
      *
-     * Skips non-APPROVED templates so the flow builder cannot pick a template
-     * that would fail at send time.
+     * Skips templates that would fail at send time: not APPROVED, or needing
+     * more than body values (see is_sendable()).
      *
      * @since 1.0.0
      *
@@ -225,6 +231,10 @@ class TemplatesAPI extends WP_REST_Controller {
         }
 
         $components       = isset( $tpl['components'] ) && is_array( $tpl['components'] ) ? $tpl['components'] : [];
+        if ( ! self::is_sendable( $components ) ) {
+            return null;
+        }
+
         $body             = $this->find_component( $components, 'BODY' );
         $header           = $this->find_component( $components, 'HEADER' );
         $footer           = $this->find_component( $components, 'FOOTER' );
@@ -245,6 +255,51 @@ class TemplatesAPI extends WP_REST_Controller {
             'header_text'      => isset( $header['text'] ) ? (string) $header['text'] : '',
             'footer_text'      => isset( $footer['text'] ) ? (string) $footer['text'] : '',
         ];
+    }
+
+    /**
+     * Whether the sender can fill every part of the template.
+     *
+     * The sender fills body values only. A media header, a header or button
+     * value, or a carousel is refused by Meta on every send (error 132012).
+     * Public so consumers can apply the same rule (e.g. a connection check).
+     *
+     * @param array $components Template components.
+     *
+     * @return bool
+     */
+    public static function is_sendable( $components ) {
+        foreach ( $components as $component ) {
+            $type = strtoupper( (string) ( $component['type'] ?? '' ) );
+
+            if ( 'BODY' === $type || 'FOOTER' === $type ) {
+                continue;
+            }
+
+            if ( 'HEADER' === $type ) {
+                $format = strtoupper( (string) ( $component['format'] ?? 'TEXT' ) );
+                if ( 'TEXT' !== $format || false !== strpos( (string) ( $component['text'] ?? '' ), '{{' ) ) {
+                    return false;
+                }
+                continue;
+            }
+
+            if ( 'BUTTONS' === $type ) {
+                foreach ( (array) ( $component['buttons'] ?? [] ) as $button ) {
+                    $kind      = strtoupper( (string) ( $button['type'] ?? '' ) );
+                    $fixed_url = 'URL' === $kind && false === strpos( (string) ( $button['url'] ?? '' ), '{{' );
+                    if ( ! $fixed_url && ! in_array( $kind, [ 'QUICK_REPLY', 'PHONE_NUMBER' ], true ) ) {
+                        return false;
+                    }
+                }
+                continue;
+            }
+
+            // CAROUSEL, LIMITED_TIME_OFFER and any type Meta adds later.
+            return false;
+        }
+
+        return true;
     }
 
     /**

@@ -281,6 +281,16 @@ class Api_Settings extends Api {
                     $value = max( 5, absint( $value ) );
                 }
 
+                // Stored as yes/no: this switch defaults to on, so a saved false must stay readable as off.
+                if ( 'customer_create_wp_user' === $key ) {
+                    $value = timetics_is_truthy_setting( $value ) ? 'yes' : 'no';
+                }
+
+                // A role with more than `read` would hand power to anyone who books.
+                if ( 'customer_wp_user_role' === $key && ! timetics_is_safe_customer_role( $value ) ) {
+                    $value = 'timetics-customer';
+                }
+
                 if ( 'phone_default_country' === $key ) {
                     $value = strtolower( sanitize_text_field( (string) $value ) );
                     $value = preg_match( '/^[a-z]{2}$/', $value ) ? $value : 'us';

@@ -79,21 +79,29 @@ class Manage_Links_Sender {
             return;
         }
 
-        $customer = get_user_by( 'email', $email );
-        if ( ! $customer instanceof \WP_User ) {
-            return;
+        // The links go to this inbox only, so its owner may see every booking made with it.
+        $first = $rows[0]['booking'];
+
+        if ( $first->is_legacy_customer() ) {
+            $account = get_userdata( $first->get_customer_id() );
+            $name    = $account ? $account->display_name : '';
+        } else {
+            $snapshot = $first->get_customer_snapshot();
+            $name     = trim( $snapshot['first_name'] . ' ' . $snapshot['last_name'] );
         }
+
+        $email = strtolower( trim( $email ) );
 
         $rows_html = self::rows_html( $rows );
 
-        ( new Manage_Links_Customer_Email( $customer, $rows_html ) )->send();
+        ( new Manage_Links_Customer_Email( $email, $name, $rows_html ) )->send();
 
         do_action(
             'timetics_gln_hook',
             'manage_links_requested',
             [
-                'customer_email'         => esc_html( $customer->user_email ),
-                'customer_name'          => esc_html( $customer->display_name ),
+                'customer_email'         => esc_html( $email ),
+                'customer_name'          => esc_html( $name ),
                 'upcoming_bookings'      => $rows_html,
                 // Anchor for delay nodes. The SDK reads `<key>_timestamp` as
                 // true UTC; without it a delay falls back to current_time().
@@ -157,9 +165,25 @@ class Manage_Links_Sender {
      * @return array[] Up to MAX rows of [ 'booking' => Booking, 'highlight' => bool ].
      */
     public function upcoming( $email, $hint = [] ) {
+        if ( ! is_email( $email ) ) {
+            return array();
+        }
+
+        // New bookings carry their own email; older ones only point at the account.
         $user = get_user_by( 'email', (string) $email );
-        if ( ! $user ) {
-            return [];
+        $who  = array(
+            'relation' => 'OR',
+            array(
+                'key'   => '_tt_booking_customer_email',
+                'value' => strtolower( trim( $email ) ),
+            ),
+        );
+
+        if ( $user ) {
+            $who[] = array(
+                'key'   => '_tt_booking_customer',
+                'value' => (int) $user->ID,
+            );
         }
 
         $today    = new \DateTimeImmutable( 'today', wp_timezone() );
@@ -168,13 +192,13 @@ class Manage_Links_Sender {
         // Bookings around today are checked one by one against the clock in
         // their own timezone, so the ones already over never take a place in
         // the list. Later days need no check.
-        $near  = $this->query( $user->ID, [ $today->modify( '-1 day' )->format( 'Y-m-d' ), $tomorrow ], 'BETWEEN' );
-        $later = $this->query( $user->ID, $tomorrow, '>', self::MAX );
+        $near  = $this->query( $who, array( $today->modify( '-1 day' )->format( 'Y-m-d' ), $tomorrow ), 'BETWEEN' );
+        $later = $this->query( $who, $tomorrow, '>', self::MAX );
 
         // The query orders by date only, so bookings on the last date it
         // reached may be cut at any time of day. Take that whole day.
         if ( count( $later ) === self::MAX ) {
-            $later = array_merge( $later, $this->query( $user->ID, end( $later )->get_start_date(), '=' ) );
+            $later = array_merge( $later, $this->query( $who, end( $later )->get_start_date(), '=' ) );
         }
 
         $bookings = [];
@@ -207,14 +231,14 @@ class Manage_Links_Sender {
     /**
      * Approved and pending bookings of a customer by start date.
      *
-     * @param int          $customer_id User id.
-     * @param string|array $date        Date, or [ from, to ] for BETWEEN.
-     * @param string       $compare     Meta compare.
-     * @param int          $limit       Most bookings.
+     * @param array        $who     Meta query clause for the customer.
+     * @param string|array $date    Date, or [ from, to ] for BETWEEN.
+     * @param string       $compare Meta compare.
+     * @param int          $limit   Most bookings.
      *
      * @return Booking[] By start date.
      */
-    private function query( $customer_id, $date, $compare, $limit = 50 ) {
+    private function query( array $who, $date, $compare, $limit = 50 ) {
         // Note: 50 per day range is far above one customer's bookings; raise it if that ever stops being true.
         $query = new WP_Query(
             [
@@ -226,10 +250,7 @@ class Manage_Links_Sender {
                 // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Bookings are post meta.
                 'meta_query'     => [
                     'relation' => 'AND',
-                    [
-                        'key'   => '_tt_booking_customer',
-                        'value' => (int) $customer_id,
-                    ],
+                    $who,
                     'start'    => [
                         'key'     => '_tt_booking_start_date',
                         'value'   => $date,

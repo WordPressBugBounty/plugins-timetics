@@ -13,7 +13,7 @@ class Notice{
      *
      * @var string
      */
-    protected $script_version = '2.1.1';
+		protected $script_version = '2.2.0';
 
     /**
      * Unique ID to identify each notice
@@ -309,6 +309,10 @@ class Notice{
     }
 
     public function  generate_html() {
+			// Notices render in admin_notices, still early enough for a footer script.
+			if ( false !== strpos( (string) $this->html, 'data-nb-popup' ) ) {
+				self::enqueue_popup_script();
+			}
 
 		?>
         <div
@@ -488,9 +492,98 @@ class Notice{
                     font-size: 1.2rem;
                 }
 
+                /* HTML banners from the banner server bring their own box, so hide the notice bar.
+                   The WordPress close button is hidden only when the banner has its own, or it could not be dismissed. */
+                .wpmet-notice.wpmet-jhanda-float {
+                    background: transparent !important;
+                    border: 0 !important;
+                    box-shadow: none !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    display: block !important;
+                }
+                .wpmet-notice.wpmet-jhanda-float:has(.notice-right-container .notice-dismiss) > .notice-dismiss { display: none !important; }
+                .wpmet-notice.wpmet-jhanda-float > div[style*='clear'] { display: none !important; }
+                .wpmet-jhanda-float .notice-right-container .notice-dismiss:before { content: none !important; }
+                .wpmet-jhanda-float .notice-right-container .notice-dismiss { position: static; padding: 0; margin: 0; top: auto; right: auto; }
+
+                /* Server popups start hidden; the script below adds nb-show when it is time. */
+                [data-nb-popup] {
+                    opacity: 0;
+                    visibility: hidden;
+                    transform: translateY(14px);
+                    transition: opacity .45s ease-out, transform .45s ease-out, visibility 0s linear .45s;
+                }
+                [data-nb-popup].nb-show {
+                    opacity: 1;
+                    visibility: visible;
+                    transform: none;
+                    transition: opacity .45s ease-out, transform .45s ease-out, visibility 0s;
+                }
+
             </style>
 		";
-    }
+		}
+
+
+		/**
+		 * Server popups wait for data-nb-delay seconds and/or data-nb-scroll percent of the page.
+		 * The handle has no file; it only carries the inline script below.
+		 *
+		 * @return void
+		 */
+		public static function enqueue_popup_script() {
+			// One copy per page, even when several popup notices render.
+			if ( wp_script_is( 'oxaim-notice-popup', 'registered' ) ) {
+				return;
+			}
+
+			$script = <<<'JS'
+				jQuery(function () {
+					jQuery('[data-nb-popup]').each(function () {
+						var box      = this;
+						var delay    = parseInt(box.getAttribute('data-nb-delay'), 10) || 0;
+						var scroll   = parseInt(box.getAttribute('data-nb-scroll'), 10) || 0;
+						var timeOk   = delay <= 0;
+						var scrollOk = scroll <= 0;
+
+						function tryShow() {
+							if (timeOk && scrollOk) {
+								box.classList.add('nb-show');
+							}
+						}
+
+						function onScroll() {
+							var room = document.documentElement.scrollHeight - window.innerHeight;
+							// A page too short to scroll counts as fully scrolled.
+							var done = room <= 0 ? 100 : (window.scrollY / room) * 100;
+							if (done >= scroll) {
+								scrollOk = true;
+								window.removeEventListener('scroll', onScroll);
+								tryShow();
+							}
+						}
+
+						if (!timeOk) {
+							setTimeout(function () { timeOk = true; tryShow(); }, delay * 1000);
+						}
+						if (!scrollOk) {
+							window.addEventListener('scroll', onScroll, { passive: true });
+						}
+
+						// Wait one frame so the hidden state is drawn first and the fade-in plays.
+						requestAnimationFrame(function () {
+							if (!scrollOk) { onScroll(); }
+							tryShow();
+						});
+					});
+				});
+JS;
+
+			wp_register_script( 'oxaim-notice-popup', false, array( 'jquery' ), '1.0.0', true );
+			wp_enqueue_script( 'oxaim-notice-popup' );
+			wp_add_inline_script( 'oxaim-notice-popup', $script );
+		}
 
 
     private static $instance;

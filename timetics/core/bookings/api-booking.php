@@ -13,6 +13,9 @@ use Timetics\Base\Api;
 use Timetics\Core\Appointments\Api_Appointment;
 use Timetics\Core\Appointments\Appointment;
 use Timetics\Core\Customers\Customer;
+use Timetics\Core\Customers\Customer_Resolver;
+use Timetics\Core\Customers\Customer_Store;
+use Timetics\Core\Customers\Pro_Compat;
 use Timetics\Core\Admin\Notification;
 use Timetics\Core\Admin\Notification_Flow_Guard;
 use Timetics\Core\Bookings\Whatsapp_Consent;
@@ -269,10 +272,20 @@ class Api_Booking extends Api {
          */
         do_action( 'timetics/admin/booking/get_item', $this->prepare_item( $booking ) );
 
+        $item = $this->prepare_item( $booking );
+
+        // An old booking's details may be the account's, matched by email, even after an edit saved them.
+        // A link holder keeps the first name: the cancel form sends it back as required.
+        if ( 'legacy' === $booking->get_owner_source() && ! current_user_can( 'manage_timetics' ) && ! $booking->belongs_to_user( get_current_user_id() ) ) {
+            $item['customer']['last_name'] = '';
+            $item['customer']['phone']     = '';
+            $item['customer']['full_name'] = $item['customer']['first_name'];
+        }
+
         $data = [
             'success'     => 1,
             'status_code' => 200,
-            'data'        => $this->prepare_item( $booking ),
+            'data'        => $item,
         ];
 
         return rest_ensure_response( $data );
@@ -925,7 +938,7 @@ class Api_Booking extends Api {
                 $new_event_customer_email->send();
             }
 
-            do_action( 'timetics_gln_hook', 'booking_created', Notification::get_hook_data( $booking ) );
+            timetics_notify( 'booking_created', Notification::get_hook_data( $booking, true ) );
 
             do_action( 'timetics_booking_payment', $booking );
 
@@ -1161,7 +1174,11 @@ class Api_Booking extends Api {
             return new WP_HTTP_Response( $data, 403 );
         }
 
-        $customer           = new Customer();
+        // Before any write: an old Pro would make attendee accounts or lose a guest's series details.
+        if ( 'created' === $action && Pro_Compat::blocks( $data ) ) {
+            return Pro_Compat::error();
+        }
+
         $meeting            = new Appointment( $appointment );
         $staff              = new Staff( $staff_id );
         $booking            = new Booking( $id );
@@ -1214,6 +1231,11 @@ class Api_Booking extends Api {
         // Checked before the old slot is released below, so a refused move keeps it.
         $takes_new_slot = 'created' === $action || $this->is_moving_slot( $booking, $meeting, $slot, $status );
 
+        // Only the customer's reschedule page sends this status; admin edits can keep the same time.
+        if ( 'updated' === $action && 'reschedule' === $client_status && 'cancel' !== $status && ! $takes_new_slot ) {
+            return new WP_Error( 'same_time_reschedule', __( 'Please pick a different time to reschedule.', 'timetics' ), array( 'status' => 400 ) );
+        }
+
         // A move may overlap the time it is about to leave.
         if ( 'created' !== $action ) {
             $slot['own_entry_id'] = $booking->sole_entry_id();
@@ -1257,7 +1279,9 @@ class Api_Booking extends Api {
             if ( ! $is_privileged ) {
                 // A paid booking must use a gateway the site really offers. Any other
                 // string used to fall through to the default (approved) status.
-                if ( $server_total > 0 && ! $this->is_enabled_payment_method( $payment_method_l ) ) {
+                // A free booking may send any method ( the form sends "cash" ), but
+                // WooCommerce only while the integration is on.
+                if ( ( $server_total > 0 || 'woocommerce' === $payment_method_l ) && ! $this->is_enabled_payment_method( $payment_method_l ) ) {
                     return new WP_Error( 'invalid_payment_method', __( 'Invalid payment method.', 'timetics' ), array( 'status' => 400 ) );
                 }
 
@@ -1265,14 +1289,43 @@ class Api_Booking extends Api {
             }
         }
 
-        $customer->make(
-            [
-                'first_name' => $first_name,
-                'last_name'  => $last_name,
-                'email'      => $email,
-                'phone'      => $phone,
-            ]
+        // An update that leaves out a field keeps it; one sent empty clears it.
+        if ( $id ) {
+            $saved     = $booking->get_customer_snapshot();
+            $last_name = array_key_exists( 'last_name', $data ) ? $last_name : $saved['last_name'];
+            $phone     = '' === $phone && ! array_key_exists( 'phone', $data ) ? $saved['phone'] : $phone;
+        }
+
+        $contact = array(
+            'first_name' => $first_name,
+            'last_name'  => $last_name,
+            'email'      => $email,
+            'phone'      => $phone,
         );
+
+        // An update keeps its owner. Only staff fixing the email picks the customer again, and makes no account.
+        $resolved = null;
+
+        if ( 'created' === $action || ( $is_privileged && strtolower( $email ) !== strtolower( $booking->get_customer_snapshot()['email'] ) ) ) {
+            $resolved = Customer_Resolver::resolve( $contact, $is_privileged, 'created' === $action );
+
+            if ( is_wp_error( $resolved ) ) {
+                return $resolved;
+            }
+        }
+
+        // An old booking gets a record on its first edit, so every reader uses the saved copy.
+        // A record ends the fallback to its WordPress customer, so that owner is saved first.
+        $legacy_owner = null;
+
+        if ( $id && $booking->is_legacy_customer() ) {
+            $legacy_owner = $booking->get_owner_user_id();
+            $resolved     = $resolved ? $resolved : array( 'record_id' => Customer_Store::find_or_create( $contact ), 'wp_user_id' => $booking->get_customer_id() );
+
+            if ( is_wp_error( $resolved['record_id'] ) ) {
+                return $resolved['record_id'];
+            }
+        }
 
         // Update booking schedule. Release the slot the booking currently holds;
         // the new one is taken further below. A cancelled or failed booking holds
@@ -1315,14 +1368,14 @@ class Api_Booking extends Api {
         }
 
         $booking_props = [
-            'customer'            => $customer->get_id(),
             'appointment'         => $meeting->get_id(),
             'appointment_name'    => $meeting->get_name(),
             'staff'               => $staff->get_id(),
-            'customer_fname'      => $customer->get_first_name(),
-            'customer_lname'      => $customer->get_last_name(),
-            'customer_email'      => $customer->get_email(),
-            'customer_phone'      => $customer->get_phone(),
+            // What was typed for this booking, never the matched account's stored details.
+            'customer_fname'      => $first_name,
+            'customer_lname'      => $last_name,
+            'customer_email'      => $email,
+            'customer_phone'      => $phone,
             'whatsapp_number'    => $whatsapp['whatsapp_number'],
             'whatsapp_opt_in'    => $whatsapp['whatsapp_opt_in'],
             'whatsapp_opt_in_at' => $whatsapp_opt_in_at,
@@ -1350,14 +1403,27 @@ class Api_Booking extends Api {
             'cancel_reason'       => $cancel_reason,
         ];
 
+        if ( $resolved ) {
+            $booking_props['customer']        = $resolved['wp_user_id'];
+            $booking_props['customer_record'] = $resolved['record_id'];
+        }
+
+        if ( $legacy_owner ) {
+            $booking_props['owner_user']   = $legacy_owner;
+            $booking_props['owner_source'] = 'legacy';
+        }
+
         if ( 'created' === $action ) {
+            $booking_props['owner_user']      = $resolved['owner_user'];
+            $booking_props['owner_source']    = $resolved['owner_source'];
             $booking_props['order_total']     = $pricing['total'];
             $booking_props['order_subtotal']  = $pricing['subtotal'];
             $booking_props['coupon_code']     = $pricing['coupon_code'];
             $booking_props['coupon_discount'] = $pricing['discount'];
         }
 
-        if ( 'created' === $action && '' !== $payment_method ) {
+        // The form sends a method even for a free booking; nothing is paid, so keep none.
+        if ( 'created' === $action && '' !== $payment_method && (float) $pricing['total'] > 0 ) {
             $booking_props['payment_method'] = $payment_method;
         }
 
@@ -1385,8 +1451,16 @@ class Api_Booking extends Api {
 
         $booking->save();
 
+        // save_metadata() keeps the old value for an empty one, so a move to a guest is written here.
+        if ( $resolved && ! $resolved['wp_user_id'] ) {
+            update_post_meta( $booking->get_id(), '_tt_booking_customer', 0 );
+        }
+
+        // Hooks keep getting a WordPress user id: 0 for a guest, never a row id.
+        $customer_id = (int) $booking->get_customer_id();
+
         // Fire when booking is completed.
-        do_action( 'timetics_after_booking_create', $booking->get_id(), $customer->get_id(), $meeting->get_id(), $data );
+        do_action( 'timetics_after_booking_create', $booking->get_id(), $customer_id, $meeting->get_id(), $data );
 
         // Convert booking time to staff/meeting time.
         $slot_start = timetics_convert_timezone( $start_date . ' ' . $start_time, $timezone, $meeting->get_timezone() );
@@ -1422,7 +1496,7 @@ class Api_Booking extends Api {
                 $book_entry_data = [
                     'meeting_id'  => $meeting->get_id(),
                     'staff_id'    => $staff->get_id(),
-                    'customer_id' => $customer->get_id(),
+                    'customer_id' => $customer_id,
                     'booking_id'  => $booking->get_id(),
                     'booked'      => 1,
                     'date'        => $slot_start->format( 'Y-m-d' ),
@@ -1474,7 +1548,7 @@ class Api_Booking extends Api {
                  * @param array   $data      Request data, e.g. `cancel_scope`.
                  */
                 $cancel_hook_data = apply_filters( 'timetics_booking_canceled_flow_data', Notification::get_hook_data( $booking ), $booking, $data );
-                do_action( 'timetics_gln_hook', 'booking_canceled', $cancel_hook_data );
+                timetics_notify( 'booking_canceled', $cancel_hook_data );
 
                 /**
                  * Added temporary for leagacy sass. It will remove in future.
@@ -1492,7 +1566,7 @@ class Api_Booking extends Api {
                  * @param int      $meeting_id  Meeting (appointment) ID.
                  * @param array    $data        Request data.
                  */
-                do_action( 'timetics_after_booking_cancel', $booking->get_id(), $customer->get_id(), $meeting->get_id(), $data );
+                do_action( 'timetics_after_booking_cancel', $booking->get_id(), $customer_id, $meeting->get_id(), $data );
             } else {
                 // Check if the booking date/time was actually changed
                 $date_time_changed = (
@@ -1531,7 +1605,7 @@ class Api_Booking extends Api {
                         $reschedule_hook_data['previous_meeting_date_timestamp'] = $old_meeting_timestamp;
                     }
 
-                    do_action( 'timetics_gln_hook', 'booking_rescheduled', $reschedule_hook_data );
+                    timetics_notify( 'booking_rescheduled', $reschedule_hook_data );
 
                     /**
                      * Fired when a booking's date or time actually changed.
@@ -1545,23 +1619,15 @@ class Api_Booking extends Api {
                      * @param int   $meeting_id  Meeting (appointment) ID.
                      * @param array $data        Request data.
                      */
-                    do_action( 'timetics_after_booking_reschedule', $booking->get_id(), $customer->get_id(), $meeting->get_id(), $data );
+                    do_action( 'timetics_after_booking_reschedule', $booking->get_id(), $customer_id, $meeting->get_id(), $data );
                 }
             }
         }
 
-        // For newly created bookings, create the calendar event now that the
-        // booking schedule entry exists. This generates the Google Meet link
-        // (stored in booking meta) so it can be shown on the success page and
-        // included in the notification emails sent below.
-        //
-        // Skipped while an online gateway payment is still outstanding — the
-        // real event gets created once payment confirms, in make_payment() and
-        // Hooks::update_booking_payment_status(). Based on payment_method and
-        // amount alone, NOT $status: a privileged (logged-in admin/staff) user
-        // gets $default_status regardless of gateway, which can be 'approved'
-        // even though no payment happened yet — checking $status here would
-        // miss that and create the event before the customer actually pays.
+        // The event (and its Meet link, used by the emails below) waits for an online payment:
+        // make_payment() and Woocommerce\Hooks::finish_paid_booking() create it then.
+        // Read from method and amount, not $status: an admin booking gets the default
+        // status, maybe 'approved', before anything is paid.
         $is_awaiting_online_payment = 'created' === $action && $server_total > 0
             && in_array( $payment_method_l, [ 'stripe', 'woocommerce', 'paypal' ], true );
 
@@ -1590,11 +1656,11 @@ class Api_Booking extends Api {
                 $new_event_customer_email->send();
             }
 
-            do_action( 'timetics_gln_hook', 'booking_created', Notification::get_hook_data( $booking ) );
+            timetics_notify( 'booking_created', Notification::get_hook_data( $booking, true ) );
         }
 
         // Fire after booking schedule create.
-        do_action( 'timetics_after_booking_schedule', $booking->get_id(), $customer->get_id(), $meeting->get_id(), $data );
+        do_action( 'timetics_after_booking_schedule', $booking->get_id(), $customer_id, $meeting->get_id(), $data );
 
         $data = [
             'success'     => 1,
@@ -1652,7 +1718,7 @@ class Api_Booking extends Api {
         $booking          = new Booking( $booking_id );
         $appointment      = new Appointment( $booking->get_appointment() );
         $staff            = new Staff( $booking->get_staff_id() );
-        $customer         = new Customer( $booking->get_customer_id() );
+        $snapshot         = $booking->get_customer_snapshot();
         $meeting_timezone = $appointment->get_timezone();
         $booking_timezone = $booking->get_timezone();
 
@@ -1695,13 +1761,15 @@ class Api_Booking extends Api {
             'payment_method'  => $booking->get_payment_method(),
             'payment_status'  => $booking->get_payment_status(),
             'payment_details' => $payment_details,
+            // The booking's own copy: a matched account's stored details never leave through it.
             'customer'      => [
-                'id'         => $customer->get_id(),
-                'full_name'  => $customer->get_display_name(),
-                'first_name' => $customer->get_first_name(),
-                'last_name'  => $customer->get_last_name(),
-                'email'      => $customer->get_email(),
-                'phone'      => $customer->get_phone(),
+                'id'         => (int) $booking->get_customer_id(),
+                'record_id'  => $booking->get_customer_record_id(),
+                'full_name'  => trim( $snapshot['first_name'] . ' ' . $snapshot['last_name'] ),
+                'first_name' => $snapshot['first_name'],
+                'last_name'  => $snapshot['last_name'],
+                'email'      => $snapshot['email'],
+                'phone'      => $snapshot['phone'],
             ],
             'appointment'   => [
                 'id'        => $appointment->get_id(),
@@ -1806,7 +1874,7 @@ class Api_Booking extends Api {
             $customer_cancel_event_email->send();
         }
 
-        do_action( 'timetics_gln_hook', 'booking_canceled', $cancel_hook_data );
+        timetics_notify( 'booking_canceled', $cancel_hook_data );
 
 
 
@@ -2142,11 +2210,11 @@ class Api_Booking extends Api {
             return false;
         }
 
-        // manage_timetics is not admin-only — every staff account holds it — so it
-        // cannot stand in for an ownership check. Real admins, the booking's own
-        // customer, or staff this specific booking is actually visible to.
+        // manage_timetics is not admin-only (every staff account holds it), so it
+        // cannot stand in for an ownership check. Real admins, the booking's owner,
+        // or staff this specific booking is actually visible to.
         if (
-            ( get_current_user_id() > 0 && (int) $booking->get_customer_id() === get_current_user_id() )
+            $booking->belongs_to_user( get_current_user_id() )
             || timetics_can_view_all_data()
             || in_array( $booking_id, timetics_get_visible_booking_ids(), true )
         ) {
@@ -2185,7 +2253,7 @@ class Api_Booking extends Api {
         }
 
         if (
-            ( get_current_user_id() > 0 && (int) $booking->get_customer_id() === get_current_user_id() )
+            $booking->belongs_to_user( get_current_user_id() )
             || timetics_can_view_all_data()
             || in_array( $booking_id, timetics_get_visible_booking_ids(), true )
         ) {
@@ -2218,9 +2286,8 @@ class Api_Booking extends Api {
             return new WP_Error( 404, __( 'Booking not found.', 'timetics' ) );
         }
 
-        // Get original customer email
-        $existing_customer = new Customer( $existing_booking->get_customer_id() );
-        $original_email = $existing_customer->get_email();
+        // A guest booking has no WordPress customer, so read the email the booking was made with.
+        $original_email = $existing_booking->get_customer_snapshot()['email'];
 
         if ( empty( $original_email ) ) {
             return new WP_Error( 500, __( 'Unable to verify booking ownership.', 'timetics' ) );

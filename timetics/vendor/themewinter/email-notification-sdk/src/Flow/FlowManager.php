@@ -351,11 +351,14 @@ class FlowManager {
                 $receiverType = $node['data']['receiverType'] ?? null;
                 if ( $receiverType && isset( $hook_data[$receiverType] ) ) {
                     $user_number = $hook_data[$receiverType];
+                    // receiverType lets the consumer apply the right rule (e.g. consent for
+                    // customers only) even when two receivers share a number.
                     $user_number = apply_filters(
                         Helpers::get_hook_name( $this->identifier, 'notification_sdk_to_whatsapp_numbers' ),
                         $hook_data[$receiverType],
                         $hook_data,
-                        $action
+                        $action,
+                        $receiverType
                     );
 
                     if ( is_array( $user_number ) ) {

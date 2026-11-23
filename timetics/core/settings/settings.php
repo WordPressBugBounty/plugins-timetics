@@ -70,6 +70,10 @@ if ( ! function_exists( 'timetics_get_settings' ) ) {
     function timetics_get_settings() {
         // Get the option key.
         $settings = get_option( 'timetics_settings' );
+        $settings = is_array( $settings ) ? $settings : array();
+
+        // Stored as yes/no, sent as a real boolean: in JavaScript the string "no" is true.
+        $settings['customer_create_wp_user'] = timetics_guest_wp_user_enabled();
 
         return apply_filters( 'timetics_get_settings', $settings );
     }

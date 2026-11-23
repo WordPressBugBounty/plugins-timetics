@@ -79,6 +79,11 @@ class Api_Customer extends Api {
                     'permission_callback' => function ( $request ) {
                         $customer_id = (int) $request['customer_id'];
 
+                        // Guest bookings store customer 0, so id 0 would match every one of them.
+                        if ( $customer_id <= 0 ) {
+                            return false;
+                        }
+
                         if ( timetics_can_view_all_data() || get_current_user_id() === $customer_id ) {
                             return true;
                         }
@@ -128,6 +133,11 @@ class Api_Customer extends Api {
                     'callback'            => [$this, 'get_bookings'],
                     'permission_callback' => function ( $request ) {
                         $customer_id = (int) $request['customer_id'];
+
+                        // Guest bookings store customer 0, so id 0 would match every one of them.
+                        if ( $customer_id <= 0 ) {
+                            return false;
+                        }
 
                         if ( timetics_can_view_all_data() || get_current_user_id() === $customer_id ) {
                             return true;
@@ -197,7 +207,7 @@ class Api_Customer extends Api {
         $customer_id = (int) $request['customer_id'];
         $customer    = new Customer( $customer_id );
 
-        if ( ! $customer->is_customer() ) {
+        if ( ! $this->is_own_record( $customer_id ) && ! $customer->is_customer() ) {
             return [
                 'status_code' => 404,
                 'message'     => esc_html__( 'Invalid customer id.', 'timetics' ),
@@ -302,7 +312,42 @@ class Api_Customer extends Api {
      * @return  JSON | WP_Error
      */
     public function create_item( $request ) {
-        return $this->save_customer( $request );
+        $data = json_decode( $request->get_body(), true );
+
+        if ( ! is_array( $data ) ) {
+            return new \WP_Error( 'invalid_body', __( 'Invalid request.', 'timetics' ), array( 'status' => 400 ) );
+        }
+
+        $validate = $this->validate( $data, array( 'first_name', 'last_name', 'email' ) );
+
+        if ( is_wp_error( $validate ) ) {
+            return new WP_HTTP_Response( array( 'success' => 0, 'status_code' => 409, 'message' => $validate->get_error_messages(), 'data' => array() ), 409 );
+        }
+
+        // Adding a customer follows the guest account switch, like a staff booking, and never
+        // changes an existing account. A removed contact with this email comes back.
+        $resolved = Customer_Resolver::resolve(
+            array(
+                'first_name' => sanitize_text_field( $data['first_name'] ),
+                'last_name'  => sanitize_text_field( $data['last_name'] ),
+                'email'      => $data['email'],
+                'phone'      => isset( $data['phone'] ) ? sanitize_text_field( $data['phone'] ) : '',
+            ),
+            true
+        );
+
+        if ( is_wp_error( $resolved ) ) {
+            return $resolved;
+        }
+
+        $item = Api_Customer_Record::instance()->prepare_row( Customer_Store::get( $resolved['record_id'] ) );
+
+        /**
+         * Added temporary for leagacy sass. It will remove in future.
+         */
+        do_action( 'timetics/admin/customer/create_item', $item );
+
+        return rest_ensure_response( array( 'success' => 1, 'status' => 200, 'message' => esc_html__( 'Successfully created customer', 'timetics' ), 'data' => $item ) );
     }
 
     /**
@@ -345,7 +390,7 @@ class Api_Customer extends Api {
         $customer_id = (int) $request['customer_id'];
         $customer    = new Customer( $customer_id );
 
-        if ( ! $customer->is_customer() ) {
+        if ( ! $this->is_own_record( $customer_id ) && ! $customer->is_customer() ) {
             $data = [
                 'status_code' => 404,
                 'message'     => esc_html__( 'Invalid customer id.', 'timetics' ),
@@ -353,6 +398,22 @@ class Api_Customer extends Api {
             ];
 
             return new WP_HTTP_Response( $data, 404 );
+        }
+
+        // Bookings trust an account's email as its owner's, so only an admin may change it here.
+        $body  = json_decode( $request->get_body(), true );
+        $email = is_array( $body ) && isset( $body['email'] ) ? strtolower( trim( (string) $body['email'] ) ) : '';
+        $user  = get_userdata( $customer_id );
+
+        if ( ! current_user_can( 'manage_options' ) && $user && strtolower( $user->user_email ) !== $email ) {
+            $data = array(
+                'success'     => 0,
+                'status_code' => 403,
+                'message'     => esc_html__( 'Please contact the site admin to change your email.', 'timetics' ),
+                'data'        => array(),
+            );
+
+            return new WP_HTTP_Response( $data, 403 );
         }
 
         return $this->save_customer( $request, $customer_id );
@@ -369,7 +430,8 @@ class Api_Customer extends Api {
         $customer_id = (int) $request['customer_id'];
         $customer    = new Customer( $customer_id );
 
-        if ( ! $customer->is_customer() ) {
+        // Kept for older callers; like the Customers screen, it only hides the contact.
+        if ( ! $customer->delete() ) {
             $data = [
                 'status_code' => 404,
                 'message'     => esc_html__( 'Invalid customer id.', 'timetics' ),
@@ -378,8 +440,6 @@ class Api_Customer extends Api {
 
             return new WP_HTTP_Response( $data, 404 );
         }
-
-        $customer->delete();
 
         /**
          * Added temporary for leagacy sass. It will remove in future.
@@ -405,21 +465,13 @@ class Api_Customer extends Api {
     public function bulk_delete( $request ) {
         $customers = json_decode( $request->get_body(), true );
 
+        if ( ! is_array( $customers ) ) {
+            return new \WP_Error( 'invalid_body', __( 'Invalid request.', 'timetics' ), array( 'status' => 400 ) );
+        }
+
+        // User ids. Kept for older callers; each contact is only hidden.
         foreach ( $customers as $customer ) {
-            $customer = new customer( $customer );
-
-            if ( ! $customer->is_customer() ) {
-                $data = [
-                    'success' => 1,
-                    'status'  => 404,
-                    'message' => esc_html__( 'Invalid customer id.', 'timetics' ),
-                    'data'    => [],
-                ];
-
-                return new WP_HTTP_Response( $data, 404 );
-            }
-
-            $customer->delete();
+            ( new Customer( absint( $customer ) ) )->delete();
         }
 
         /**
@@ -527,6 +579,19 @@ class Api_Customer extends Api {
      *
      * @return  string
      */
+    /**
+     * Whether the logged-in user is asking for their own record.
+     *
+     * A booking no longer adds the customer role, so a logged-in user may lack it.
+     *
+     * @param int $customer_id Requested user id.
+     *
+     * @return bool
+     */
+    private function is_own_record( $customer_id ) {
+        return $customer_id > 0 && get_current_user_id() === $customer_id;
+    }
+
     public function generate_username( $email ) {
         $username = strtok( $email, '@' );
 
@@ -570,7 +635,7 @@ class Api_Customer extends Api {
         $customer_id = (int) $request['customer_id'];
         $customer    = new Customer( $customer_id );
 
-        if ( ! $customer->is_customer() ) {
+        if ( ! $this->is_own_record( $customer_id ) && ! $customer->is_customer() ) {
             $data = [
                 'status_code' => 404,
                 'message'     => esc_html__( 'Invalid customer id.', 'timetics' ),
@@ -601,15 +666,36 @@ class Api_Customer extends Api {
             'posts_per_page' => $per_page,
             'paged'          => $paged,
             'post_status'    => 'any',
+            // Owned bookings only: older ones of this account, and new ones it made.
+            // A new booking that only points at the account or shares its email is not its.
             // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Meta query is necessary for filtering bookings by customer
             'meta_query'     => array(
                 'relation' => 'OR',
                 array(
-                    'key'     => '_tt_booking_customer',
+                    'relation' => 'AND',
+                    array(
+                        'key'     => '_tt_booking_customer',
+                        'value'   => $customer_id,
+                        'compare' => '=',
+                    ),
+                    array(
+                        'relation' => 'OR',
+                        array(
+                            'key'     => '_tt_booking_customer_record',
+                            'compare' => 'NOT EXISTS',
+                        ),
+                        array(
+                            'key'     => '_tt_booking_customer_record',
+                            'value'   => array( '', '0' ),
+                            'compare' => 'IN',
+                        ),
+                    ),
+                ),
+                array(
+                    'key'     => '_tt_booking_owner_user',
                     'value'   => $customer_id,
                     'compare' => '=',
                 ),
-
             ),
         ];
 

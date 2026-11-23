@@ -12,7 +12,7 @@ class Manage_Links_Customer_Email extends Email {
     /**
      * Customer the list belongs to.
      *
-     * @var \WP_User
+     * @var object user_email and display_name.
      */
     public $customer;
 
@@ -26,11 +26,16 @@ class Manage_Links_Customer_Email extends Email {
     /**
      * Constructor
      *
-     * @param \WP_User $customer  Customer.
-     * @param string   $rows_html Escaped booking rows.
+     * @param string $email     Inbox the links go to.
+     * @param string $name      Name the bookings were made with.
+     * @param string $rows_html Escaped booking rows.
      */
-    public function __construct( \WP_User $customer, $rows_html ) {
-        $this->customer  = $customer;
+    public function __construct( $email, $name, $rows_html ) {
+        // Shaped like the WP_User the template reads: a guest has no account.
+        $this->customer  = (object) array(
+            'user_email'   => $email,
+            'display_name' => $name,
+        );
         $this->rows_html = $rows_html;
 
         parent::__construct();

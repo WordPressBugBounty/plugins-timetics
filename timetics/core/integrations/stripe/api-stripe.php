@@ -160,7 +160,7 @@ class Api_Stripe extends Api {
         if ( is_array( $payment ) && ! empty( $payment['error'] ) ) {
             if ( defined( 'WP_DEBUG' ) && WP_DEBUG && defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG ) {
                 // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Debug logging is guarded by WP_DEBUG checks.
-                error_log( 'Timetics Stripe payment intent failed: ' . wp_json_encode( $payment['error'] ) );
+                error_log( 'WPTimetics Stripe payment intent failed: ' . wp_json_encode( $payment['error'] ) );
             }
 
             return new WP_HTTP_Response(

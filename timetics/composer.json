@@ -1,6 +1,6 @@
 {
     "name": "arraytics/timetics",
-    "description": "Timetics booking wordpress plugin",
+    "description": "WPTimetics booking wordpress plugin",
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {

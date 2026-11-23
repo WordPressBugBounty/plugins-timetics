@@ -1,9 +1,9 @@
-=== Timetics – Appointment Booking Calendar & Scheduling ===
+=== Appointment Booking Calendar & Scheduling - WPTimetics ===
 Contributors: arraytics, ehsanriyadh
 Tags: appointment booking, booking calendar, appointment scheduler, online booking, online scheduling, reservation system, elearning, booking system
 Requires at least: 5.3
 Tested up to: 7.1
-Stable tag: 1.0.67
+Stable tag: 1.0.68
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -12,7 +12,7 @@ Appointment booking and scheduling plugin with online booking calendar, payments
 
 == Description ==
 
-[**WPTimetics**](https://arraytics.com/timetics/) is an appointment booking and scheduling system that helps businesses accept online bookings, manage appointments, organize staff schedules, and automate booking workflows from one dashboard.
+[**WPTimetics**](https://arraytics.com/wptimetics/) is an appointment booking and scheduling system that helps businesses accept online bookings, manage appointments, organize staff schedules, and automate booking workflows from one dashboard.
 
 Customers can book appointments through an online booking calendar, choose available time slots, receive instant confirmations, and pay online. Built-in calendar management, automated reminders, and calendar sync help reduce manual scheduling and avoid booking conflicts.
 
@@ -34,7 +34,7 @@ Let your customers book appointments online 24/7 while you stay focused on growi
 - ✅ **Translation ready** - fully compatible with WPML and Loco Translate
 - ✅ **No coding required** - set up your first booking in under 5 minutes
 
-[Live Demo](https://products.arraytics.com/timetics/booking/) | [Documentation](https://docs.arraytics.com/) | [Roadmaps](https://arraytics.com/timetics-roadmaps/) | [Tutorials](https://www.youtube.com/playlist?list=PLkqKWn6EHYbr2O6EvASj6UoVl3Fy1IWL5) | [Pro](https://arraytics.com/timetics/pricing/)
+[Live Demo](https://products.arraytics.com/timetics/booking/) | [Documentation](https://docs.arraytics.com/) | [Roadmaps](https://arraytics.com/timetics-roadmaps/) | [Tutorials](https://www.youtube.com/playlist?list=PLkqKWn6EHYbr2O6EvASj6UoVl3Fy1IWL5) | [Pro](https://arraytics.com/wptimetics/pricing/)
 
 Need help getting started? 👉 [Contact our support team](https://arraytics.com/support/)
 
@@ -44,21 +44,21 @@ Need help getting started? 👉 [Contact our support team](https://arraytics.com
 
 Timetics is a flexible **WordPress booking system** built for **professional and service-based business** that needs to schedule, manage, and automate client appointments online. Here are the most common use cases:
 
-- [Education & Training - eLearning Use Cases](https://arraytics.com/timetics/education/)- Schedule mentorship sessions, course consultations, tutoring, workshops, and career counseling with ease. WPTimetics allowing educators to manage **student bookings, class scheduling, and live learning sessions** without the complexity of a traditional Learning Management System. Perfect for anyone who needs **class scheduling and student booking instead of a full LMS setup**.
+- [Education & Training - eLearning Use Cases](https://arraytics.com/wptimetics/education/)- Schedule mentorship sessions, course consultations, tutoring, workshops, and career counseling with ease. WPTimetics allowing educators to manage **student bookings, class scheduling, and live learning sessions** without the complexity of a traditional Learning Management System. Perfect for anyone who needs **class scheduling and student booking instead of a full LMS setup**.
 
-- [Recruiting & HR](https://arraytics.com/timetics/recruiting/)- Recruiters and HR teams can **automate interview scheduling**, let candidates choose available time slots, and receive instant booking confirmations – eliminating endless back-and-forth emails.
+- [Recruiting & HR](https://arraytics.com/wptimetics/recruiting/)- Recruiters and HR teams can **automate interview scheduling**, let candidates choose available time slots, and receive instant booking confirmations – eliminating endless back-and-forth emails.
 
-- [Customer Support & Client Services](https://arraytics.com/timetics/customer-support/)- Organize **support calls, virtual help sessions, and follow-up appointments** to ensure your customers get assistance promptly.
+- [Customer Support & Client Services](https://arraytics.com/wptimetics/customer-support/)- Organize **support calls, virtual help sessions, and follow-up appointments** to ensure your customers get assistance promptly.
 
-- [Sales & Marketing Teams](https://arraytics.com/timetics/sales-marketing/)- Let prospects **book consultations, product demos, discovery calls**, or strategy sessions directly from your website. Integrates seamlessly with CRM tools for tracking leads.
+- [Sales & Marketing Teams](https://arraytics.com/wptimetics/sales-marketing/)- Let prospects **book consultations, product demos, discovery calls**, or strategy sessions directly from your website. Integrates seamlessly with CRM tools for tracking leads.
 
-- [Consultants & Coaches - Online Learning & eLearning Sessions](https://arraytics.com/timetics/counseling/)- From business consultants to life coaches, offer clients an easy way to book one-on-one or group sessions. Timetics is ideal for **coaching-based eLearning businesses** that rely on scheduled sessions instead of structured courses. A practical solution for professionals who deliver **learning through live interaction rather than LMS-based courses**.
+- [Consultants & Coaches - Online Learning & eLearning Sessions](https://arraytics.com/wptimetics/counseling/)- From business consultants to life coaches, offer clients an easy way to book one-on-one or group sessions. Timetics is ideal for **coaching-based eLearning businesses** that rely on scheduled sessions instead of structured courses. A practical solution for professionals who deliver **learning through live interaction rather than LMS-based courses**.
 
-- [Teachers & Mentors - Student Booking & Class Scheduling ](https://arraytics.com/timetics/education/)- Manage class schedules, private lessons, and tutoring sessions so students can book convenient time slots without email chains. Timetics acts as a **student booking system for WordPress eLearning websites**, helping teachers organize their availability and avoid scheduling conflicts. Ideal for educators who want a **simple alternative to LMS platforms focused on scheduling and live classes**.
+- [Teachers & Mentors - Student Booking & Class Scheduling ](https://arraytics.com/wptimetics/education/)- Manage class schedules, private lessons, and tutoring sessions so students can book convenient time slots without email chains. Timetics acts as a **student booking system for WordPress eLearning websites**, helping teachers organize their availability and avoid scheduling conflicts. Ideal for educators who want a **simple alternative to LMS platforms focused on scheduling and live classes**.
 
 - **Musicians & Creative Professionals**- Allow clients and collaborators to **book studio sessions, music lessons, or creative consultations**. Manage availability, payments, and rescheduling with ease.
 
-- [Self Sessions & Fitness Guide](https://arraytics.com/timetics/fitness/)- Provide a convenient and hassle-free way for fitness-conscious clients to book appointments.
+- [Self Sessions & Fitness Guide](https://arraytics.com/wptimetics/fitness/)- Provide a convenient and hassle-free way for fitness-conscious clients to book appointments.
 
 - **Event Organizers & Venues**- Conference organizers, workshop hosts, venue managers, and ticketed event producers use Timetics PRO to manage **event booking with an [interactive Visual Seat Map](https://docs.arraytics.com/docs/timetics/one-to-many-with-seat-mappro/seatplan-from-frontend/)** — attendees browse your live floor plan, pick their exact seat, choose a ticket tier (VIP, Gold, Standard), and complete payment in one seamless flow directly on your WordPress site.
 
@@ -316,6 +316,17 @@ Handles secure online payment transactions for appointment bookings made through
 **Note:** Optional integration, only active if you configure Stripe payment settings.
 
 == Changelog ==
+
+= 1.0.68 (November 23, 2026) =
+New: MCP Server - Connect AI apps like Claude, ChatGPT and Gemini to manage bookings.
+New: Guest customers - Book without creating a WordPress account.
+Improvement: WooCommerce - Series sessions show in the cart, and emails go out once the order is paid.
+Tweak: Renamed to WPTimetics, with a new logo and plugin page cleanup.
+Fix: Security - Guest bookings can no longer change existing accounts.
+Fix: Security - WooCommerce checkout prices only the booking's own cart line.
+Fix: Bookings no longer fail when the site cannot send email.
+Fix: Rescheduling to the same time is refused.
+Fix: Free bookings no longer save a payment method.
 
 = 1.0.67 (November 14, 2026) =
 Fix: Security improvements for guest bookings and payments.

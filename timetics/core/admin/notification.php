@@ -37,7 +37,7 @@ class Notification {
         SDK::get_instance()
             ->setup(
                 array(
-                    'plugin_name'          => 'Timetics',
+                    'plugin_name'          => 'WPTimetics',
                     'plugin_slug'          => 'timetics',
                     'general_prefix'       => 'tt',
                     'hook_prefix'          => 'timetics',
@@ -326,7 +326,7 @@ class Notification {
         $powered_by_html = '';
         if ( $show_powered_by ) {
             $powered_by_html = '<p style="margin:8px 0 0;font-size:11px;color:#b0bec9;font-style:italic;">'
-                . esc_html__( 'Powered by Timetics', 'timetics' )
+                . esc_html__( 'Powered by WPTimetics', 'timetics' )
                 . '</p>';
         }
 
@@ -341,16 +341,48 @@ class Notification {
     }
 
     /**
+     * Set-password link for the account this booking created, made once per request.
+     *
+     * Each new key kills the one sent before, so only the booking-created emails ask
+     * for it, and never once the account can do more than read (it was made staff).
+     *
+     * @param  Booking $booking
+     * @return string Empty when there is no link to give.
+     */
+    public static function password_url( Booking $booking ) {
+        static $urls = array();
+
+        $user = get_userdata( $booking->get_created_account_id() );
+
+        // Staff may have changed the booking's email: that inbox must not get this account's link.
+        if ( ! $user || strtolower( $user->user_email ) !== strtolower( $booking->get_customer_snapshot()['email'] ) ) {
+            return '';
+        }
+
+        if ( ! isset( $urls[ $user->ID ] ) ) {
+            $extra = array_diff( array_keys( array_filter( $user->allcaps ) ), array_merge( array( 'read', 'level_0' ), $user->roles ) );
+            $key   = $extra ? '' : get_password_reset_key( $user );
+
+            $urls[ $user->ID ] = $key && ! is_wp_error( $key )
+                ? network_site_url( 'wp-login.php?action=rp&key=' . $key . '&login=' . rawurlencode( $user->user_login ), 'login' )
+                : '';
+        }
+
+        return $urls[ $user->ID ];
+    }
+
+    /**
      * Build the hook data payload from a Booking object.
      * Called from any file that needs to fire a timetics_gln_hook action.
      *
      * @param  Booking $booking
+     * @param  bool    $with_password_url Only for booking_created: see password_url().
      * @return array
      */
-    public static function get_hook_data( Booking $booking ) {
+    public static function get_hook_data( Booking $booking, $with_password_url = false ) {
         $meeting  = new Appointment( $booking->get_appointment() );
         $staff    = new Staff( $booking->get_staff_id() );
-        $customer = new Customer( $booking->get_customer_id() );
+        $customer = Customer::from_booking( $booking );
 
         $formatted = timetics_format_email_datetime( $booking->get_start_date(), $booking->get_start_time() );
 
@@ -362,17 +394,7 @@ class Notification {
         $calendar_event = $booking->get_event();
         $meet_link      = ( is_array( $calendar_event ) && ! empty( $calendar_event['hangoutLink'] ) ) ? $calendar_event['hangoutLink'] : '';
 
-        $set_password_url = '';
-        $customer_user    = get_user_by( 'email', $customer->get_email() );
-        if ( $customer_user ) {
-            $reset_key = get_password_reset_key( $customer_user );
-            if ( ! is_wp_error( $reset_key ) ) {
-                $set_password_url = network_site_url(
-                    'wp-login.php?action=rp&key=' . $reset_key . '&login=' . rawurlencode( $customer_user->user_login ),
-                    'login'
-                );
-            }
-        }
+        $set_password_url = $with_password_url ? self::password_url( $booking ) : '';
 
         return apply_filters( 'timetics_notification_flow_data', array(
             // The booking id lets delayed flows be re-validated or re-scheduled
@@ -406,6 +428,9 @@ class Notification {
             'login_url'              => wp_login_url(),
             'login_username'         => $customer->get_email(),
             'set_password_url'       => $set_password_url,
+            // Separate on purpose: a guest row id is never a WordPress user id.
+            'customer_record_id'     => $booking->get_customer_record_id(),
+            'wp_user_id'             => (int) $booking->get_customer_id(),
         ), $booking );
     }
 

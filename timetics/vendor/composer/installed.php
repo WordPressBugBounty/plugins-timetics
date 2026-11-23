@@ -3,7 +3,7 @@
         'name' => 'arraytics/timetics',
         'pretty_version' => 'dev-develop',
         'version' => 'dev-develop',
-        'reference' => '2c6ddeea9d27222983e1f094c3051686685f47a6',
+        'reference' => '7f5ac4aa85a8e95cc234260a9f18a4169d63f43d',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'arraytics/timetics' => array(
             'pretty_version' => 'dev-develop',
             'version' => 'dev-develop',
-            'reference' => '2c6ddeea9d27222983e1f094c3051686685f47a6',
+            'reference' => '7f5ac4aa85a8e95cc234260a9f18a4169d63f43d',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -33,7 +33,7 @@
         'themewinter/email-notification-sdk' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'a64ea89d28893fdb531e43103df66d9b6221c823',
+            'reference' => '0bb19618407f496335abc5eeb81b178664015c18',
             'type' => 'library',
             'install_path' => __DIR__ . '/../themewinter/email-notification-sdk',
             'aliases' => array(

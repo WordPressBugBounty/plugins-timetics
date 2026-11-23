@@ -34,20 +34,7 @@ defined( 'ABSPATH' ) || exit;
 
     $timetics_login_url        = wp_login_url();
     $timetics_login_username   = $timetics_customer_email;
-    $timetics_set_password_url = '';
-
-    $timetics_customer_user = get_user_by( 'id', $this->customer->get_id() );
-
-    if ( $timetics_customer_user ) {
-        $timetics_reset_key = get_password_reset_key( $timetics_customer_user );
-
-        if ( ! is_wp_error( $timetics_reset_key ) ) {
-            $timetics_set_password_url = network_site_url(
-                'wp-login.php?action=rp&key=' . $timetics_reset_key . '&login=' . rawurlencode( $timetics_customer_user->user_login ),
-                'login'
-            );
-        }
-    }
+    $timetics_set_password_url = \Timetics\Core\Admin\Notification::password_url( $this->booking );
 
     $timetics_placeholders = [
         '{%meeting_title%}'     => $this->meeting->get_name(),
@@ -172,6 +159,18 @@ defined( 'ABSPATH' ) || exit;
 
                 </div>
             <?php endif;?>
+
+            <?php
+            // Without this the account is made silently: most saved bodies have no {%set_password_url%} tag.
+            if ( $timetics_set_password_url && false === strpos( (string) $timetics_email_body, '{%set_password_url%}' ) ) :
+                ?>
+                <p style="color: #556880; margin: 0 0 15px;"><?php esc_html_e( 'We made an account for you, so you can see your bookings any time.', 'timetics' ); ?></p>
+                <p style="margin: 0 0 30px;">
+                    <a style="padding: 9px 11px 10px 11px; border-radius: 5px; font-weight: 600; font-size: 13px; background: #3161F1; color: #ffffff; text-decoration: none; white-space: nowrap;" href="<?php echo esc_url( $timetics_set_password_url ); ?>">
+                        <?php esc_html_e( 'Set your password', 'timetics' ); ?>
+                    </a>
+                </p>
+            <?php endif; ?>
 
             <p style="color: #556880; margin-bottom: 0; font-size: 15px; font-weight: 600; line-height: 1;"><?php echo esc_html__( 'Need to make changes to this meeting?', 'timetics' ); ?></p>
             <table cellspacing="0" cellpadding="0" border="0" style="margin: 35px 0 40px;">

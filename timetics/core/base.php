@@ -50,6 +50,10 @@ class Base {
         Bookings\Hooks::instance()->init();
         Bookings\Manage_Links_Sender::instance()->init();
         Customers\Api_Customer::instance();
+        Customers\Api_Customer_Record::instance();
+        Customers\Pro_Compat::init();
+        Customers\Customer_Store::init();
+        Customers\Customer_Privacy::init();
         Staffs\Hooks::instance()->init();
         Settings\Api_Settings::instance();
         Integrations\Auth::instance()->init();
@@ -67,6 +71,7 @@ class Base {
         add_action( 'init', array( Admin\Notification::instance(), 'init' ), 15 );
         Admin\Notification_Flow_Guard::instance()->init();
         Admin\Theme_Mode::instance()->init();
+        Mcp\Hooks::instance()->init();
     }
 }
 

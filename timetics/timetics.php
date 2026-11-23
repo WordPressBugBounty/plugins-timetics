@@ -1,10 +1,10 @@
 <?php
 
 /**
- * Plugin Name:       Timetics - Appointment Booking Calendar & Scheduling System
+ * Plugin Name:       WPTimetics - Appointment Booking Calendar & Scheduling System
  * Plugin URI:        https://arraytics.com/timetics/
  * Description:       Schedule, Appointment and Seat Booking plugin.
- * Version:           1.0.67
+ * Version:           1.0.68
  * Requires at least: 5.3
  * Requires PHP:      7.3
  * Author:            Arraytics
@@ -14,23 +14,23 @@
  * Text Domain:       timetics
  * Domain Path:       /languages
 
- * Timetics is free software: you can redistribute it and/or modify
+ * WPTimetics is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 2 of the License, or
  * any later version.
 
- * Timetics Essential is distributed in the hope that it will be useful,
+ * WPTimetics is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with Timetics. If not, see <http://www.gnu.org/licenses/>.
+ * along with WPTimetics. If not, see <http://www.gnu.org/licenses/>.
  *
  * @package Timetics
  * @category Core
  * @author Arraytics
- * @version 1.0.67
+ * @version 1.0.68
  */
 
 // Exit if accessed directly.
@@ -56,7 +56,7 @@ final class Timetics {
      * @return string
      */
     public static function get_version() {
-        return '1.0.67';
+        return '1.0.68';
     }
 
     /**
@@ -234,6 +234,11 @@ final class Timetics {
      * @return void
      */
     public function init() {
+        Timetics\Core\Customers\Customer_Store::maybe_upgrade();
+
+        // On init: the role names are translated, and translations load at init.
+        add_action( 'init', array( Timetics\Base\Role::instance(), 'maybe_rename_roles' ) );
+
         Timetics\Bootstrap::instantiate( self::get_plugin_file() );
 
         // Add autoload from composer for integrating uninstallation form
@@ -302,6 +307,8 @@ final class Timetics {
         // Insert new role.
         Timetics\Base\Role::instance()->init();
 
+        Timetics\Core\Customers\Customer_Store::install();
+
         // Update default settings.
         timetics_update_default_settings();
 
@@ -354,7 +361,7 @@ final class Timetics {
      * @return void
      */
     public function show_plugin_requirements_not_met_notice() {
-        printf( '<div>Minimum requirements for Timetics are not met. Please update requirements to continue.</div>' );
+        printf( '<div>Minimum requirements for WPTimetics are not met. Please update requirements to continue.</div>' );
     }
 
     /**
@@ -375,33 +382,5 @@ final class Timetics {
         return trailingslashit( plugin_dir_path( self::get_plugin_file() ) );
     }
 }
-
-/**
- * Add a "Go Pro" action link on the Plugins page.
- * Hidden when the pro plugin already exists.
- */
-if ( ! function_exists( 'timetics_add_go_pro_action_link' ) ) {
-    function timetics_add_go_pro_action_link( $links ) {
-        if ( ! function_exists( 'get_plugins' ) ) {
-            require_once ABSPATH . 'wp-admin/includes/plugin.php';
-        }
-
-        foreach ( get_plugins() as $plugin ) {
-            if ( isset( $plugin['TextDomain'] ) && 'timetics-pro' === $plugin['TextDomain'] ) {
-                return $links;
-            }
-        }
-
-        $go_pro = sprintf(
-            '<a href="%1$s" target="_blank" rel="noopener noreferrer" style="color:#e8364c;font-weight:600;">%2$s</a>',
-            esc_url( 'https://arraytics.com/timetics/pricing/' ),
-            esc_html__( 'Go Pro', 'timetics' )
-        );
-
-        $links[] = $go_pro;
-        return $links;
-    }
-}
-add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'timetics_add_go_pro_action_link' );
 
 Timetics::get_instance();

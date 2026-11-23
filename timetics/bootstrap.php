@@ -247,7 +247,8 @@ final class Bootstrap {
         global $current_screen;
         $this->has_pro = class_exists('TimeticsPro');
 
-        $this->handle_buy_pro_module();
+		// admin_init: the current user is known by then, and the banner is admin-only.
+		add_action( 'admin_init', array( $this, 'handle_buy_pro_module' ) );
 
         if ( function_exists('WC') ) {
             Core\Integrations\Woocommerce\Hooks::instance()->init();
@@ -431,6 +432,10 @@ final class Bootstrap {
             'theme_mode'          => Core\Admin\Theme_Mode::get_for_localize(),
             'dark_mode_enabled'   => Core\Admin\Theme_Mode::is_enabled(),
             'phone_default_country' => timetics_phone_default_country(),
+            'customer_roles'      => timetics_safe_customer_roles(),
+            'can_edit_customers'  => current_user_can( 'manage_options' ),
+            // Pro export reads row ids from the Customers list only from version 2.
+            'pro_customers_api'   => defined( 'TIMETICS_PRO_GUEST_CUSTOMERS_API_VERSION' ) ? (int) TIMETICS_PRO_GUEST_CUSTOMERS_API_VERSION : 0,
 		);
 
         $localize_obj = apply_filters( 'timetics_admin_localize_data', $localize_obj );
@@ -578,17 +583,14 @@ final class Bootstrap {
 	 * @return void
 	 */
 	public function handle_buy_pro_module() {
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only page parameter check, no form processing
-        $page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
-
-
-        if ( 'timetics' !== $page ) {
-            return;
-        }
-
+		// Staff with manage_timetics cannot buy or install Pro, so the upsell is for site admins only.
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
 
 		/**
-		 * Show banner (codename: jhanda)
+		 * Show banner (codename: jhanda). Runs on every admin page because the
+		 * banner server picks the screen (dashboard, all pages, plugin pages).
 		 */
 		$filter_string = 'timetics,timetics-free-only';
 
@@ -601,7 +603,6 @@ final class Bootstrap {
 
 
 		\Wpmet\Libs\Banner::instance('timetics')
-			->is_test(true)
 			->set_filter(ltrim($filter_string, ','))
 			->set_api_url('https://banner.arraytics.com/public/jhanda')
 			->set_plugin_screens('timetics')

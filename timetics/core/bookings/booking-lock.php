@@ -47,7 +47,7 @@ class Booking_Lock {
         // nobody knowing, so the booking stops and the site's log says why.
         if ( '1' !== (string) $got ) {
             // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Site owners need the reason.
-            error_log( 'Timetics booking lock unavailable: ' . ( '' !== $wpdb->last_error ? $wpdb->last_error : 'GET_LOCK returned NULL' ) );
+            error_log( 'WPTimetics booking lock unavailable: ' . ( '' !== $wpdb->last_error ? $wpdb->last_error : 'GET_LOCK returned NULL' ) );
 
             return new WP_Error( 'lock_unavailable', __( 'Bookings cannot be saved right now. Please try again later or contact us.', 'timetics' ), array( 'status' => 503 ) );
         }

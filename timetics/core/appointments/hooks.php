@@ -79,20 +79,20 @@ class Hooks {
      */
     public function register_appointment() {
         $labels = array(
-            'name'               => __( 'Timetics Appointments', 'timetics' ),
-            'singular_name'      => __( 'Timetics Appointment', 'timetics' ),
-            'menu_name'          => __( 'Timetics Appointments', 'timetics' ),
+            'name'               => __( 'WPTimetics Appointments', 'timetics' ),
+            'singular_name'      => __( 'WPTimetics Appointment', 'timetics' ),
+            'menu_name'          => __( 'WPTimetics Appointments', 'timetics' ),
             'add_new'            => __( 'Add New', 'timetics' ),
-            'add_new_item'       => __( 'Add New Timetics Appointment', 'timetics'),
+            'add_new_item'       => __( 'Add New WPTimetics Appointment', 'timetics' ),
             'edit'               => __( 'Edit', 'timetics' ),
-            'edit_item'          => __( 'Edit Timetics Appointment', 'timetics' ),
-            'new_item'           => __( 'New Timetics Appointment', 'timetics' ),
+            'edit_item'          => __( 'Edit WPTimetics Appointment', 'timetics' ),
+            'new_item'           => __( 'New WPTimetics Appointment', 'timetics' ),
             'view'               => __( 'View', 'timetics' ),
-            'view_item'          => __( 'View Timetics Appointment', 'timetics' ),
-            'search_items'       => __( 'Search Timetics Appointments', 'timetics' ),
-            'not_found'          => __( 'No timetics appointments found', 'timetics' ),
-            'not_found_in_trash' => __( 'No timetics appointments found in trash', 'timetics' ),
-            'parent'             => __( 'Parent Timetics Appointment', 'timetics' ),
+            'view_item'          => __( 'View WPTimetics Appointment', 'timetics' ),
+            'search_items'       => __( 'Search WPTimetics Appointments', 'timetics' ),
+            'not_found'          => __( 'No WPTimetics appointments found', 'timetics' ),
+            'not_found_in_trash' => __( 'No WPTimetics appointments found in trash', 'timetics' ),
+            'parent'             => __( 'Parent WPTimetics Appointment', 'timetics' ),
         );
 
         $args = array(
